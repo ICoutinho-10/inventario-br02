@@ -437,6 +437,7 @@
       buscarProduto: function (codigo, locacao) { return get('buscar', { codigo: codigo, locacao: locacao }); },
       ultimosLancamentos: function (qtd) { return get('ultimos', { qtd: qtd }); },
       salvarContagem: function (d) { var c = { acao: 'salvar' }; for (var k in d) c[k] = d[k]; return post(c); },
+      recalcular: function () { return post({ acao: 'recalcular' }); },
       salvarLote: function (d) { var c = { acao: 'salvarLote' }; for (var k in d) c[k] = d[k]; return post(c); },
       kardex: function (filtro, fonte) { return get('kardex', { filtro: filtro, fonte: fonte }); }
     };
@@ -931,7 +932,7 @@
     var feitos = 0, erros = 0, idx = 0;
     $('fgoTx').textContent = 'Lançando ' + pend.length + ' ite' + (pend.length > 1 ? 'ns' : 'm') + '…';
     google.script.run
-      .withSuccessHandler(function () { pend.forEach(function (it) { it.estado = 'feito'; }); feitos = pend.length; idx = pend.length; proximo(); })
+      .withSuccessHandler(function () { pend.forEach(function (it) { it.estado = 'feito'; }); feitos = pend.length; idx = pend.length; google.script.run.recalcular(); proximo(); })
       .withFailureHandler(function (e) {
         var m = e && e.message ? e.message : String(e);
         if (/inválida/i.test(m)) { proximo(); return; }   // planilha ainda sem o lançamento em lote: envia um por um

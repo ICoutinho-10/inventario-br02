@@ -224,6 +224,34 @@
     .side button { font-size: 12px; padding: 0 6px; gap: 6px; }
   }
 
+
+  /* Conferência com cara de Kardex */
+  .fview .ktool, .fview .kmsg, .fview .fcard { max-width: 1080px; margin-left: auto; margin-right: auto; }
+  .fview { padding: 18px 14px 40px; }
+  .fcard { border-radius: 14px; padding: 16px 16px 0; }
+  .ftit { text-align: center; font-family: Calibri, Carlito, Arial, sans-serif; font-weight: 700; font-size: 30px; line-height: 1.1; margin: 2px 0 12px; color: #000; min-height: 33px; }
+  .fhead { display: grid; grid-template-columns: 150px 1fr 1fr 170px; border: 1.5px solid #000; border-bottom: 0; font-family: Calibri, Carlito, Arial, sans-serif; color: #000; }
+  .fhead > div { display: flex; align-items: center; justify-content: center; min-height: 52px; border-right: 1px solid #000; font-weight: 700; font-size: 15px; text-align: center; padding: 4px 8px; }
+  .fhead > div:last-child { border-right: 0; }
+  .fhead img { width: 76px; height: 38px; object-fit: contain; }
+  table.ft { border: 1.5px solid #000; min-width: 720px; }
+  .ft th { background: #fff; color: #000; font-family: Calibri, Carlito, Arial, sans-serif; font-size: 13px; letter-spacing: .2px; padding: 7px 8px; text-align: center;
+           border: 1px solid #000; }
+  .ft td { border-left: 1px solid #000; border-right: 1px solid #000; border-bottom: 1px dotted #6B7280; padding: 4px 8px; font-size: 14.5px; color: #000; }
+  .ft tbody tr:nth-child(even) td { background: #fff; }
+  .ft td.seq { width: 46px; color: #000; }
+  .ft td.sku { width: 130px; text-align: center; }
+  .ft td.dsc { color: #000; max-width: 340px; }
+  .ft td.loc { width: 130px; text-align: center; color: #000; }
+  .ft td.sbf { width: 96px; color: #000; font-size: 17px; }
+  .ft td.fis { width: 130px; }
+  .ft td.st { width: 110px; }
+  .ft input.fq { width: 96px; height: 36px; font-size: 17px; border-radius: 8px; border: 1.5px solid #10B981; background: #F0FDF4; }
+  .ft tr.div td { background: #FFF7D6 !important; }
+  .fadd { margin: 12px 0; }
+  .fbar { margin: 0 -16px; }
+  @media (max-width: 700px) { .fhead { grid-template-columns: 90px 1fr; } .fhead > div:nth-child(n+3) { display: none; } .fhead img { width: 64px; } table.ft { border: 0; } }
+
   /* Ficha KARDEX impressa (FO.SC.A.026) */
   .kpg { font-family: Calibri, Carlito, Arial, sans-serif; color: #000; page-break-after: always; }
   .kpg:last-child { page-break-after: auto; }
@@ -243,6 +271,7 @@
   .kfo { width: 111px; height: 46px; border: 1px solid #000; border-left: 0; box-sizing: border-box; display: flex; flex-direction: column;
          align-items: center; justify-content: center; font-size: 9pt; line-height: 1.35; }
   .kfo b { font-size: 9.5pt; }
+  .kx .r1 td.kcp { font-size: 10.5pt; white-space: nowrap; letter-spacing: -.1px; }
   @media print {
     @page { size: A4 landscape; margin: 10mm; }
     html, body { background: #fff !important; padding: 0 !important; }
@@ -330,8 +359,10 @@
   </div>
   <div class="kmsg" id="fmsg"></div>
   <div class="fcard">
+    <div class="ftit" id="ftit"></div>
+    <div class="fhead"><div><img alt="BYD" id="flogo"></div><div>KARDEX - MP / MERCADORIA</div><div id="fconf">Conferido Por:</div><div>FILIAL&nbsp;&nbsp;&nbsp;AUTO</div></div>
     <div class="fscroll"><table class="ft">
-      <thead><tr><th class="c">Seq</th><th>Código SAP</th><th>Descrição</th><th>Local</th><th class="c">Qtde SBF</th><th class="c">Qtde Kardex físico</th><th class="c">Situação</th></tr></thead>
+      <thead><tr><th>SEQ</th><th>CÓDIGO SAP</th><th>DESCRIÇÃO</th><th>LOCAL</th><th>QTDE SBF</th><th>QTDE KARDEX FÍSICO</th><th>SITUAÇÃO</th></tr></thead>
       <tbody id="fbody"><tr><td colspan="7" class="fvazio">Digite o endereço para carregar os itens do SBF.</td></tr></tbody>
     </table></div>
     <button type="button" class="fadd" id="fadd">+ Adicionar item encontrado fora da lista</button>
@@ -347,6 +378,14 @@
       <label class="kl" for="kf">Endereço do Kardex</label>
       <input class="ki" id="kf" list="kfl" placeholder="Ex.: T02 R33 B" autocomplete="off" autocapitalize="characters">
       <datalist id="kfl"></datalist>
+    </div>
+    <div class="fr">
+      <label class="kl" for="kconf">Conferido por</label>
+      <input class="ki" id="kconf" placeholder="Nome" autocomplete="off">
+    </div>
+    <div class="fr">
+      <label class="kl" for="kcria">Criado por</label>
+      <input class="ki" id="kcria" placeholder="Nome" autocomplete="off">
     </div>
     <div>
       <label class="kl">Fonte</label>
@@ -612,14 +651,15 @@
   // ---- KARDEX: ficha FO.SC.A.026 filtrada por endereço (Inventariados ou SBF) ----
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   var kFonte = 'sbf';
+  function kNome(id) { var v = $(id).value.trim(); return v ? v.charAt(0).toUpperCase() + v.slice(1) : ''; }
   function montarKardex(k) {
     var cols = [38, 143, 297, 106, 67, 55, 55, 55, 56, 55];
     var POR = 28, pags = Math.max(1, Math.ceil(k.itens.length / POR)), h = '';
     for (var p = 0; p < pags; p++) {
       h += '<div class="kpg"><div class="ktit">' + esc(k.titulo) + '</div><div class="kwrap"><table class="kx"><colgroup>' +
            cols.map(function (w) { return '<col style="width:' + w + 'px">'; }).join('') + '</colgroup>';
-      h += '<tr class="r1"><td></td><td class="klogo"><img alt="BYD" src="data:image/png;base64,' + k.logo + '"></td><td>KARDEX - MP / MERCADORIA</td><td>ALMOXARIFE</td>' +
-           '<td colspan="2">' + esc(k.almoxarife) + '</td><td>FILIAL</td><td colspan="3">AUTO</td></tr>';
+      h += '<tr class="r1"><td></td><td class="klogo"><img alt="BYD" src="data:image/png;base64,' + k.logo + '"></td><td>KARDEX - MP / MERCADORIA</td>' +
+           '<td colspan="4" class="kcp">Conferido Por: ' + esc(kNome('kconf')) + ' / Criado Por: ' + esc(kNome('kcria')) + '</td><td colspan="3">FILIAL&nbsp;&nbsp;&nbsp;&nbsp;AUTO</td></tr>';
       h += '<tr class="r2"><th>SEQ</th><th>CÓDIGO SAP</th><th>DESCRICÃO</th><th>LOCAL</th><th colspan="6">QUANT.</th></tr>';
       for (var i = 0; i < POR; i++) {
         var ix = p * POR + i, it = k.itens[ix] || { sku: '', desc: '', local: '', qtd: '' };
@@ -711,6 +751,10 @@
   Array.prototype.forEach.call(document.querySelectorAll('.kseg button'), function (bt) { bt.addEventListener('click', function () { visualizar(); }); });
   $('kseg2').addEventListener('change', function () { visualizar(); });
   window.addEventListener('resize', ajustarZoom);
+  ['kconf', 'kcria'].forEach(function (id) {
+    $(id).value = ler('inv_' + id);
+    $(id).addEventListener('input', function () { gravar('inv_' + id, $(id).value.trim()); if (kAtual) { montarKardex(kAtual.k); ajustarZoom(); } });
+  });
   function imprimirAgora() {
     var img = $('kardex').querySelector('img');
     var go = function () { setTimeout(function () { window.print(); }, 150); };
@@ -786,7 +830,13 @@
     });
     return tr;
   }
+  function fCab() {
+    $('ftit').textContent = $('ff').value.trim().toUpperCase();
+    $('fconf').textContent = 'Conferido Por: ' + (estado.resp ? estado.resp.charAt(0) + estado.resp.slice(1).toLowerCase() : '');
+    if (!$('flogo').getAttribute('src')) $('flogo').setAttribute('src', document.querySelector('.logo img').getAttribute('src'));
+  }
   function fDesenhar() {
+    fCab();
     var tb = $('fbody'); tb.innerHTML = '';
     if (!fItens.length) { tb.innerHTML = '<tr><td colspan="7" class="fvazio">' + ($('ff').value.trim() ? 'Nenhum item do SBF nesse endereço. Use "+ Adicionar item" se encontrou peças.' : 'Digite o endereço para carregar os itens do SBF.') + '</td></tr>'; }
     fItens.forEach(function (it, i) { tb.appendChild(fLinha(it, i)); });
@@ -807,7 +857,7 @@
   $('ff').addEventListener('input', function () { clearTimeout(fTimer); fTimer = setTimeout(fCarregar, 600); });
   $('ff').addEventListener('keydown', function (e) { if (e.key === 'Enter') { clearTimeout(fTimer); fCarregar(); } });
   $('fresp').value = estado.resp || '';
-  $('fresp').addEventListener('change', function () { estado.resp = limpa($('fresp').value); $('fresp').value = estado.resp; gravar('inv_resp', estado.resp); $('resp').value = estado.resp; });
+  $('fresp').addEventListener('change', function () { estado.resp = limpa($('fresp').value); $('fresp').value = estado.resp; gravar('inv_resp', estado.resp); $('resp').value = estado.resp; fCab(); });
   $('fseg').addEventListener('change', function () { $('fsw').classList.toggle('on', $('fseg').checked); });
   $('fadd').addEventListener('click', function () {
     var f = $('ff').value.trim().toUpperCase();
@@ -826,12 +876,6 @@
       var v = fNum(pend[i].fis);
       if (!pend[i].sku) { fMsg('Preencha o código do item adicionado (linha ' + (fItens.indexOf(pend[i]) + 1) + ').', true); return; }
       if (v === null || isNaN(v) || v < 0) { fMsg('Informe a quantidade física da linha ' + (fItens.indexOf(pend[i]) + 1) + '.', true); return; }
-    }
-    if (!fConfirmar) {
-      fConfirmar = true; $('fgo').classList.add('conf');
-      $('fgoTx').textContent = 'Confirmar lançamento de ' + pend.length + ' ite' + (pend.length > 1 ? 'ns' : 'm');
-      setTimeout(function () { if (fConfirmar && !fRodando) fResumo(); }, 6000);
-      return;
     }
     fRodando = true; fConfirmar = false; $('fgo').classList.remove('conf'); $('fgo').disabled = true;
     var feitos = 0, erros = 0, idx = 0;
@@ -857,7 +901,8 @@
     document.body.classList.toggle('v-f', v === 'f');
     Array.prototype.forEach.call(document.querySelectorAll('.side button'), function (x) { x.classList.toggle('on', x.getAttribute('data-v') === v); });
     try { localStorage.setItem('inv_aba', v); } catch (e) {}
-    if (v === 'f') $('fresp').value = estado.resp || '';
+    if (v === 'f') { $('fresp').value = estado.resp || ''; fCab(); }
+    if (v === 'k' && !$('kconf').value && estado.resp) $('kconf').value = estado.resp.charAt(0) + estado.resp.slice(1).toLowerCase();
     if (v === 'k') { if (!$('kf').value && estado.loc) { $('kf').value = estado.loc; visualizar(); } ajustarZoom(); }
   }
   Array.prototype.forEach.call(document.querySelectorAll('.side button'), function (x) { x.addEventListener('click', function () { abrir(x.getAttribute('data-v')); }); });

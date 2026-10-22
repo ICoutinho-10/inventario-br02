@@ -252,6 +252,21 @@
   .fbar { margin: 0 -16px; }
   @media (max-width: 700px) { .fhead { grid-template-columns: 90px 1fr; } .fhead > div:nth-child(n+3) { display: none; } .fhead img { width: 64px; } table.ft { border: 0; } }
 
+
+  /* Histórico de posições lançadas (balão ao lado) */
+  body.v-f .fview { display: grid; grid-template-columns: minmax(0, 1080px) 280px; gap: 20px; justify-content: center; align-items: start; }
+  .fhist { position: sticky; top: 18px; background: rgba(60,64,150,.28); border: 1px solid rgba(120,130,240,.28); border-radius: 18px; padding: 14px; max-height: calc(100vh - 36px); overflow-y: auto; }
+  .fhh { display: flex; align-items: center; gap: 8px; font-family: "Oxanium", var(--font); font-weight: 800; font-size: 14px; letter-spacing: .4px; margin: 2px 4px 12px; color: #EEF1FF; }
+  #fhl { padding: 0; }
+  #fhl li { display: flex; gap: 10px; align-items: flex-start; background: rgba(10,12,40,.55); border: 1px solid rgba(16,185,129,.35); border-radius: 14px; padding: 10px 12px; margin-bottom: 8px; color: #EEF1FF; }
+  #fhl li .ck { flex: 0 0 auto; width: 26px; height: 26px; border-radius: 50%; background: var(--green); display: grid; place-items: center; box-shadow: 0 4px 12px rgba(16,185,129,.4); }
+  #fhl li .tx { flex: 1; min-width: 0; }
+  #fhl li b { display: block; font-size: 15px; letter-spacing: .2px; }
+  #fhl li small { display: block; font-size: 12px; color: #A6B0E8; margin-top: 2px; }
+  #fhl li .dv { color: #FCD34D; }
+  #fhl li.vz { border-style: dashed; border-color: rgba(120,130,240,.35); color: #A6B0E8; font-size: 13px; display: block; }
+  @media (max-width: 1300px) { body.v-f .fview { grid-template-columns: minmax(0, 1fr); } .fhist { position: static; max-height: none; } }
+
   /* Ficha KARDEX impressa (FO.SC.A.026) */
   .kpg { font-family: Calibri, Carlito, Arial, sans-serif; color: #000; page-break-after: always; }
   .kpg:last-child { page-break-after: auto; }
@@ -342,6 +357,7 @@
 </form>
 </div>
 <div class="fview" id="fview">
+<div class="fmain">
   <div class="ktool">
     <div class="fr">
       <label class="kl" for="fresp">Conferente</label>
@@ -371,6 +387,11 @@
       <button type="button" class="go" id="fgo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span id="fgoTx">Lançar conferência</span></button>
     </div>
   </div>
+</div>
+<aside class="fhist">
+  <div class="fhh"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>Posições lançadas</div>
+  <ul id="fhl"></ul>
+</aside>
 </div>
 <div class="kview" id="kview">
   <div class="ktool">
@@ -416,6 +437,7 @@
       buscarProduto: function (codigo, locacao) { return get('buscar', { codigo: codigo, locacao: locacao }); },
       ultimosLancamentos: function (qtd) { return get('ultimos', { qtd: qtd }); },
       salvarContagem: function (d) { var c = { acao: 'salvar' }; for (var k in d) c[k] = d[k]; return post(c); },
+      salvarLote: function (d) { var c = { acao: 'salvarLote' }; for (var k in d) c[k] = d[k]; return post(c); },
       kardex: function (filtro, fonte) { return get('kardex', { filtro: filtro, fonte: fonte }); }
     };
     function runner(ok, falha) {
@@ -830,6 +852,22 @@
     });
     return tr;
   }
+  var CK = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>';
+  function fHist() { try { return JSON.parse(localStorage.getItem('inv_hist') || '[]'); } catch (e) { return []; } }
+  function fHistDesenhar() {
+    var l = fHist(), ul = $('fhl'); ul.innerHTML = '';
+    if (!l.length) { ul.innerHTML = '<li class="vz">Nenhuma posição lançada neste aparelho ainda.</li>'; return; }
+    l.forEach(function (x) {
+      var li = document.createElement('li');
+      li.innerHTML = '<span class="ck">' + CK + '</span><span class="tx"><b></b><small></small><small></small></span>';
+      li.querySelector('b').textContent = x.end;
+      var s = li.querySelectorAll('small');
+      s[0].innerHTML = esc(x.n + ' ite' + (x.n > 1 ? 'ns' : 'm')) + (x.div ? ' · <span class="dv">' + x.div + ' divergente' + (x.div > 1 ? 's' : '') + '</span>' : ' · tudo confere') + (x.seg ? ' · 2ª contagem' : '');
+      s[1].textContent = x.dh + ' · ' + x.conf;
+      ul.appendChild(li);
+    });
+  }
+  function fHistAdd(reg) { var l = fHist(); l.unshift(reg); try { localStorage.setItem('inv_hist', JSON.stringify(l.slice(0, 60))); } catch (e) {} fHistDesenhar(); }
   function fCab() {
     $('ftit').textContent = $('ff').value.trim().toUpperCase();
     $('fconf').textContent = 'Conferido Por: ' + (estado.resp ? estado.resp.charAt(0) + estado.resp.slice(1).toLowerCase() : '');
@@ -857,6 +895,7 @@
   $('ff').addEventListener('input', function () { clearTimeout(fTimer); fTimer = setTimeout(fCarregar, 600); });
   $('ff').addEventListener('keydown', function (e) { if (e.key === 'Enter') { clearTimeout(fTimer); fCarregar(); } });
   $('fresp').value = estado.resp || '';
+  fHistDesenhar();
   $('fresp').addEventListener('change', function () { estado.resp = limpa($('fresp').value); $('fresp').value = estado.resp; gravar('inv_resp', estado.resp); $('resp').value = estado.resp; fCab(); });
   $('fseg').addEventListener('change', function () { $('fsw').classList.toggle('on', $('fseg').checked); });
   $('fadd').addEventListener('click', function () {
@@ -868,6 +907,17 @@
     fDesenhar();
     var ins = $('fbody').querySelectorAll('input.fc'); if (ins.length) ins[ins.length - 1].focus();
   });
+  function fConcluir() {
+    var end = $('ff').value.trim().toUpperCase(), div = 0;
+    fItens.forEach(function (it) { if (fNum(it.fis) !== it.sbf) div++; });
+    var d = new Date(), p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+    fHistAdd({ end: end, n: fItens.length, div: div, seg: $('fseg').checked, conf: estado.resp,
+               dh: p2(d.getDate()) + '/' + p2(d.getMonth() + 1) + '/' + d.getFullYear() + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes()) });
+    fItens = []; $('ff').value = ''; $('fseg').checked = false; $('fsw').classList.remove('on');
+    fDesenhar();
+    fMsg('Endereço ' + end + ' lançado na planilha ✓  Digite o próximo endereço.');
+    $('ff').focus();
+  }
   $('fgo').addEventListener('click', function () {
     if (fRodando) return;
     if (!estado.resp) { fMsg('Informe o conferente.', true); $('fresp').focus(); return; }
@@ -879,10 +929,20 @@
     }
     fRodando = true; fConfirmar = false; $('fgo').classList.remove('conf'); $('fgo').disabled = true;
     var feitos = 0, erros = 0, idx = 0;
+    $('fgoTx').textContent = 'Lançando ' + pend.length + ' ite' + (pend.length > 1 ? 'ns' : 'm') + '…';
+    google.script.run
+      .withSuccessHandler(function () { pend.forEach(function (it) { it.estado = 'feito'; }); feitos = pend.length; idx = pend.length; proximo(); })
+      .withFailureHandler(function (e) {
+        var m = e && e.message ? e.message : String(e);
+        if (/inválida/i.test(m)) { proximo(); return; }   // planilha ainda sem o lançamento em lote: envia um por um
+        pend.forEach(function (it) { it.estado = 'erro'; it.erro = m; }); erros = pend.length; idx = pend.length; proximo();
+      })
+      .salvarLote({ responsavel: estado.resp, segunda: $('fseg').checked, itens: pend.map(function (it) { return { locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)) }; }) });
     function proximo() {
       if (idx >= pend.length) {
-        fRodando = false; fDesenhar(); atualizarLista();
-        fMsg(erros ? feitos + ' lançado(s), ' + erros + ' com erro — clique em Lançar de novo para reenviar os que falharam.' : 'Conferência lançada na planilha: ' + feitos + ' ite' + (feitos > 1 ? 'ns' : 'm') + '.', !!erros);
+        fRodando = false; atualizarLista();
+        if (erros) { fDesenhar(); fMsg(feitos + ' lançado(s), ' + erros + ' com erro — clique em Lançar de novo para reenviar os que falharam.', true); return; }
+        fConcluir();
         return;
       }
       var it = pend[idx++];
@@ -892,7 +952,6 @@
         .withFailureHandler(function (e) { it.estado = 'erro'; it.erro = e && e.message ? e.message : String(e); erros++; fDesenhar(); proximo(); })
         .salvarContagem({ responsavel: estado.resp, locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)), segunda: $('fseg').checked });
     }
-    proximo();
   });
 
   // ---- Menu lateral ----

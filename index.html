@@ -104,30 +104,52 @@
   .sect .dot { width: 8px; height: 8px; border-radius: 50%; background: #16A34A; animation: pulso 2s infinite; }
   .sect .dot.off { background: #9CA3AF; animation: none; }
   @keyframes pulso { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,.55); } 70% { box-shadow: 0 0 0 8px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
-  /* Painel KARDEX na parte escura (desktop); no celular fica abaixo do app */
-  .kpanel { position: fixed; top: 24px; left: calc(50% + 300px); width: 270px; z-index: 5; color: #EEF1FF;
-            background: rgba(60,64,150,.28); border: 1px solid rgba(120,130,240,.28); border-radius: 16px; padding: 16px; }
-  .kpanel h4 { margin: 0 0 12px; font-family: "Oxanium", var(--font); font-weight: 800; font-size: 16px; letter-spacing: .5px; display: flex; align-items: center; gap: 8px; }
-  .kpanel label.kl { display: block; font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: #A6B0E8; margin: 12px 0 6px; }
-  .kpanel input.ki { height: 42px; font-size: 16px; background: rgba(10,12,40,.6); color: #EEF1FF; border: 1.5px solid rgba(120,130,240,.35); border-radius: 10px; }
-  .kpanel input.ki:focus { border-color: #22D3EE; box-shadow: 0 0 0 3px rgba(34,211,238,.18); }
-  .kseg { display: flex; background: rgba(10,12,40,.6); border: 1px solid rgba(120,130,240,.35); border-radius: 10px; padding: 3px; gap: 3px; }
-  .kseg button { flex: 1; height: 36px; border: 0; border-radius: 8px; background: transparent; color: #A6B0E8; font-family: var(--font); font-weight: 800; font-size: 13px; cursor: pointer; }
+  /* Menu lateral (parte escura) */
+  .side { position: fixed; left: 0; top: 0; bottom: 0; width: 220px; z-index: 6; padding: 22px 14px; color: #EEF1FF;
+          background: rgba(10,12,40,.55); border-right: 1px solid rgba(120,130,240,.22); }
+  .side .mt { font-family: "Oxanium", var(--font); font-weight: 800; font-size: 12px; letter-spacing: 1.2px; color: #A6B0E8; margin: 0 10px 12px; }
+  .side button { width: 100%; height: 46px; margin-bottom: 6px; border: 0; border-radius: 12px; background: transparent; color: #C7CEF5;
+                 font-family: var(--font); font-weight: 800; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 0 12px; text-align: left; }
+  .side button:hover { background: rgba(120,130,240,.14); }
+  .side button.on { background: #EEF1FF; color: #111827; }
+  body { padding-left: 220px; }
+  .bar { left: calc(50% + 110px) !important; }
+
+  /* Aba KARDEX: visualização real da ficha */
+  .kview { display: none; padding: 22px 26px 40px; color: #EEF1FF; }
+  body.v-k .app { display: none; }
+  body.v-k .kview { display: block; }
+  .ktool { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; background: rgba(60,64,150,.28); border: 1px solid rgba(120,130,240,.28);
+           border-radius: 16px; padding: 14px 16px; margin-bottom: 18px; }
+  .ktool .kf { flex: 1 1 220px; min-width: 200px; }
+  .ktool label.kl { display: block; font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: #A6B0E8; margin: 0 0 6px; }
+  .ktool input.ki { height: 42px; font-size: 16px; background: rgba(10,12,40,.6); color: #EEF1FF; border: 1.5px solid rgba(120,130,240,.35); border-radius: 10px; }
+  .ktool input.ki:focus { border-color: #22D3EE; box-shadow: 0 0 0 3px rgba(34,211,238,.18); }
+  .kseg { display: flex; background: rgba(10,12,40,.6); border: 1px solid rgba(120,130,240,.35); border-radius: 10px; padding: 3px; gap: 3px; min-width: 230px; }
+  .kseg button { flex: 1; height: 34px; border: 0; border-radius: 8px; background: transparent; color: #A6B0E8; font-family: var(--font); font-weight: 800; font-size: 13px; cursor: pointer; padding: 0 12px; }
   .kseg button.on { background: #EEF1FF; color: #111827; }
-  .kpanel .sw { margin-top: 12px; background: rgba(10,12,40,.6); border: 1.5px dashed rgba(120,130,240,.35); color: #EEF1FF; }
-  .kpanel .sw .tx small { color: #A6B0E8; }
-  .kpanel .sw.on { border: 1.5px solid #F59E0B; background: rgba(245,158,11,.14); }
-  .kgo { margin-top: 16px; width: 100%; height: 46px; border: 0; border-radius: 12px; background: var(--red); color: #fff; font-family: var(--font);
+  .ktool .sw { margin: 0; padding: 7px 12px; background: rgba(10,12,40,.6); border: 1.5px dashed rgba(120,130,240,.35); color: #EEF1FF; }
+  .ktool .sw .tx small { color: #A6B0E8; }
+  .ktool .sw.on { border: 1.5px solid #F59E0B; background: rgba(245,158,11,.14); }
+  .kgo { height: 44px; border: 0; border-radius: 12px; background: var(--red); color: #fff; font-family: var(--font); padding: 0 18px;
          font-weight: 800; font-size: 14px; letter-spacing: .3px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
   .kgo:hover { background: var(--red2); }
   .kgo:disabled { opacity: .6; cursor: wait; }
-  .kmsg { margin-top: 10px; font-size: 12px; color: #FCA5A5; min-height: 16px; }
-  @media (max-width: 1180px) {
-    .kpanel { position: static; width: auto; max-width: 560px; margin: 16px auto 110px; border-radius: 16px; }
+  .kmsg { font-size: 13px; color: #C7CEF5; margin: -6px 2px 14px; min-height: 18px; }
+  .kmsg.err { color: #FCA5A5; }
+  .kprev { overflow-x: auto; }
+  .kpg { background: #fff; width: 1123px; min-height: 794px; padding: 38px; box-sizing: border-box; margin: 0 auto 22px; box-shadow: 0 10px 40px rgba(0,0,0,.45); border-radius: 4px; }
+  .kvazio { max-width: 520px; margin: 60px auto; text-align: center; color: #A6B0E8; font-size: 15px; line-height: 1.5; }
+  @media (max-width: 900px) {
+    body { padding-left: 0; }
+    .bar { left: 50% !important; }
+    .side { position: sticky; top: 0; bottom: auto; width: auto; display: flex; gap: 6px; padding: 8px 10px; border-right: 0; border-bottom: 1px solid rgba(120,130,240,.22); background: #0f1030; }
+    .side .mt { display: none; }
+    .side button { margin: 0; height: 40px; justify-content: center; }
+    .kview { padding: 14px 12px 40px; }
   }
 
   /* Ficha KARDEX impressa (FO.SC.A.026) */
-  #kardex { display: none; }
   .kpg { font-family: Calibri, Carlito, Arial, sans-serif; color: #000; page-break-after: always; }
   .kpg:last-child { page-break-after: auto; }
   .ktit { width: 1039px; text-align: center; font-weight: 700; font-size: 30pt; line-height: 1; margin: 0 0 14px; padding-right: 111px; box-sizing: border-box; }
@@ -148,9 +170,12 @@
   .kfo b { font-size: 9.5pt; }
   @media print {
     @page { size: A4 landscape; margin: 10mm; }
-    html, body { background: #fff !important; }
-    .app, .kpanel, .bar { display: none !important; }
-    #kardex { display: block; }
+    html, body { background: #fff !important; padding: 0 !important; }
+    .app, .side, .ktool, .kmsg, .bar { display: none !important; }
+    .kview { display: block !important; padding: 0 !important; }
+    .kprev { overflow: visible; }
+    #kardex { zoom: 1 !important; }
+    .kpg { width: auto; min-height: 0; padding: 0; margin: 0; box-shadow: none; border-radius: 0; }
   }
   li.vazio { color: var(--dim); font-size: 13px; background: transparent; padding: 4px 2px; }
 
@@ -163,6 +188,7 @@
 </style>
 </head>
 <body>
+<nav class="side"><div class="mt">MENU</div><button type="button" class="on" data-v="c"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Contagem</button><button type="button" data-v="k"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>Kardex</button></nav>
 <div class="app">
 <div class="top"><div class="topin">
   <div class="logo"><img alt="BYD" src="data:image/png;base64,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"></div>
@@ -216,21 +242,26 @@
   </div></div>
 </form>
 </div>
-<div id="kardex"></div>
-<div class="kpanel">
-  <h4><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>KARDEX</h4>
-  <label class="kl" for="kf">Endereço do Kardex</label>
-  <input class="ki" id="kf" list="kfl" placeholder="Ex.: T02 R33 B" autocomplete="off" autocapitalize="characters">
-  <datalist id="kfl"></datalist>
-  <label class="kl">Imprimir</label>
-  <div class="kseg"><button type="button" class="on" data-f="inv">Inventariados</button><button type="button" data-f="sbf">SBF</button></div>
-  <label class="sw" id="ksw">
-    <input type="checkbox" id="kseg2">
-    <span class="tg" aria-hidden="true"></span>
-    <span class="tx"><b>2ª contagem</b><small>Imprime só os itens recontados</small></span>
-  </label>
-  <button type="button" class="kgo" id="kgo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>IMPRIMIR KARDEX</button>
+<div class="kview" id="kview">
+  <div class="ktool">
+    <div class="kf">
+      <label class="kl" for="kf">Endereço do Kardex</label>
+      <input class="ki" id="kf" list="kfl" placeholder="Ex.: T02 R33 B" autocomplete="off" autocapitalize="characters">
+      <datalist id="kfl"></datalist>
+    </div>
+    <div>
+      <label class="kl">Fonte</label>
+      <div class="kseg"><button type="button" class="on" data-f="inv">Inventariados</button><button type="button" data-f="sbf">SBF</button></div>
+    </div>
+    <label class="sw" id="ksw">
+      <input type="checkbox" id="kseg2">
+      <span class="tg" aria-hidden="true"></span>
+      <span class="tx"><b>2ª contagem</b><small>Só os itens recontados</small></span>
+    </label>
+    <button type="button" class="kgo" id="kgo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>IMPRIMIR</button>
+  </div>
   <div class="kmsg" id="kmsg"></div>
+  <div class="kprev" id="kprev"><div id="kardex"><div class="kvazio">Digite um endereço (ex.: <b>T02 R33 B</b>) para ver o Kardex como ele sai na impressão.</div></div></div>
 </div>
 
 <script>
@@ -524,23 +555,62 @@
     if (on && kFonte === 'sbf') document.querySelector('.kseg button[data-f="inv"]').click();
     $('kseg2').checked = on; $('ksw').classList.toggle('on', on);
   });
-  $('kgo').addEventListener('click', function () {
-    var filtro = $('kf').value.trim() || estado.loc || '';
-    var km = $('kmsg'); km.textContent = '';
-    if (!filtro) { km.textContent = 'Digite o endereço do Kardex (ex.: T02 R33 B).'; $('kf').focus(); return; }
-    var b = $('kgo'); b.disabled = true;
+  // ---- Visualização ao vivo + impressão ----
+  var kAtual = null, kPedido = 0, kTimer = null;
+  function kParams() {
+    return { filtro: $('kf').value.trim(), fonte: (kFonte === 'inv' && $('kseg2').checked) ? 'inv2' : kFonte };
+  }
+  function ajustarZoom() {
+    var w = $('kprev').clientWidth;
+    $('kardex').style.zoom = w && w < 1123 ? (w / 1123).toFixed(3) : 1;
+  }
+  function kMsg(t, erro) { $('kmsg').textContent = t || ''; $('kmsg').className = 'kmsg' + (erro ? ' err' : ''); }
+  function visualizar(depois) {
+    var p = kParams();
+    if (!p.filtro) { kAtual = null; $('kardex').innerHTML = '<div class="kvazio">Digite um endereço (ex.: <b>T02 R33 B</b>) para ver o Kardex como ele sai na impressão.</div>'; kMsg(''); return; }
+    var n = ++kPedido;
+    kMsg('Carregando ' + p.filtro.toUpperCase() + '…');
     google.script.run
       .withSuccessHandler(function (k) {
-        b.disabled = false;
-        if (!k.itens.length) { km.textContent = 'Nenhum item ' + (k.fonte === 'sbf' ? 'no SBF' : k.fonte === 'inv2' ? 'com 2ª contagem' : 'inventariado') + ' em ' + k.titulo + '.'; return; }
+        if (n !== kPedido) return;
+        kAtual = { chave: p.filtro.toUpperCase() + '|' + p.fonte, k: k };
+        var nome = k.fonte === 'sbf' ? 'no SBF' : k.fonte === 'inv2' ? 'com 2ª contagem' : 'inventariados';
         montarKardex(k);
-        var img = $('kardex').querySelector('img');
-        var imprimir = function () { setTimeout(function () { window.print(); }, 150); };
-        if (img && !img.complete) img.onload = imprimir; else imprimir();
+        ajustarZoom();
+        kMsg(k.itens.length ? k.itens.length + ' ite' + (k.itens.length > 1 ? 'ns ' : 'm ') + nome + ' · ' + Math.max(1, Math.ceil(k.itens.length / 28)) + ' folha(s)' : 'Nenhum item ' + nome + ' em ' + k.titulo + '.');
+        if (depois) depois(k);
       })
-      .withFailureHandler(function (e) { b.disabled = false; km.textContent = 'Não gerou o Kardex: ' + (e && e.message ? e.message : e); })
-      .kardex(filtro, (kFonte === 'inv' && $('kseg2').checked) ? 'inv2' : kFonte);
+      .withFailureHandler(function (e) { if (n === kPedido) kMsg('Não gerou o Kardex: ' + (e && e.message ? e.message : e), true); })
+      .kardex(p.filtro, p.fonte);
+  }
+  function agendar() { clearTimeout(kTimer); kTimer = setTimeout(function () { visualizar(); }, 600); }
+  $('kf').addEventListener('input', agendar);
+  $('kf').addEventListener('keydown', function (e) { if (e.key === 'Enter') { clearTimeout(kTimer); visualizar(); } });
+  Array.prototype.forEach.call(document.querySelectorAll('.kseg button'), function (bt) { bt.addEventListener('click', function () { visualizar(); }); });
+  $('kseg2').addEventListener('change', function () { visualizar(); });
+  window.addEventListener('resize', ajustarZoom);
+  function imprimirAgora() {
+    var img = $('kardex').querySelector('img');
+    var go = function () { setTimeout(function () { window.print(); }, 150); };
+    if (img && !img.complete) img.onload = go; else go();
+  }
+  $('kgo').addEventListener('click', function () {
+    var p = kParams();
+    if (!p.filtro) { kMsg('Digite o endereço do Kardex (ex.: T02 R33 B).', true); $('kf').focus(); return; }
+    if (kAtual && kAtual.chave === p.filtro.toUpperCase() + '|' + p.fonte) { if (kAtual.k.itens.length) imprimirAgora(); return; }
+    var b = $('kgo'); b.disabled = true;
+    visualizar(function (k) { b.disabled = false; if (k.itens.length) imprimirAgora(); });
+    setTimeout(function () { b.disabled = false; }, 15000);
   });
+  // ---- Menu lateral ----
+  function abrir(v) {
+    document.body.classList.toggle('v-k', v === 'k');
+    Array.prototype.forEach.call(document.querySelectorAll('.side button'), function (x) { x.classList.toggle('on', x.getAttribute('data-v') === v); });
+    try { localStorage.setItem('inv_aba', v); } catch (e) {}
+    if (v === 'k') { if (!$('kf').value && estado.loc) { $('kf').value = estado.loc; visualizar(); } ajustarZoom(); }
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('.side button'), function (x) { x.addEventListener('click', function () { abrir(x.getAttribute('data-v')); }); });
+  try { if (localStorage.getItem('inv_aba') === 'k') abrir('k'); } catch (e) {}
 
   pintarSeg();
   recarregarEnderecos();

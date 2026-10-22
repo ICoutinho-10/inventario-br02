@@ -1010,10 +1010,10 @@
   function aplicarTema(t) {
     document.body.setAttribute('data-tema', t);
     Array.prototype.forEach.call(document.querySelectorAll('.tema .tw'), function (b) { b.classList.toggle('on', b.getAttribute('data-t') === t); });
-    gravar('inv_tema', t);
+    gravar('inv_tema2', t);
   }
   Array.prototype.forEach.call(document.querySelectorAll('.tema .tw'), function (b) { b.addEventListener('click', function () { aplicarTema(b.getAttribute('data-t')); }); });
-  aplicarTema(ler('inv_tema') || 'marinho');
+  aplicarTema(ler('inv_tema2') || 'marinho');
   // ---- Menu lateral ----
   function abrir(v) {
     document.body.classList.toggle('v-k', v === 'k');

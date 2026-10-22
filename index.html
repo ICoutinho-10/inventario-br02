@@ -225,6 +225,9 @@
   }
 
 
+  .ft td.sbf.esf { background: repeating-linear-gradient(135deg, #E9ECF2 0 6px, #F3F5F9 6px 12px); opacity: .55; filter: blur(.4px); }
+  .ft th.esf { opacity: .45; }
+  .ft td.sbf.esf::before { content: none !important; }
   /* Conferência com cara de Kardex */
   .fview .ktool, .fview .kmsg, .fview .fcard { max-width: 1080px; margin-left: auto; margin-right: auto; }
   .fview { padding: 18px 14px 40px; }
@@ -424,7 +427,7 @@
     <div class="ftit" id="ftit"></div>
     <div class="fhead"><div><img alt="BYD" id="flogo"></div><div>KARDEX - MP / MERCADORIA</div><div id="fconf">Conferido Por:</div><div>FILIAL&nbsp;&nbsp;&nbsp;AUTO</div></div>
     <div class="fscroll"><table class="ft">
-      <thead><tr><th>SEQ</th><th>CÓDIGO SAP</th><th>DESCRIÇÃO</th><th>LOCAL</th><th>QTDE SBF</th><th>QTDE KARDEX FÍSICO</th><th>SITUAÇÃO</th></tr></thead>
+      <thead><tr><th>SEQ</th><th>CÓDIGO SAP</th><th>DESCRIÇÃO</th><th>LOCAL</th><th class="esf">QTDE SBF</th><th>QTDE KARDEX FÍSICO</th><th>SITUAÇÃO</th></tr></thead>
       <tbody id="fbody"><tr><td colspan="7" class="fvazio">Digite o endereço para carregar os itens do SBF.</td></tr></tbody>
     </table></div>
     <button type="button" class="fadd" id="fadd">+ Adicionar item encontrado fora da lista</button>
@@ -847,19 +850,17 @@
     if (it.estado === 'erro') return '<span class="chip erro" title="' + esc(it.erro || '') + '">Erro — tente de novo</span>';
     var f = fNum(it.fis);
     if (f === null || isNaN(f)) return '<span class="chip bx">Sem qtde</span>';
-    var d = Math.round((f - it.sbf) * 1000) / 1000;
-    if (d === 0) return '<span class="chip ok">Confere</span>';
-    return d < 0 ? '<span class="chip bx">Baixa ' + fFmt(-d) + '</span>' : '<span class="chip al">Alta ' + fFmt(d) + '</span>';
+    return '<span class="chip ok">Conferido</span>';
   }
   function fResumo() {
     var n = fItens.length, div = 0, bx = 0, al = 0, feitos = 0;
     fItens.forEach(function (it) {
       if (it.estado === 'feito') { feitos++; return; }
       var f = fNum(it.fis); if (f === null || isNaN(f)) return;
-      var d = f - it.sbf; if (d) { div++; if (d < 0) bx += -d; else al += d; }
+      div++;
     });
-    $('fres').innerHTML = n ? '<b>' + n + '</b> ite' + (n > 1 ? 'ns' : 'm') + ' · <b>' + div + '</b> divergente' + (div === 1 ? '' : 's') +
-      (bx ? ' · baixa <b>' + fFmt(bx) + '</b>' : '') + (al ? ' · alta <b>' + fFmt(al) + '</b>' : '') + (feitos ? ' · <b>' + feitos + '</b> lançado' + (feitos > 1 ? 's' : '') : '') : 'Nenhum item carregado.';
+    $('fres').innerHTML = n ? '<b>' + n + '</b> ite' + (n > 1 ? 'ns' : 'm') + ' · <b>' + div + '</b> conferido' + (div === 1 ? '' : 's') +
+      (feitos ? ' · <b>' + feitos + '</b> lançado' + (feitos > 1 ? 's' : '') : '') : 'Nenhum item carregado.';
     var pend = fItens.filter(function (it) { return it.estado !== 'feito'; }).length;
     if (!fRodando) { fConfirmar = false; $('fgo').classList.remove('conf'); $('fgoTx').textContent = pend ? 'Lançar conferência (' + pend + ')' : 'Lançar conferência'; }
     $('fgo').disabled = fRodando || !pend;
@@ -867,11 +868,11 @@
   function fLinha(it, i) {
     var tr = document.createElement('tr');
     var f = fNum(it.fis);
-    tr.className = (it.estado === 'feito' ? 'lan' : '') + (f !== null && !isNaN(f) && f !== it.sbf && it.estado !== 'feito' ? ' div' : '');
+    tr.className = (it.estado === 'feito' ? 'lan' : '');
     tr.innerHTML = '<td class="seq">' + (i + 1) + '</td>' +
       (it.novo ? '<td class="sku"><input class="fc" placeholder="Código" value="' + esc(it.sku) + '"></td>' : '<td class="sku">' + esc(it.sku) + '</td>') +
       '<td class="dsc" title="' + esc(it.desc) + '">' + esc(it.desc) + '</td><td class="loc">' + esc(it.local) + '</td>' +
-      '<td class="sbf">' + fFmt(it.sbf) + '</td>' +
+      '<td class="sbf esf"></td>' +
       '<td class="fis"><input class="fq" inputmode="decimal" value="' + esc(it.fis) + '"' + (it.estado === 'feito' ? ' disabled' : '') + '></td>' +
       '<td class="st">' + fSituacao(it) + '</td>';
     tr.addEventListener('click', function () { fSelecionar(tr); });
@@ -879,7 +880,6 @@
     q.addEventListener('input', function () {
       it.fis = q.value; it.estado = '';
       var v = fNum(q.value);
-      tr.classList.toggle('div', v !== null && !isNaN(v) && v !== it.sbf);
       tr.querySelector('td.st').innerHTML = fSituacao(it);
       fResumo();
     });
@@ -910,7 +910,7 @@
       li.innerHTML = '<span class="ck">' + CK + '</span><span class="tx"><b></b><small></small><small></small></span>';
       li.querySelector('b').textContent = x.end;
       var s = li.querySelectorAll('small');
-      s[0].innerHTML = esc(x.n + ' ite' + (x.n > 1 ? 'ns' : 'm')) + (x.div ? ' · <span class="dv">' + x.div + ' divergente' + (x.div > 1 ? 's' : '') + '</span>' : ' · tudo confere') + (x.seg ? ' · 2ª contagem' : '');
+      s[0].innerHTML = esc(x.n + ' ite' + (x.n > 1 ? 'ns' : 'm')) + ' · conferido' + (x.seg ? ' · 2ª contagem' : '');
       s[1].textContent = x.dh + ' · ' + x.conf;
       ul.appendChild(li);
     });
@@ -939,9 +939,9 @@
     fMsg('Carregando ' + filtro.toUpperCase() + '…');
     kardexSBF(filtro).then(function (k) {
       if (n !== fPedido) return;
-      fItens = k.itens.map(function (x) { return { sku: x.sku, desc: x.desc, local: x.local, sbf: Number(x.qtd), fis: fFmt(Number(x.qtd)), estado: '' }; });
+      fItens = k.itens.map(function (x) { return { sku: x.sku, desc: x.desc, local: x.local, sbf: Number(x.qtd), fis: '', estado: '' }; });
       fDesenhar();
-      fMsg(k.itens.length ? 'Confira cada item. Se a quantidade física for diferente, altere só a coluna "Qtde Kardex físico". SBF de ' + k.gerado + '.' : '');
+      fMsg(k.itens.length ? 'Conte cada item e digite a quantidade na coluna "Qtde Kardex físico".' : '');
     }, function (e) { if (n === fPedido) fMsg('Não carregou o SBF: ' + (e && e.message ? e.message : e), true); });
   }
   $('ff').addEventListener('input', function () { clearTimeout(fTimer); fTimer = setTimeout(fCarregar, 600); });

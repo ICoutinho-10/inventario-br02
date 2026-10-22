@@ -70,7 +70,7 @@
   input:focus { outline: none; background: #fff; border-color: var(--indigo); box-shadow: 0 0 0 4px rgba(79,70,229,.12); }
   #cod { padding-left: 52px; }
   .scan { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; padding: 7px; border-radius: 10px;
-          color: #fff; background: var(--grad); pointer-events: none; }
+          color: #fff; background: var(--green); pointer-events: none; }
   #qtd { height: 74px; font-size: 34px; text-align: center; letter-spacing: 1px; }
   .desc { min-height: 20px; margin: 8px 2px 16px; font-size: 13px; font-weight: 700; color: var(--dim); }
   .desc.ok { color: var(--ok); } .desc.warn { color: var(--warn); }
@@ -261,7 +261,7 @@
     </div>
     <div>
       <label class="kl">Fonte</label>
-      <div class="kseg"><button type="button" class="on" data-f="inv">Inventariados</button><button type="button" data-f="sbf">SBF</button></div>
+      <div class="kseg"><button type="button" data-f="inv">Inventariados</button><button type="button" class="on" data-f="sbf">SBF</button></div>
     </div>
     <label class="sw" id="ksw">
       <input type="checkbox" id="kseg2">
@@ -522,7 +522,7 @@
   }
   // ---- KARDEX: ficha FO.SC.A.026 filtrada por endereço (Inventariados ou SBF) ----
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
-  var kFonte = 'inv';
+  var kFonte = 'sbf';
   function montarKardex(k) {
     var cols = [143, 335, 106, 67, 55, 55, 55, 56, 55];
     var POR = 28, pags = Math.max(1, Math.ceil(k.itens.length / POR)), h = '';
@@ -530,7 +530,7 @@
       h += '<div class="kpg"><div class="ktit">' + esc(k.titulo) + '</div><div class="kwrap"><table class="kx"><colgroup>' +
            cols.map(function (w) { return '<col style="width:' + w + 'px">'; }).join('') + '</colgroup>';
       h += '<tr class="r1"><td class="klogo"><img alt="BYD" src="data:image/png;base64,' + k.logo + '"></td><td>KARDEX - MP / MERCADORIA</td><td>ALMOXARIFE</td>' +
-           '<td colspan="2">' + esc(k.almoxarife) + '</td><td>FILIAL</td><td colspan="3">PÓS VENDAS</td></tr>';
+           '<td colspan="2">' + esc(k.almoxarife) + '</td><td>FILIAL</td><td colspan="3">AUTO</td></tr>';
       h += '<tr class="r2"><th>CÓDIGO SAP</th><th>DESCRICÃO</th><th>LOCAL</th><th colspan="6">QUANT.</th></tr>';
       for (var i = 0; i < POR; i++) {
         var it = k.itens[p * POR + i] || { sku: '', desc: '', local: '', qtd: '' };
@@ -575,23 +575,46 @@
     $('kardex').style.zoom = w && w < 1123 ? (w / 1123).toFixed(3) : 1;
   }
   function kMsg(t, erro) { $('kmsg').textContent = t || ''; $('kmsg').className = 'kmsg' + (erro ? ' err' : ''); }
+  // SBF: cópia da aba SBF publicada junto com o site (sbf.json)
+  var SBF = null, sbfCarregando = null;
+  function carregarSBF() {
+    if (SBF) return Promise.resolve(SBF);
+    if (!sbfCarregando) sbfCarregando = fetch('sbf.json?v=' + Date.now()).then(function (r) { return r.json(); }).then(function (j) { SBF = j; return j; });
+    return sbfCarregando;
+  }
+  function kardexSBF(filtro) {
+    return carregarSBF().then(function (s) {
+      var f = filtro.trim().toUpperCase().replace(/\s+/g, ' '), itens = [];
+      Object.keys(s.e).forEach(function (end) {
+        if (end === f || end.indexOf(f) === 0) s.e[end].forEach(function (x) { itens.push({ sku: s.p[x[0]], desc: s.d[x[0]], local: end, qtd: x[1] }); });
+      });
+      itens.sort(function (a, b) { return a.local.localeCompare(b.local, 'pt-BR', { numeric: true }) || a.sku.localeCompare(b.sku, 'pt-BR', { numeric: true }); });
+      var src = document.querySelector('.logo img').getAttribute('src');
+      return { titulo: f, fonte: 'sbf', itens: itens, almoxarife: estado.resp || '', logo: src.slice(src.indexOf(',') + 1), gerado: s.gerado };
+    });
+  }
   function visualizar(depois) {
     var p = kParams();
     if (!p.filtro) { kAtual = null; $('kardex').innerHTML = '<div class="kvazio">Digite um endereço (ex.: <b>T02 R33 B</b>) para ver o Kardex como ele sai na impressão.</div>'; kMsg(''); return; }
     var n = ++kPedido;
     kMsg('Carregando ' + p.filtro.toUpperCase() + '…');
-    google.script.run
-      .withSuccessHandler(function (k) {
+    var ok = function (k) {
         if (n !== kPedido) return;
         kAtual = { chave: p.filtro.toUpperCase() + '|' + p.fonte, k: k };
         var nome = k.fonte === 'sbf' ? 'no SBF' : k.fonte === 'inv2' ? 'com 2ª contagem' : 'inventariados';
         montarKardex(k);
         ajustarZoom();
         kMsg(k.itens.length ? k.itens.length + ' ite' + (k.itens.length > 1 ? 'ns ' : 'm ') + nome + ' · ' + Math.max(1, Math.ceil(k.itens.length / 28)) + ' folha(s)' : 'Nenhum item ' + nome + ' em ' + k.titulo + '.');
+        if (k.gerado) kMsg($('kmsg').textContent + ' · SBF de ' + k.gerado);
         if (depois) depois(k);
-      })
-      .withFailureHandler(function (e) { if (n === kPedido) kMsg('Não gerou o Kardex: ' + (e && e.message ? e.message : e), true); })
-      .kardex(p.filtro, p.fonte);
+    };
+    var falha = function (e) {
+      if (n !== kPedido) return;
+      var m = e && e.message ? e.message : String(e);
+      kMsg(/inválida/i.test(m) ? 'Inventariados ainda não liberado na planilha — use SBF por enquanto.' : 'Não gerou o Kardex: ' + m, true);
+    };
+    if (p.fonte === 'sbf') kardexSBF(p.filtro).then(ok, falha);
+    else google.script.run.withSuccessHandler(ok).withFailureHandler(falha).kardex(p.filtro, p.fonte);
   }
   function agendar() { clearTimeout(kTimer); kTimer = setTimeout(function () { visualizar(); }, 600); }
   $('kf').addEventListener('input', agendar);

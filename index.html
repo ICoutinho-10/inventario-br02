@@ -164,6 +164,66 @@
     .kview { padding: 14px 12px 40px; }
   }
 
+
+  /* Aba CONFERÊNCIA KARDEX */
+  .fview { display: none; padding: 22px 26px 40px; color: #EEF1FF; }
+  body.v-f .app { display: none; }
+  body.v-f .fview { display: block; }
+  .ktool .fr { flex: 0 1 220px; min-width: 170px; }
+  .fcard { background: #fff; color: var(--ink); border-radius: 20px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,.45); }
+  .fscroll { overflow-x: auto; }
+  table.ft { width: 100%; border-collapse: collapse; min-width: 760px; font-size: 14px; }
+  .ft th { background: linear-gradient(135deg, #1E1B4B, #3730A3); color: #fff; font-size: 11px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase;
+           padding: 12px 10px; text-align: left; white-space: nowrap; }
+  .ft th.c, .ft td.c { text-align: center; }
+  .ft td { padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .ft tbody tr:nth-child(even) td { background: #FAFBFE; }
+  .ft td.seq { width: 52px; color: var(--dim); font-weight: 800; text-align: center; }
+  .ft td.sku { font-weight: 800; white-space: nowrap; }
+  .ft td.dsc { color: #334155; max-width: 360px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ft td.loc { white-space: nowrap; font-weight: 700; color: #3730A3; }
+  .ft td.sbf { width: 110px; text-align: center; font-weight: 800; font-size: 16px; color: #475569; }
+  .ft td.fis { width: 150px; text-align: center; }
+  .ft input.fq { width: 110px; height: 42px; font-size: 18px; text-align: center; padding: 0 8px; border-radius: 12px; background: #ECFDF5; border: 1.5px solid #A7F3D0; color: #065F46; }
+  .ft input.fq:focus { border-color: #10B981; box-shadow: 0 0 0 4px rgba(16,185,129,.18); background: #fff; }
+  .ft input.fc { width: 150px; height: 38px; font-size: 14px; padding: 0 10px; border-radius: 10px; }
+  .ft td.st { width: 120px; text-align: center; white-space: nowrap; }
+  .chip { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 800; }
+  .chip.ok { background: #ECFDF5; color: #047857; }
+  .chip.bx { background: #FFF1F2; color: #BE123C; }
+  .chip.al { background: #EEF2FF; color: #4338CA; }
+  .chip.feito { background: #10B981; color: #fff; }
+  .chip.erro { background: #BE123C; color: #fff; }
+  .ft tr.div td { background: #FFFBEB !important; }
+  .ft tr.div input.fq { background: #FEF3C7; border-color: #F59E0B; color: #92400E; }
+  .ft tr.lan td { opacity: .55; }
+  .ft tr.lan td.st { opacity: 1; }
+  .fvazio { padding: 50px 20px; text-align: center; color: var(--dim); font-size: 15px; }
+  .fadd { margin: 12px 14px; height: 40px; padding: 0 14px; border: 1.5px dashed var(--line2); border-radius: 12px; background: #fff; color: #3730A3;
+          font-family: var(--font); font-weight: 800; font-size: 13px; cursor: pointer; }
+  .fadd:hover { border-color: #6366F1; background: #EEF2FF; }
+  .fbar { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 14px 16px; border-top: 1px solid var(--line); background: #F8F9FC; }
+  .fres { flex: 1; min-width: 200px; font-size: 14px; color: var(--dim); font-weight: 700; }
+  .fres b { color: var(--ink); }
+  .fbar .go { margin: 0; width: auto; min-width: 260px; padding: 0 24px; }
+  .fbar .go.conf { background: linear-gradient(135deg, #FBBF24, #D97706); box-shadow: 0 10px 24px rgba(217,119,6,.35); }
+  @media (max-width: 900px) { .fview { padding: 14px 10px 40px; } .fbar .go { width: 100%; } }
+  @media (max-width: 700px) {
+    table.ft { min-width: 0; }
+    .ft thead { display: none; }
+    .ft tbody tr { display: grid; grid-template-columns: 34px 1fr 1fr; column-gap: 8px; padding: 10px 10px 12px; border-bottom: 1px solid var(--line); }
+    .ft tbody tr td { border: 0; padding: 2px 0; background: transparent !important; }
+    .ft tbody tr:nth-child(even) { background: #FAFBFE; }
+    .ft tr.div { background: #FFFBEB !important; }
+    .ft td.seq { grid-row: 1 / span 5; width: auto; padding-top: 4px; }
+    .ft td.sku, .ft td.dsc, .ft td.loc, .ft td.st { grid-column: 2 / span 2; text-align: left; max-width: none; white-space: normal; }
+    .ft td.sbf, .ft td.fis { width: auto; text-align: left; padding-top: 6px; }
+    .ft td.sbf::before { content: "SBF "; font-size: 11px; color: var(--dim); font-weight: 700; }
+    .ft td.fis input.fq { width: 100%; }
+    .ft td.fvazio { grid-column: 1 / -1; }
+    .side button { font-size: 12px; padding: 0 6px; gap: 6px; }
+  }
+
   /* Ficha KARDEX impressa (FO.SC.A.026) */
   .kpg { font-family: Calibri, Carlito, Arial, sans-serif; color: #000; page-break-after: always; }
   .kpg:last-child { page-break-after: auto; }
@@ -186,7 +246,7 @@
   @media print {
     @page { size: A4 landscape; margin: 10mm; }
     html, body { background: #fff !important; padding: 0 !important; }
-    .app, .side, .ktool, .kmsg, .bar { display: none !important; }
+    .app, .side, .ktool, .kmsg, .bar, .fview { display: none !important; }
     .kview { display: block !important; padding: 0 !important; }
     .kprev { overflow: visible; }
     #kardex { zoom: 1 !important; }
@@ -203,7 +263,7 @@
 </style>
 </head>
 <body>
-<nav class="side"><div class="mt">MENU</div><button type="button" class="on" data-v="c"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Contagem</button><button type="button" data-v="k"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>Kardex</button></nav>
+<nav class="side"><div class="mt">MENU</div><button type="button" class="on" data-v="f"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>Conferência Kardex</button><button type="button" data-v="c"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Contagem avulsa</button><button type="button" data-v="k"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>Imprimir Kardex</button></nav>
 <div class="app">
 <div class="top"><div class="topin">
   <div class="logo"><img alt="BYD" src="data:image/png;base64,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"></div>
@@ -251,6 +311,35 @@
   <ul id="hist"></ul>
 
 </form>
+</div>
+<div class="fview" id="fview">
+  <div class="ktool">
+    <div class="fr">
+      <label class="kl" for="fresp">Conferente</label>
+      <input class="ki" id="fresp" placeholder="Seu nome" autocomplete="off">
+    </div>
+    <div class="kf">
+      <label class="kl" for="ff">Endereço</label>
+      <input class="ki" id="ff" list="kfl" placeholder="Ex.: T02 R33 B" autocomplete="off" autocapitalize="characters">
+    </div>
+    <label class="sw" id="fsw">
+      <input type="checkbox" id="fseg">
+      <span class="tg" aria-hidden="true"></span>
+      <span class="tx"><b>2ª contagem</b><small>Recontagem de divergência</small></span>
+    </label>
+  </div>
+  <div class="kmsg" id="fmsg"></div>
+  <div class="fcard">
+    <div class="fscroll"><table class="ft">
+      <thead><tr><th class="c">Seq</th><th>Código SAP</th><th>Descrição</th><th>Local</th><th class="c">Qtde SBF</th><th class="c">Qtde Kardex físico</th><th class="c">Situação</th></tr></thead>
+      <tbody id="fbody"><tr><td colspan="7" class="fvazio">Digite o endereço para carregar os itens do SBF.</td></tr></tbody>
+    </table></div>
+    <button type="button" class="fadd" id="fadd">+ Adicionar item encontrado fora da lista</button>
+    <div class="fbar">
+      <div class="fres" id="fres">Nenhum item carregado.</div>
+      <button type="button" class="go" id="fgo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg><span id="fgoTx">Lançar conferência</span></button>
+    </div>
+  </div>
 </div>
 <div class="kview" id="kview">
   <div class="ktool">
@@ -524,17 +613,17 @@
   function esc(t) { return String(t == null ? '' : t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   var kFonte = 'sbf';
   function montarKardex(k) {
-    var cols = [143, 335, 106, 67, 55, 55, 55, 56, 55];
+    var cols = [38, 143, 297, 106, 67, 55, 55, 55, 56, 55];
     var POR = 28, pags = Math.max(1, Math.ceil(k.itens.length / POR)), h = '';
     for (var p = 0; p < pags; p++) {
       h += '<div class="kpg"><div class="ktit">' + esc(k.titulo) + '</div><div class="kwrap"><table class="kx"><colgroup>' +
            cols.map(function (w) { return '<col style="width:' + w + 'px">'; }).join('') + '</colgroup>';
-      h += '<tr class="r1"><td class="klogo"><img alt="BYD" src="data:image/png;base64,' + k.logo + '"></td><td>KARDEX - MP / MERCADORIA</td><td>ALMOXARIFE</td>' +
+      h += '<tr class="r1"><td></td><td class="klogo"><img alt="BYD" src="data:image/png;base64,' + k.logo + '"></td><td>KARDEX - MP / MERCADORIA</td><td>ALMOXARIFE</td>' +
            '<td colspan="2">' + esc(k.almoxarife) + '</td><td>FILIAL</td><td colspan="3">AUTO</td></tr>';
-      h += '<tr class="r2"><th>CÓDIGO SAP</th><th>DESCRICÃO</th><th>LOCAL</th><th colspan="6">QUANT.</th></tr>';
+      h += '<tr class="r2"><th>SEQ</th><th>CÓDIGO SAP</th><th>DESCRICÃO</th><th>LOCAL</th><th colspan="6">QUANT.</th></tr>';
       for (var i = 0; i < POR; i++) {
-        var it = k.itens[p * POR + i] || { sku: '', desc: '', local: '', qtd: '' };
-        h += '<tr class="b' + (i === POR - 1 ? ' ult' : '') + '"><td>' + esc(it.sku) + '</td><td class="l">' + esc(it.desc) + '</td><td>' + esc(it.local) + '</td>' +
+        var ix = p * POR + i, it = k.itens[ix] || { sku: '', desc: '', local: '', qtd: '' };
+        h += '<tr class="b' + (i === POR - 1 ? ' ult' : '') + '"><td>' + (k.itens[ix] ? ix + 1 : '') + '</td><td>' + esc(it.sku) + '</td><td class="l">' + esc(it.desc) + '</td><td>' + esc(it.local) + '</td>' +
              '<td class="q q1">' + esc(it.qtd) + '</td><td class="q"></td><td class="q"></td><td class="q"></td><td class="q"></td><td class="q q6"></td></tr>';
       }
       h += '</table><div class="kfo"><b>FO.SC.A.026</b>Rev.00 - Set/25</div></div></div>';
@@ -635,15 +724,144 @@
     visualizar(function (k) { b.disabled = false; if (k.itens.length) imprimirAgora(); });
     setTimeout(function () { b.disabled = false; }, 15000);
   });
+  // ---- CONFERÊNCIA KARDEX: SBF x físico, lança na planilha ----
+  var fItens = [], fTimer = null, fPedido = 0, fConfirmar = false, fRodando = false;
+  function fNum(v) { var s = String(v == null ? '' : v).trim().replace(',', '.'); return s === '' ? null : Number(s); }
+  function fMsg(t, erro) { $('fmsg').textContent = t || ''; $('fmsg').className = 'kmsg' + (erro ? ' err' : ''); }
+  function fFmt(n) { return String(Math.round(n * 1000) / 1000).replace('.', ','); }
+  function fSituacao(it) {
+    if (it.estado === 'feito') return '<span class="chip feito">Lançado ✓</span>';
+    if (it.estado === 'erro') return '<span class="chip erro" title="' + esc(it.erro || '') + '">Erro — tente de novo</span>';
+    var f = fNum(it.fis);
+    if (f === null || isNaN(f)) return '<span class="chip bx">Sem qtde</span>';
+    var d = Math.round((f - it.sbf) * 1000) / 1000;
+    if (d === 0) return '<span class="chip ok">Confere</span>';
+    return d < 0 ? '<span class="chip bx">Baixa ' + fFmt(-d) + '</span>' : '<span class="chip al">Alta ' + fFmt(d) + '</span>';
+  }
+  function fResumo() {
+    var n = fItens.length, div = 0, bx = 0, al = 0, feitos = 0;
+    fItens.forEach(function (it) {
+      if (it.estado === 'feito') { feitos++; return; }
+      var f = fNum(it.fis); if (f === null || isNaN(f)) return;
+      var d = f - it.sbf; if (d) { div++; if (d < 0) bx += -d; else al += d; }
+    });
+    $('fres').innerHTML = n ? '<b>' + n + '</b> ite' + (n > 1 ? 'ns' : 'm') + ' · <b>' + div + '</b> divergente' + (div === 1 ? '' : 's') +
+      (bx ? ' · baixa <b>' + fFmt(bx) + '</b>' : '') + (al ? ' · alta <b>' + fFmt(al) + '</b>' : '') + (feitos ? ' · <b>' + feitos + '</b> lançado' + (feitos > 1 ? 's' : '') : '') : 'Nenhum item carregado.';
+    var pend = fItens.filter(function (it) { return it.estado !== 'feito'; }).length;
+    if (!fRodando) { fConfirmar = false; $('fgo').classList.remove('conf'); $('fgoTx').textContent = pend ? 'Lançar conferência (' + pend + ')' : 'Lançar conferência'; }
+    $('fgo').disabled = fRodando || !pend;
+  }
+  function fLinha(it, i) {
+    var tr = document.createElement('tr');
+    var f = fNum(it.fis);
+    tr.className = (it.estado === 'feito' ? 'lan' : '') + (f !== null && !isNaN(f) && f !== it.sbf && it.estado !== 'feito' ? ' div' : '');
+    tr.innerHTML = '<td class="seq">' + (i + 1) + '</td>' +
+      (it.novo ? '<td class="sku"><input class="fc" placeholder="Código" value="' + esc(it.sku) + '"></td>' : '<td class="sku">' + esc(it.sku) + '</td>') +
+      '<td class="dsc" title="' + esc(it.desc) + '">' + esc(it.desc) + '</td><td class="loc">' + esc(it.local) + '</td>' +
+      '<td class="sbf">' + fFmt(it.sbf) + '</td>' +
+      '<td class="fis"><input class="fq" inputmode="decimal" value="' + esc(it.fis) + '"' + (it.estado === 'feito' ? ' disabled' : '') + '></td>' +
+      '<td class="st">' + fSituacao(it) + '</td>';
+    var q = tr.querySelector('input.fq');
+    q.addEventListener('input', function () {
+      it.fis = q.value; it.estado = '';
+      var v = fNum(q.value);
+      tr.className = (v !== null && !isNaN(v) && v !== it.sbf) ? 'div' : '';
+      tr.querySelector('td.st').innerHTML = fSituacao(it);
+      fResumo();
+    });
+    q.addEventListener('focus', function () { q.select(); });
+    q.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') { e.preventDefault(); var t = tr.nextElementSibling && tr.nextElementSibling.querySelector('input.fq'); if (t) t.focus(); }
+    });
+    var c = tr.querySelector('input.fc');
+    if (c) c.addEventListener('change', function () {
+      it.sku = c.value.trim().toUpperCase(); c.value = it.sku;
+      if (!it.sku) return;
+      tr.querySelector('td.dsc').textContent = 'Buscando…';
+      google.script.run.withSuccessHandler(function (r) {
+        it.desc = r && r.encontrado ? r.descricao : 'Código não encontrado na base';
+        if (r && r.produto) { it.sku = r.produto; c.value = r.produto; }
+        tr.querySelector('td.dsc').textContent = it.desc;
+      }).withFailureHandler(function () { tr.querySelector('td.dsc').textContent = ''; }).buscarProduto(it.sku, it.local);
+    });
+    return tr;
+  }
+  function fDesenhar() {
+    var tb = $('fbody'); tb.innerHTML = '';
+    if (!fItens.length) { tb.innerHTML = '<tr><td colspan="7" class="fvazio">' + ($('ff').value.trim() ? 'Nenhum item do SBF nesse endereço. Use "+ Adicionar item" se encontrou peças.' : 'Digite o endereço para carregar os itens do SBF.') + '</td></tr>'; }
+    fItens.forEach(function (it, i) { tb.appendChild(fLinha(it, i)); });
+    fResumo();
+  }
+  function fCarregar() {
+    var filtro = $('ff').value.trim();
+    var n = ++fPedido;
+    if (!filtro) { fItens = []; fDesenhar(); fMsg(''); return; }
+    fMsg('Carregando ' + filtro.toUpperCase() + '…');
+    kardexSBF(filtro).then(function (k) {
+      if (n !== fPedido) return;
+      fItens = k.itens.map(function (x) { return { sku: x.sku, desc: x.desc, local: x.local, sbf: Number(x.qtd), fis: fFmt(Number(x.qtd)), estado: '' }; });
+      fDesenhar();
+      fMsg(k.itens.length ? 'Confira cada item. Se a quantidade física for diferente, altere só a coluna "Qtde Kardex físico". SBF de ' + k.gerado + '.' : '');
+    }, function (e) { if (n === fPedido) fMsg('Não carregou o SBF: ' + (e && e.message ? e.message : e), true); });
+  }
+  $('ff').addEventListener('input', function () { clearTimeout(fTimer); fTimer = setTimeout(fCarregar, 600); });
+  $('ff').addEventListener('keydown', function (e) { if (e.key === 'Enter') { clearTimeout(fTimer); fCarregar(); } });
+  $('fresp').value = estado.resp || '';
+  $('fresp').addEventListener('change', function () { estado.resp = limpa($('fresp').value); $('fresp').value = estado.resp; gravar('inv_resp', estado.resp); $('resp').value = estado.resp; });
+  $('fseg').addEventListener('change', function () { $('fsw').classList.toggle('on', $('fseg').checked); });
+  $('fadd').addEventListener('click', function () {
+    var f = $('ff').value.trim().toUpperCase();
+    if (!f) { fMsg('Digite o endereço antes de adicionar um item.', true); $('ff').focus(); return; }
+    var locs = {}; fItens.forEach(function (x) { locs[x.local] = 1; });
+    var local = Object.keys(locs).length === 1 ? Object.keys(locs)[0] : f;
+    fItens.push({ sku: '', desc: '', local: local, sbf: 0, fis: '', estado: '', novo: true });
+    fDesenhar();
+    var ins = $('fbody').querySelectorAll('input.fc'); if (ins.length) ins[ins.length - 1].focus();
+  });
+  $('fgo').addEventListener('click', function () {
+    if (fRodando) return;
+    if (!estado.resp) { fMsg('Informe o conferente.', true); $('fresp').focus(); return; }
+    var pend = fItens.filter(function (it) { return it.estado !== 'feito'; });
+    for (var i = 0; i < pend.length; i++) {
+      var v = fNum(pend[i].fis);
+      if (!pend[i].sku) { fMsg('Preencha o código do item adicionado (linha ' + (fItens.indexOf(pend[i]) + 1) + ').', true); return; }
+      if (v === null || isNaN(v) || v < 0) { fMsg('Informe a quantidade física da linha ' + (fItens.indexOf(pend[i]) + 1) + '.', true); return; }
+    }
+    if (!fConfirmar) {
+      fConfirmar = true; $('fgo').classList.add('conf');
+      $('fgoTx').textContent = 'Confirmar lançamento de ' + pend.length + ' ite' + (pend.length > 1 ? 'ns' : 'm');
+      setTimeout(function () { if (fConfirmar && !fRodando) fResumo(); }, 6000);
+      return;
+    }
+    fRodando = true; fConfirmar = false; $('fgo').classList.remove('conf'); $('fgo').disabled = true;
+    var feitos = 0, erros = 0, idx = 0;
+    function proximo() {
+      if (idx >= pend.length) {
+        fRodando = false; fDesenhar(); atualizarLista();
+        fMsg(erros ? feitos + ' lançado(s), ' + erros + ' com erro — clique em Lançar de novo para reenviar os que falharam.' : 'Conferência lançada na planilha: ' + feitos + ' ite' + (feitos > 1 ? 'ns' : 'm') + '.', !!erros);
+        return;
+      }
+      var it = pend[idx++];
+      $('fgoTx').textContent = 'Lançando ' + idx + ' de ' + pend.length + '…';
+      google.script.run
+        .withSuccessHandler(function () { it.estado = 'feito'; feitos++; fDesenhar(); proximo(); })
+        .withFailureHandler(function (e) { it.estado = 'erro'; it.erro = e && e.message ? e.message : String(e); erros++; fDesenhar(); proximo(); })
+        .salvarContagem({ responsavel: estado.resp, locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)), segunda: $('fseg').checked });
+    }
+    proximo();
+  });
+
   // ---- Menu lateral ----
   function abrir(v) {
     document.body.classList.toggle('v-k', v === 'k');
+    document.body.classList.toggle('v-f', v === 'f');
     Array.prototype.forEach.call(document.querySelectorAll('.side button'), function (x) { x.classList.toggle('on', x.getAttribute('data-v') === v); });
     try { localStorage.setItem('inv_aba', v); } catch (e) {}
+    if (v === 'f') $('fresp').value = estado.resp || '';
     if (v === 'k') { if (!$('kf').value && estado.loc) { $('kf').value = estado.loc; visualizar(); } ajustarZoom(); }
   }
   Array.prototype.forEach.call(document.querySelectorAll('.side button'), function (x) { x.addEventListener('click', function () { abrir(x.getAttribute('data-v')); }); });
-  try { if (localStorage.getItem('inv_aba') === 'k') abrir('k'); } catch (e) {}
+  (function () { var a = ''; try { a = localStorage.getItem('inv_aba') || ''; } catch (e) {} abrir(a === 'k' || a === 'c' ? a : 'f'); })();
 
   pintarSeg();
   recarregarEnderecos();

@@ -1013,7 +1013,7 @@
     gravar('inv_tema', t);
   }
   Array.prototype.forEach.call(document.querySelectorAll('.tema .tw'), function (b) { b.addEventListener('click', function () { aplicarTema(b.getAttribute('data-t')); }); });
-  aplicarTema(ler('inv_tema') || 'roxo');
+  aplicarTema(ler('inv_tema') || 'marinho');
   // ---- Menu lateral ----
   function abrir(v) {
     document.body.classList.toggle('v-k', v === 'k');

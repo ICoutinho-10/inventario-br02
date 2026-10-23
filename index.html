@@ -780,7 +780,10 @@
   var SBF = null, sbfCarregando = null;
   function carregarSBF() {
     if (SBF) return Promise.resolve(SBF);
-    if (!sbfCarregando) sbfCarregando = fetch('sbf.json?v=' + Date.now()).then(function (r) { return r.json(); }).then(function (j) { SBF = j; return j; });
+    if (!sbfCarregando) sbfCarregando = fetch(API + '?api=sbf&t=' + Date.now()).then(function (r) { return r.json(); })
+      .then(function (j) { if (!j || !j.ok) throw new Error('sbf'); return j.dados; })
+      .catch(function () { return fetch('sbf.json?v=' + Date.now()).then(function (r) { return r.json(); }); })
+      .then(function (j) { SBF = j; setTimeout(function () { SBF = null; sbfCarregando = null; }, 10 * 60 * 1000); return j; });
     return sbfCarregando;
   }
   function kardexSBF(filtro) {

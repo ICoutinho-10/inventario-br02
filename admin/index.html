@@ -115,6 +115,11 @@
   .t th { position: sticky; top: 0; z-index: 2; background: #0a2d4c; color: var(--tx2); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700;
           text-align: left; padding: 11px 10px; border-bottom: 1px solid var(--borda); white-space: nowrap; cursor: pointer; user-select: none; }
   .t th.n, .t td.n { text-align: right; }
+  .t th .thsub { display: block; font-size: 9.5px; letter-spacing: .02em; text-transform: none; font-weight: 500; color: var(--tx3, #6f8aa3); margin-top: 2px; }
+  .t th[title] { cursor: help; }
+  .leg { display: flex; flex-wrap: wrap; gap: 6px 18px; align-items: baseline; font-size: 12.5px; color: var(--tx2); background: rgba(56,185,255,.06); border: 1px solid rgba(56,185,255,.22); border-radius: 12px; padding: 10px 14px; margin: 0 0 12px; }
+  .leg em { font-style: normal; color: var(--tx); font-weight: 700; }
+  .leg .mut { opacity: .7; }
   .t th .ar { color: var(--acento); margin-left: 4px; }
   .t td { padding: 9px 10px; border-bottom: 1px solid #0f2f4a; color: var(--tx); white-space: nowrap; }
   .t tbody tr:nth-child(even) td { background: rgba(8,34,59,.45); }
@@ -533,10 +538,16 @@
       return '<div class="card pd"><span class="lugar">' + (i + 1) + 'º</span><p class="eyebrow">' + ['Mais lançamentos', '2º lugar', '3º lugar'][i] + '</p><div class="nm">' + esc(p.nome) + '</div>' +
         '<div class="kv"><div><b class="num">' + n0(p.lanc) + '</b><small>lançamentos</small></div><div><b class="num">' + n(Math.round(p.ritmo * 10) / 10) + '</b><small>lanç/h</small></div><div><b class="num" style="color:' + (p.acur == null ? 'var(--tx3)' : corAc(p.acur)) + '">' + (p.acur == null ? '—' : pc(p.acur, 0)) + '</b><small>acurácia</small></div></div></div>';
     }).join('') + '</div>';
-    var cols = [['nome', 'Conferente'], ['lanc', 'Lançamentos'], ['pos', 'Posições'], ['ends', 'Endereços'], ['skus', 'SKUs'], ['pecas', 'Peças'], ['ini', 'Início'], ['fim', 'Último'], ['horas', 'Horas ativas'], ['ritmo', 'Ritmo (lanç/h)'], ['acur', 'Acurácia'], ['seg', '2ª contagens']];
+    var cols = [['nome', 'Conferente', ''], ['lanc', 'Lançamentos', 'linhas enviadas', 'Cada vez que o conferente clicou em Lançar uma quantidade (1 linha na aba Lançamentos)'],
+                ['pos', 'Posições', 'SKU + endereço', 'Combinações SKU + endereço diferentes. Lançamentos maior que Posições = mesma posição lançada mais de uma vez (recontagem, 2ª contagem ou quantidade lançada em partes)'],
+                ['ends', 'Endereços', 'locais diferentes', 'Quantos endereços físicos diferentes a pessoa contou'], ['skus', 'SKUs', 'códigos diferentes', 'Quantos códigos de peça diferentes a pessoa contou'],
+                ['pecas', 'Peças', 'soma das qtdes', 'Soma das quantidades lançadas'], ['ini', 'Início', '1º lançamento', 'Data e hora do primeiro lançamento'], ['fim', 'Último', 'último lançamento', 'Data e hora do último lançamento'],
+                ['horas', 'Horas ativas', 'tempo contando', 'Tempo entre lançamentos, sem contar pausas longas'], ['ritmo', 'Ritmo', 'lançamentos/hora', 'Lançamentos ÷ horas ativas'],
+                ['acur', 'Acurácia', 'posições OK', 'Posições da pessoa em que a contagem bateu com o saldo TOTVS ÷ posições contadas'], ['seg', '2ª contagens', 'recontagens', 'Lançamentos marcados como 2ª contagem']];
     var mx = Math.max.apply(null, P.map(function (p) { return p.lanc; }));
+    h += '<div class="leg"><b>Como ler:</b> <span><em>Lançamentos</em> = cliques em Lançar</span><span><em>Posições</em> = SKU + endereço diferentes</span><span><em>Endereços</em> = locais diferentes</span><span>Lançamentos − Posições = <b>relançamentos</b> da mesma posição (recontagem, 2ª contagem ou lançado em partes)</span><span class="mut">Passe o mouse no título da coluna para ver a explicação.</span></div>';
     h += '<div class="card" style="padding:0"><div class="tw" style="border:0;max-height:none"><table class="t" id="pTab"><thead><tr>' + cols.map(function (c, i) {
-      return '<th data-c="' + c[0] + '" class="' + (i ? 'n' : '') + '">' + c[1] + (ord.c === c[0] ? '<span class="ar">' + (ord.d < 0 ? '▼' : '▲') + '</span>' : '') + '</th>';
+      return '<th data-c="' + c[0] + '" class="' + (i ? 'n' : '') + '"' + (c[3] ? ' title="' + esc(c[3]) + '"' : '') + '>' + c[1] + (ord.c === c[0] ? '<span class="ar">' + (ord.d < 0 ? '▼' : '▲') + '</span>' : '') + (c[2] ? '<small class="thsub">' + c[2] + '</small>' : '') + '</th>';
     }).join('') + '</tr></thead><tbody>' + P.map(function (p) {
       return '<tr><td><b>' + esc(p.nome) + '</b></td><td class="n num"><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><span style="display:inline-block;width:70px;height:6px;border-radius:3px;background:#0b2237;overflow:hidden"><i style="display:block;height:100%;width:' + (100 * p.lanc / mx) + '%;background:#38b9ff"></i></span>' + n0(p.lanc) + '</div></td>' +
         '<td class="n num">' + n0(p.pos) + '</td><td class="n num">' + n0(p.ends) + '</td><td class="n num">' + n0(p.skus) + '</td><td class="n num">' + n0(p.pecas) + '</td>' +

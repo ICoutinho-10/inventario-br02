@@ -314,6 +314,18 @@
   /* ===== Temas (fundo escuro) ===== */
   :root, body[data-tema="roxo"] { --g1: #3B2A8C; --g2: #7A1236; --b0: #0B0D2A; --t1: #1E1B4B; --t2: #3730A3; --t3: #9F1239;
                                    --pan: rgba(60,64,150,.28); --pbr: rgba(120,130,240,.28); --sideb: rgba(10,12,40,.55); --tx2: #A6B0E8; }
+  .lido-fundo { position: fixed; inset: 0; z-index: 100; background: rgba(6,12,30,.55); backdrop-filter: blur(3px); display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .lido { background: #fff; color: #111827; width: 100%; max-width: 440px; border-radius: 18px; padding: 22px 22px 18px; box-shadow: 0 24px 60px rgba(0,0,0,.35); font-family: var(--font); }
+  .lido-ic { width: 42px; height: 42px; border-radius: 50%; background: #FEF3C7; color: #B45309; font-weight: 900; font-size: 22px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+  .lido h3 { margin: 0 0 10px; font-size: 18px; }
+  .lido ul { margin: 0 0 12px; padding-left: 18px; font-size: 13.5px; line-height: 1.5; max-height: 180px; overflow: auto; }
+  .lido ul li { display: list-item !important; grid-template-columns: none !important; border: 0 !important; background: none !important; padding: 0 !important; margin: 0 0 4px !important; box-shadow: none !important; }
+  .lido p { margin: 0 0 16px; font-size: 13.5px; color: #374151; }
+  .lido-bt { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .lido-bt button { height: 44px; border-radius: 12px; border: 0; font-family: var(--font); font-weight: 800; font-size: 14px; cursor: pointer; }
+  .lido-bt .sub { background: #B45309; color: #fff; grid-column: 1 / -1; }
+  .lido-bt .som { background: #EEF2FF; color: #3730A3; }
+  .lido-bt .can { background: #F3F4F6; color: #374151; }
   body[data-tema="marinho"] { --g1: #1D4ED8; --g2: #0E7490; --b0: #06122A; --t1: #0B1E3F; --t2: #1D4ED8; --t3: #0E7490;
                               --pan: rgba(37,99,235,.18); --pbr: rgba(96,165,250,.28); --sideb: rgba(4,12,30,.6); --tx2: #93C5FD; }
   body[data-tema="grafite"] { --g1: #374151; --g2: #1F2937; --b0: #0B0F14; --t1: #111827; --t2: #374151; --t3: #4B5563;
@@ -491,7 +503,8 @@
       salvarContagem: function (d) { var c = { acao: 'salvar' }; for (var k in d) c[k] = d[k]; return post(c); },
       recalcular: function () { return post({ acao: 'recalcular' }); },
       salvarLote: function (d) { var c = { acao: 'salvarLote' }; for (var k in d) c[k] = d[k]; return post(c); },
-      kardex: function (filtro, fonte) { return get('kardex', { filtro: filtro, fonte: fonte }); }
+      kardex: function (filtro, fonte) { return get('kardex', { filtro: filtro, fonte: fonte }); },
+      jaLido: function (itens) { return get('jalido', { itens: JSON.stringify(itens) }); }
     };
     function runner(ok, falha) {
       var r = {
@@ -661,7 +674,15 @@
     if (!/^\d+([.,]\d+)?$/.test(qtd)) { mostrar('err', 'Informe a quantidade encontrada.'); $('qtd').focus(); return; }
 
     var dados = { responsavel: estado.resp, locacao: estado.loc, codigo: cod, quantidade: qtd, segunda: $('seg').checked };
-    $('btn').disabled = true; $('btnTx').textContent = 'Salvando…';
+    $('btn').disabled = true; $('btnTx').textContent = 'Conferindo…';
+    jaLidoAntes([{ locacao: dados.locacao, codigo: cod }], dados.segunda, function (subst) {
+      if (subst === null) { mostrar('warn', 'Lançamento cancelado.'); pronto(); return; }
+      if (subst) dados.substituir = true;
+      $('btnTx').textContent = 'Salvando…';
+      enviarAvulsa(dados, qtd);
+    });
+  });
+  function enviarAvulsa(dados, qtd) {
     google.script.run
       .withSuccessHandler(function (r) {
         atualizarLista();
@@ -676,7 +697,42 @@
         pronto();
       })
       .salvarContagem(dados);
-  });
+  }
+
+  // ---- aviso: posição já lida neste turno ----
+  // cb(true) = substituir a contagem anterior · cb(false) = somar · cb(null) = cancelar
+  function jaLidoAntes(itens, segunda, cb) {
+    if (segunda) { cb(false); return; }   // 2ª contagem já substitui a 1ª
+    var feito = false, t = setTimeout(function () { if (!feito) { feito = true; cb(false); } }, 8000);
+    google.script.run
+      .withSuccessHandler(function (r) {
+        if (feito) return; feito = true; clearTimeout(t);
+        var l = (r && r.lidos) || [];
+        if (!l.length) { cb(false); return; }
+        var lista = l.slice(0, 8).map(function (x) {
+          return '<li><b>' + esc(x.codigo) + '</b> em <b>' + esc(x.locacao) + '</b> — ' + fmtN(x.qtd) + ' un. por ' + esc(x.resp || '—') + (x.hora ? ' às ' + esc(x.hora) : '') + (x.n > 1 ? ' (' + x.n + ' lançamentos)' : '') + '</li>';
+        }).join('') + (l.length > 8 ? '<li>… e mais ' + (l.length - 8) + '</li>' : '');
+        avisoLido((l.length === 1 ? 'Esta posição já foi lida neste turno' : l.length + ' posições já foram lidas neste turno'), lista, cb);
+      })
+      .withFailureHandler(function () { if (feito) return; feito = true; clearTimeout(t); cb(false); })
+      .jaLido(itens);
+  }
+  function fmtN(v) { return String(Math.round((Number(v) || 0) * 1000) / 1000).replace('.', ','); }
+  function avisoLido(titulo, lista, cb) {
+    var fundo = document.createElement('div');
+    fundo.className = 'lido-fundo';
+    fundo.innerHTML = '<div class="lido" role="dialog" aria-modal="true"><div class="lido-ic">!</div><h3>' + esc(titulo) + '</h3>' +
+      '<ul>' + lista + '</ul><p>Deseja <b>substituir</b> a contagem anterior? A anterior fica marcada como <i>Anulado</i> e vale só a nova.</p>' +
+      '<div class="lido-bt"><button type="button" class="sub">Substituir</button><button type="button" class="som">Somar à anterior</button><button type="button" class="can">Cancelar</button></div></div>';
+    document.body.appendChild(fundo);
+    function fim(v) { document.removeEventListener('keydown', tecla); fundo.remove(); cb(v); }
+    function tecla(e) { if (e.key === 'Escape') fim(null); }
+    document.addEventListener('keydown', tecla);
+    fundo.querySelector('.sub').onclick = function () { fim(true); };
+    fundo.querySelector('.som').onclick = function () { fim(false); };
+    fundo.querySelector('.can').onclick = function () { fim(null); };
+    fundo.querySelector('.sub').focus();
+  }
 
   function pronto() { $('btn').disabled = false; pintarSeg(); }
   function mostrar(tipo, texto) { var m = $('msg'); m.className = 'msg ' + tipo; m.textContent = texto; }
@@ -863,7 +919,8 @@
     if (it.estado === 'feito') return '<span class="chip feito">Lançado ✓</span>';
     if (it.estado === 'erro') return '<span class="chip erro" title="' + esc(it.erro || '') + '">Erro — tente de novo</span>';
     var f = fNum(it.fis);
-    if (f === null || isNaN(f)) return '<span class="chip bx">Sem qtde</span>';
+    if (f === null) return '<span class="chip bx" title="Sem quantidade: vai lançar 0">Sem qtde · lança 0</span>';
+    if (isNaN(f)) return '<span class="chip bx">Qtde inválida</span>';
     return '<span class="chip ok">Conferido</span>';
   }
   function fResumo() {
@@ -990,10 +1047,18 @@
     var pend = fItens.filter(function (it) { return it.estado !== 'feito'; });
     for (var i = 0; i < pend.length; i++) {
       var v = fNum(pend[i].fis);
+      if (v === null) { pend[i].fis = '0'; v = 0; }   // sem quantidade = 0 na planilha
       if (!pend[i].sku) { fMsg('Preencha o código do item adicionado (linha ' + (fItens.indexOf(pend[i]) + 1) + ').', true); return; }
       if (v === null || isNaN(v) || v < 0) { fMsg('Informe a quantidade física da linha ' + (fItens.indexOf(pend[i]) + 1) + '.', true); return; }
     }
     fRodando = true; fConfirmar = false; $('fgo').classList.remove('conf'); $('fgo').disabled = true;
+    $('fgoTx').textContent = 'Conferindo…';
+    jaLidoAntes(pend.map(function (it) { return { locacao: it.local, codigo: it.sku }; }), $('fseg').checked, function (subst) {
+      if (subst === null) { fRodando = false; $('fgo').disabled = false; fDesenhar(); fMsg('Lançamento cancelado.'); return; }
+      fLancar(pend, subst);
+    });
+  });
+  function fLancar(pend, subst) {
     var feitos = 0, erros = 0, idx = 0;
     $('fgoTx').textContent = 'Lançando ' + pend.length + ' ite' + (pend.length > 1 ? 'ns' : 'm') + '…';
     google.script.run
@@ -1003,7 +1068,7 @@
         if (/inválida/i.test(m)) { proximo(); return; }   // planilha ainda sem o lançamento em lote: envia um por um
         pend.forEach(function (it) { it.estado = 'erro'; it.erro = m; }); erros = pend.length; idx = pend.length; proximo();
       })
-      .salvarLote({ responsavel: estado.resp, segunda: $('fseg').checked, itens: pend.map(function (it) { return { locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)) }; }) });
+      .salvarLote({ responsavel: estado.resp, segunda: $('fseg').checked, substituir: !!subst, itens: pend.map(function (it) { return { locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)) }; }) });
     function proximo() {
       if (idx >= pend.length) {
         fRodando = false; atualizarLista();
@@ -1016,9 +1081,9 @@
       google.script.run
         .withSuccessHandler(function () { it.estado = 'feito'; feitos++; fDesenhar(); proximo(); })
         .withFailureHandler(function (e) { it.estado = 'erro'; it.erro = e && e.message ? e.message : String(e); erros++; fDesenhar(); proximo(); })
-        .salvarContagem({ responsavel: estado.resp, locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)), segunda: $('fseg').checked });
+        .salvarContagem({ responsavel: estado.resp, locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)), segunda: $('fseg').checked, substituir: !!subst });
     }
-  });
+  }
 
   // ---- Tema de cores ----
   function aplicarTema(t) {

@@ -291,7 +291,7 @@
       var u = parseD(r[11]);
       return { prod: String(r[0]), desc: r[1], arm: r[2], end: String(r[3]), saldo: num(r[4]), cont: num(r[5]), dif: num(r[6]), lancar: num(r[7]),
                mov: String(r[8] || ''), n: num(r[9]), resp: String(r[10] || ''), ult: u, dia: u ? diaKey(u) : '', obs: r[12] || '',
-               mb52: r[13] === '' ? null : num(r[13]), consol: num(r[14]), pct: r[15] === '' ? null : num(r[15]), custo: num((d.custo || {})[r[0]]) };
+               mb52: r[13] === '' ? null : num(r[13]), consol: num(r[14]), pct: typeof r[15] === 'number' ? r[15] : null, custo: num((d.custo || {})[r[0]]) };
     });
     d.L = d.lanc.filter(function (r) { return !/ANULAD|CANCEL/i.test(r[5]); }).map(function (r) {
       var t = parseD(r[0]); var td = t ? diaTurno(t) : null;

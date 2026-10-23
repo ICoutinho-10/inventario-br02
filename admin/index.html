@@ -42,6 +42,8 @@
   .lk:hover { border-color: var(--acento); }
   .lk.verde { border-color: rgba(52,211,153,.45); }
   .lk.verde svg { color: var(--ok); }
+  .lk.robo { border-color: rgba(20,184,166,.5); background: linear-gradient(135deg, rgba(20,184,166,.18), rgba(34,197,94,.10)); }
+  .lk.robo svg { color: #2DD4BF; }
   .lk svg { color: var(--acento); flex: 0 0 auto; }
   .vivo { font-size: 11px; color: var(--tx3); display: flex; align-items: center; gap: 8px; padding: 0 4px; }
   .vivo i { width: 8px; height: 8px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 0 0 rgba(52,211,153,.6); animation: pulso 2s infinite; }
@@ -194,6 +196,7 @@
     <div class="links">
       <a class="lk" id="lkPlan" href="https://docs.google.com/spreadsheets/d/1gC4MmQdrRkBqZT2AQXjap6i5ovgpFnPw1Edm5mwl9WE/edit" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Abrir planilha</a>
       <a class="lk verde" href="https://icoutinho-10.github.io/inventario-br02/" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 7v10M12 7v10M16 7v10"/></svg>Abrir contagem</a>
+      <a class="lk robo" href="roboinventario://abrir" title="Abre o Robô Inventário neste PC (precisa ter rodado o INSTALAR uma vez)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 17h6"/></svg>Abrir robô</a>
       <div class="vivo"><i id="dot"></i><span id="upd">conectando…</span></div>
     </div>
   </aside>

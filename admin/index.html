@@ -28,7 +28,7 @@
     --trilho: #0b2237; --ok: #34d399; --bx: #f87171; --al: #fb923c; --azul: #60a5fa; --ama: #fbbf24;
     --ctrl: #061a2e; --ctrl2: #0a2d4c; --row-alt: rgba(8,34,59,.45); --row-hover: rgba(56,185,255,.08);
     --on-accent: #02121f; --tese1: #0a2947; --tese2: #05192e; --accent-weak: rgba(56,185,255,.15);
-    --glow1: rgba(17,119,190,.22); --glow2: rgba(56,185,255,.08); --grad: linear-gradient(135deg, #38b9ff, #22d3ee);
+    --glow1: rgba(17,119,190,.22); --glow2: rgba(56,185,255,.08); --grad: linear-gradient(135deg, #38b9ff, #22d3ee); --acento-rgb: 56,185,255;
   }
   [data-theme="lime"] {
     --bg:#07100B; --card1:#0E2017; --card2:#081610; --borda:#1E5A3A; --borda2:#164830;
@@ -36,7 +36,7 @@
     --trilho:#0C2419; --ok:#34d399; --bx:#f87171; --al:#fb923c; --azul:#10B981; --ama:#fbbf24;
     --ctrl:#0C1E14; --ctrl2:#123524; --row-alt:rgba(14,32,23,.5); --row-hover:rgba(182,255,46,.08);
     --on-accent:#07140B; --tese1:#10281A; --tese2:#0A1A11; --accent-weak:rgba(182,255,46,.16);
-    --glow1:rgba(16,185,129,.20); --glow2:rgba(182,255,46,.08); --grad:linear-gradient(135deg,#B6FF2E,#10B981);
+    --glow1:rgba(16,185,129,.20); --glow2:rgba(182,255,46,.08); --grad:linear-gradient(135deg,#B6FF2E,#10B981); --acento-rgb:182,255,46;
   }
   [data-theme="cyan"] {
     --bg:#04121A; --card1:#072433; --card2:#04151F; --borda:#0E4D63; --borda2:#0B3C50;
@@ -44,7 +44,7 @@
     --trilho:#08202C; --ok:#34d399; --bx:#f87171; --al:#fb923c; --azul:#3B82F6; --ama:#fbbf24;
     --ctrl:#06202C; --ctrl2:#0A3346; --row-alt:rgba(7,36,51,.5); --row-hover:rgba(0,229,255,.08);
     --on-accent:#021318; --tese1:#072E3F; --tese2:#04171F; --accent-weak:rgba(0,229,255,.16);
-    --glow1:rgba(59,130,246,.18); --glow2:rgba(0,229,255,.09); --grad:linear-gradient(135deg,#00E5FF,#3B82F6);
+    --glow1:rgba(59,130,246,.18); --glow2:rgba(0,229,255,.09); --grad:linear-gradient(135deg,#00E5FF,#3B82F6); --acento-rgb:0,229,255;
   }
   [data-theme="teal"] {
     --bg:#06161A; --card1:#0D2A2F; --card2:#07191D; --borda:#155E62; --borda2:#104A4F;
@@ -52,7 +52,7 @@
     --trilho:#0A2529; --ok:#34d399; --bx:#f87171; --al:#fb923c; --azul:#22d3ee; --ama:#fbbf24;
     --ctrl:#092227; --ctrl2:#0E353A; --row-alt:rgba(13,42,47,.5); --row-hover:rgba(45,212,191,.08);
     --on-accent:#04140F; --tese1:#0C2E33; --tese2:#07191D; --accent-weak:rgba(45,212,191,.16);
-    --glow1:rgba(34,211,238,.16); --glow2:rgba(45,212,191,.09); --grad:linear-gradient(135deg,#2DD4BF,#22D3EE);
+    --glow1:rgba(34,211,238,.16); --glow2:rgba(45,212,191,.09); --grad:linear-gradient(135deg,#2DD4BF,#22D3EE); --acento-rgb:45,212,191;
   }
   [data-theme="claro"] {
     --bg:#EDF1F6; --card1:#FFFFFF; --card2:#F7F9FC; --borda:#DCE3EC; --borda2:#E7ECF3;
@@ -60,7 +60,7 @@
     --trilho:#E6EAF2; --ok:#059669; --bx:#DC2626; --al:#EA580C; --azul:#2563EB; --ama:#D97706;
     --ctrl:#F1F4F9; --ctrl2:#E7ECF5; --row-alt:rgba(15,23,42,.03); --row-hover:rgba(37,99,235,.07);
     --on-accent:#FFFFFF; --tese1:#FFFFFF; --tese2:#F4F7FC; --accent-weak:rgba(37,99,235,.14);
-    --glow1:rgba(37,99,235,.08); --glow2:rgba(79,70,229,.06); --grad:linear-gradient(135deg,#4F46E5,#2563EB);
+    --glow1:rgba(37,99,235,.08); --glow2:rgba(79,70,229,.06); --grad:linear-gradient(135deg,#4F46E5,#2563EB); --acento-rgb:37,99,235;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; }
@@ -484,18 +484,18 @@
   }
   function donut(partes, centro, sub) {
     var tot = soma(partes, function (p) { return p.v; }) || 1, R = 59, C = 2 * Math.PI * R, off = 0;
-    var s = '<svg viewBox="0 0 180 180" style="width: 180px; height: 180px; flex: 0 0 auto"><circle cx="90" cy="90" r="' + R + '" fill="none" stroke="#0b2237" stroke-width="22"/>';
+    var s = '<svg viewBox="0 0 180 180" style="width: 180px; height: 180px; flex: 0 0 auto"><circle cx="90" cy="90" r="' + R + '" fill="none" stroke="var(--trilho)" stroke-width="22"/>';
     partes.forEach(function (p) {
       if (!p.v) return;
       var l = C * p.v / tot;
       s += '<circle cx="90" cy="90" r="' + R + '" fill="none" stroke="' + p.c + '" stroke-width="22" stroke-dasharray="' + l.toFixed(2) + ' ' + (C - l).toFixed(2) + '" stroke-dashoffset="' + (-off).toFixed(2) + '" transform="rotate(-90 90 90)"><title>' + p.n + ': ' + n0(p.v) + '</title></circle>';
       off += l;
     });
-    return s + '<text x="90" y="92" text-anchor="middle" style="font: 800 26px Manrope, \'DM Sans\', sans-serif; fill: #edf7ff">' + centro + '</text><text x="90" y="112" text-anchor="middle" class="eixo">' + sub + '</text></svg>';
+    return s + '<text x="90" y="92" text-anchor="middle" style="font: 800 26px Manrope, \'DM Sans\', sans-serif; fill: var(--tx)">' + centro + '</text><text x="90" y="112" text-anchor="middle" class="eixo">' + sub + '</text></svg>';
   }
   function anel(v) {
     var R = 46, C = 2 * Math.PI * R, c = corAc(v);
-    return '<svg class="anel" viewBox="0 0 112 112"><circle cx="56" cy="56" r="' + R + '" fill="none" stroke="#0b2237" stroke-width="12"/><circle cx="56" cy="56" r="' + R + '" fill="none" stroke="' + c + '" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + (C * Math.min(v, 1)).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 56 56)"/></svg>';
+    return '<svg class="anel" viewBox="0 0 112 112"><circle cx="56" cy="56" r="' + R + '" fill="none" stroke="var(--trilho)" stroke-width="12"/><circle cx="56" cy="56" r="' + R + '" fill="none" stroke="' + c + '" stroke-width="12" stroke-linecap="round" stroke-dasharray="' + (C * Math.min(v, 1)).toFixed(1) + ' ' + C.toFixed(1) + '" transform="rotate(-90 56 56)"/></svg>';
   }
   function barrasH(itens, max, cor) {
     max = max || Math.max.apply(null, itens.map(function (i) { return Math.abs(i.v); }).concat([1]));
@@ -566,7 +566,7 @@
     // tiles
     h += '<div class="g4">';
     h += tile('Posições contadas', n0(k.pos), '<b>' + n0(k.ends) + '</b> endereços · <b>' + n0(k.skus) + '</b> SKUs', [[k.ok, 'var(--ok)'], [k.bx.length, 'var(--bx)'], [k.al.length, 'var(--al)']]);
-    h += tile('Cobertura do SBF', pc(cobEnd), '<b>' + n0(uniq(D.H.map(function (x) { return x.end; })).length) + '</b> de ' + n0(T.enderecos) + ' endereços já contados (acumulado)', [[cobEnd, 'var(--acento)'], [1 - cobEnd, '#0b2237']]);
+    h += tile('Cobertura do SBF', pc(cobEnd), '<b>' + n0(uniq(D.H.map(function (x) { return x.end; })).length) + '</b> de ' + n0(T.enderecos) + ' endereços já contados (acumulado)', [[cobEnd, 'var(--acento)'], [1 - cobEnd, 'var(--trilho)']]);
     h += tile('Peças contadas', n0(k.pecas), 'Lançadas por <b>' + k.confs.length + '</b> conferente' + (k.confs.length !== 1 ? 's' : '') + ' · <b>' + n0(L.length) + '</b> lançamentos');
     h += tile('Ritmo médio', n(Math.round(k.ritmo * 10) / 10) + '<small style="font-size:14px;color:var(--tx3)"> lanç/h</small>', 'Por conferente, só tempo ativo (pausas &gt; 30 min não contam)');
     h += tile('Baixa 602', n0(k.bx.length), '<b>' + n0(k.qbx) + '</b> peças a menos' + (k.vbx ? ' · <b>' + brl.format(k.vbx) + '</b>' : ''), null, 'var(--bx)');
@@ -582,7 +582,7 @@
     var picos = Math.max.apply(null, hrs);
     h += '<div class="g2">';
     h += '<div class="card"><p class="eyebrow">Ritmo do turno</p><h3>Lançamentos por hora</h3><p class="sc">' + (F.dia ? 'Turno ' + diaBR(F.dia) : 'Todos os dias somados') + ' · pico de ' + n0(picos) + ' lançamentos às ' + rot[hrs.indexOf(picos)] + 'h</p>' +
-         barrasV(hrs.slice(ini, fim + 1), rot.slice(ini, fim + 1), function (v) { return v === picos ? '#38b9ff' : '#1d6fa8'; }) + '</div>';
+         barrasV(hrs.slice(ini, fim + 1), rot.slice(ini, fim + 1), function (v) { return v === picos ? 'var(--acento)' : 'var(--azul)'; }) + '</div>';
     h += '<div class="card"><p class="eyebrow">Situação</p><h3>Posições por resultado</h3><p class="sc">Comparação da quantidade contada com o saldo TOTVS</p><div style="display:flex;align-items:center;gap:22px;flex-wrap:wrap">' +
          donut([{ n: 'Confere', v: k.ok, c: '#34d399' }, { n: 'Baixa 602', v: k.bx.length, c: '#f87171' }, { n: 'Alta 202', v: k.al.length, c: '#fb923c' }], pc(k.acur, 0), 'confere') +
          '<div class="barras" style="flex:1;min-width:180px">' +
@@ -607,7 +607,7 @@
            return { r: x.h.prod + ' · ' + x.h.end, s: x.h.desc, v: x.v || x.h.dif, c: x.h.dif < 0 ? '#f87171' : '#fb923c', t: (x.v ? brl.format(x.v) : (x.h.dif > 0 ? '+' : '') + n0(x.h.dif) + ' pç') };
          })) : '<div class="vazio">Nenhuma divergência.</div>') + '</div>';
     var rk = groupBy(L, function (l) { return l.conf; }).map(function (g) { return { r: g.k, v: g.itens.length }; }).sort(function (a, b) { return b.v - a.v; });
-    h += '<div class="card"><p class="eyebrow">Equipe</p><h3>Lançamentos por conferente</h3><p class="sc">Detalhe completo no menu Performance</p>' + barrasH(rk.slice(0, 10), 0, 'linear-gradient(90deg,#1d6fa8,#38b9ff)') + '</div>';
+    h += '<div class="card"><p class="eyebrow">Equipe</p><h3>Lançamentos por conferente</h3><p class="sc">Detalhe completo no menu Performance</p>' + barrasH(rk.slice(0, 10), 0, 'linear-gradient(90deg,var(--azul),var(--acento))') + '</div>';
     h += '</div>';
     // corredores + MB52 + dias
     var cor = groupBy(H, function (x) { return corredor(x.end); }).map(function (g) {
@@ -669,7 +669,7 @@
     h += '<div class="card" style="padding:0"><div class="tw" style="border:0;max-height:none"><table class="t" id="pTab"><thead><tr>' + cols.map(function (c, i) {
       return '<th data-c="' + c[0] + '" class="' + (i ? 'n' : '') + '"' + (c[3] ? ' title="' + esc(c[3]) + '"' : '') + '>' + c[1] + (ord.c === c[0] ? '<span class="ar">' + (ord.d < 0 ? '▼' : '▲') + '</span>' : '') + (c[2] ? '<small class="thsub">' + c[2] + '</small>' : '') + '</th>';
     }).join('') + '</tr></thead><tbody>' + P.map(function (p) {
-      return '<tr><td><b>' + esc(p.nome) + '</b></td><td class="n num"><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><span style="display:inline-block;width:70px;height:6px;border-radius:3px;background:#0b2237;overflow:hidden"><i style="display:block;height:100%;width:' + (100 * p.lanc / mx) + '%;background:#38b9ff"></i></span>' + n0(p.lanc) + '</div></td>' +
+      return '<tr><td><b>' + esc(p.nome) + '</b></td><td class="n num"><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><span style="display:inline-block;width:70px;height:6px;border-radius:3px;background:var(--trilho);overflow:hidden"><i style="display:block;height:100%;width:' + (100 * p.lanc / mx) + '%;background:var(--acento)"></i></span>' + n0(p.lanc) + '</div></td>' +
         '<td class="n num">' + n0(p.pos) + '</td><td class="n num">' + n0(p.ends) + '</td><td class="n num">' + n0(p.skus) + '</td><td class="n num">' + n0(p.pecas) + '</td>' +
         '<td class="n num">' + dtBR(p.ini) + '</td><td class="n num">' + dtBR(p.fim) + '</td><td class="n num">' + n(Math.round(p.horas * 10) / 10) + ' h</td>' +
         '<td class="n num"><b>' + n(Math.round(p.ritmo * 10) / 10) + '</b></td><td class="n num">' + (p.acur == null ? '—' : '<span class="tag ' + (p.acur >= .95 ? 'ok' : p.acur >= .8 ? 'al' : 'bx') + '">' + pc(p.acur, 0) + '</span>') + '</td><td class="n num">' + n0(p.seg) + '</td></tr>';
@@ -686,7 +686,7 @@
       hm += '<div class="hn" title="' + esc(p.nome) + '">' + esc(p.nome) + '</div>';
       for (var c = i0; c <= i1; c++) {
         var v = mat[pi][c], a = v ? .18 + .82 * v / mxh : 0;
-        hm += '<div class="hc" style="background:' + (v ? 'rgba(56,185,255,' + a.toFixed(2) + ')' : '#0b2237') + ';color:' + (a > .55 ? 'var(--on-accent)' : '#a9c6da') + '" title="' + esc(p.nome) + ' · ' + p2(horas[c]) + 'h: ' + v + '">' + (v || '') + '</div>';
+        hm += '<div class="hc" style="background:' + (v ? 'rgba(var(--acento-rgb),' + a.toFixed(2) + ')' : 'var(--trilho)') + ';color:' + (a > .55 ? 'var(--on-accent)' : 'var(--tx2)') + '" title="' + esc(p.nome) + ' · ' + p2(horas[c]) + 'h: ' + v + '">' + (v || '') + '</div>';
       }
     });
     hm += '</div>';
@@ -920,6 +920,7 @@
       var dot = $("temaDot"); if (dot) dot.style.background = TEMAS[t].grad;
       var nm = $("temaNome"); if (nm) nm.textContent = TEMAS[t].nome;
       Array.prototype.forEach.call(document.querySelectorAll(".tema-opt"), function (b) { b.classList.toggle("on", b.getAttribute("data-t") === t); });
+      try { if (typeof desenhar === "function" && D) desenhar(); } catch (e) {}
     }
     var btn = $("temaBtn"), menu = $("temaMenu"), box = $("tema");
     if (btn && menu) {

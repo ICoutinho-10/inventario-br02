@@ -1,5 +1,15 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.5.0 — 24/10/2026 — Gráficos seguem o tema + logo BYD consistente
+- `admin/index.html`: **gráficos tematizados** — trilhos, barras de accent e heatmap passaram a
+  usar `var(--trilho)/var(--acento)/var(--azul)/var(--acento-rgb)`, então recolorem junto com o tema
+  (as cores de status verde/amarelo/vermelho continuam fixas, por serem semânticas). Redesenha na
+  troca de tema. Novo var `--acento-rgb` por tema (pro heatmap).
+- **Logo BYD consistente**: menu do admin (branco no escuro, vermelho no claro), `login.html`
+  (BYD branco no card escuro) e cabeçalho da contagem `index.html` (BYD branco no header).
+- Nota: a contagem pública (`index.html`) segue com tema único (claro) — seletor multi-tema lá
+  seria refatoração maior de uma ferramenta crítica; fazer em passo separado com teste.
+
 ## v0.4.0 — 24/10/2026 — Seletor de temas + logo do WS no painel
 - `admin/index.html`: **seletor de tema** (botão com degradê na barra superior) com 5 temas —
   **Azul-marinho** (atual), **Cyber Lime** (neon), **Electric Cyan** (neon), **Deep Teal** e

@@ -704,7 +704,7 @@
     if (!cod) { mostrar('err', 'Bipe ou digite o código do material.'); $('cod').focus(); return; }
     if (!/^\d+([.,]\d+)?$/.test(qtd)) { mostrar('err', 'Informe a quantidade encontrada.'); $('qtd').focus(); return; }
 
-    var dados = { responsavel: estado.resp, locacao: estado.loc, codigo: cod, quantidade: qtd, segunda: $('seg').checked };
+    var dados = { responsavel: estado.resp, locacao: estado.loc, codigo: cod, quantidade: qtd, segunda: $('seg').checked, origem: 'Avulsa' };
     $('btn').disabled = true; $('btnTx').textContent = 'Conferindo…';
     jaLidoAntes([{ locacao: dados.locacao, codigo: cod }], dados.segunda, function (subst) {
       if (subst === null) { mostrar('warn', 'Lançamento cancelado.'); pronto(); return; }
@@ -1098,7 +1098,7 @@
         if (/inválida/i.test(m)) { proximo(); return; }   // planilha ainda sem o lançamento em lote: envia um por um
         pend.forEach(function (it) { it.estado = 'erro'; it.erro = m; }); erros = pend.length; idx = pend.length; proximo();
       })
-      .salvarLote({ responsavel: estado.resp, segunda: $('fseg').checked, substituir: !!subst, itens: pend.map(function (it) { return { locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)) }; }) });
+      .salvarLote({ responsavel: estado.resp, segunda: $('fseg').checked, substituir: !!subst, origem: 'Kardex', itens: pend.map(function (it) { return { locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)) }; }) });
     function proximo() {
       if (idx >= pend.length) {
         fRodando = false; atualizarLista();

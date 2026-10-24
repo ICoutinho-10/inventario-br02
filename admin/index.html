@@ -432,7 +432,7 @@
     });
     d.L = d.lanc.filter(function (r) { return !/ANULAD|CANCEL/i.test(r[5]); }).map(function (r) {
       var t = parseD(r[0]); var td = t ? diaTurno(t) : null;
-      return { t: t, dia: td ? diaKey(td) : '', sku: r[1], end: r[2], q: num(r[3]), conf: r[4] || '(sem nome)', st: r[5], seg: /2/.test(r[5]) };
+      return { t: t, dia: td ? diaKey(td) : '', sku: r[1], end: r[2], q: num(r[3]), conf: r[4] || '(sem nome)', st: r[5], seg: /2/.test(r[5]), origem: r[6] || '' };
     });
     var dias = {};
     d.H.forEach(function (h) { if (h.dia) dias[h.dia] = 1; });

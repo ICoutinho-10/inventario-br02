@@ -5,30 +5,60 @@ planilha pela API do Apps Script. A **Administração** (`/admin/`) — dashboar
 histórico, Contagem Kardex, **Usuários** e atalhos (planilha, contagem, robô, Apps Script,
 scripts) — tem **login real** e é só para administradores.
 
-## Hospedagem
-Hospedado no **Netlify** (o login precisa de servidor — não funciona no GitHub Pages).
-- App público: `/` · Login: `/login.html` · Administração: `/admin/`
-- O porteiro protege só `/admin` e `/scripts-publicados`; o resto é público por enquanto.
-- Enquanto estiver no GitHub Pages (sem backend), a Administração segue pública (como hoje);
-  ao subir pro Netlify com as env vars, o login passa a valer automaticamente.
+## Hospedagem (2 lugares, de propósito)
+- **Cloudflare Pages = site principal** (operacional público **+** `/admin/` trancado por senha).
+  Grátis, permite uso comercial, muito estável, sem "pausa por crédito". O login roda em
+  **Pages Functions** e os usuários ficam em **Cloudflare KV**.
+- **GitHub Pages = rede de segurança dos coordenadores**: publica **só o app operacional**
+  (sem o `/admin/`), via GitHub Action. Se o Cloudflare cair, a contagem continua no ar aqui.
+  O admin **nunca** é publicado no GitHub Pages.
 
-## Primeiro deploy (Netlify)
-1. Criar um site novo no Netlify ligado a este repositório (`icoutinho-10/inventario-br02`).
-2. Na raiz do projeto, instalar deps e gerar os segredos:
-   ```
-   npm install
-   node scripts/usuarios.mjs segredo    # cria CENTRAL_SECRET no Netlify
-   node scripts/usuarios.mjs setup       # cria CENTRAL_SETUP e mostra o código do 1º acesso
-   ```
-3. Deploy. Abrir `/login.html`, usar o código do passo 2 para criar o 1º administrador
-   (`ivan.silva`). Depois disso a criação de administrador fecha.
-4. Em `/admin/` → aba **Usuários**: cadastrar os coordenadores (eles passam o login).
+```
+functions/
+  _middleware.js        porteiro: tranca /admin e /scripts-publicados (redireciona pro login)
+  api/[[path]].js       /api/*: login, logout, setup, sessão, trocar-senha, acessos (usuários)
+  lib/                  sessao.js (HMAC+PBKDF2 via Web Crypto), usuarios.js (KV), acessos.js (KV)
+_headers                no-store nas páginas
+index.html              app operacional (público)
+admin/index.html        Administração (login, gate fail-closed → só admin)
+login.html              tela de login
+.github/workflows/pages-operacional.yml   deploy do operacional no GitHub Pages
+```
 
-## Variáveis de ambiente (Netlify → Site configuration → Environment variables)
-- `CENTRAL_SECRET` — assina a sessão (`scripts/usuarios.mjs segredo`).
-- `CENTRAL_SETUP` — código de uso único do 1º administrador (`... setup`).
-- `CENTRAL_USERS` — opcional, bootstrap de usuários por env (`... publicar`).
+## Deploy no Cloudflare (Ivan faz o login; Claude guia)
+1. Criar conta grátis em cloudflare.com (se não tiver).
+2. **Workers & Pages → Create → Pages → Connect to Git** → escolher o repo `inventario-br02`.
+   Build command: *(vazio)*. Output directory: `/` (raiz). Deploy.
+3. **KV**: Storage & Databases → KV → Create namespace (ex.: `central`). Depois, no projeto
+   Pages → Settings → Functions (ou Bindings) → **KV namespace binding**: variável
+   `CENTRAL_KV` → o namespace criado.
+4. **Variáveis** (Settings → Environment variables / Secrets), em Production:
+   - `CENTRAL_SECRET` = `7pVG5VEqeiRufoGpTd1xUScUixjiPEw-q4m-XeDs7AE`  *(já gerado; pode trocar)*
+   - `CENTRAL_SETUP` = um código curto só seu p/ criar o 1º admin (ex.: invente 8–12 caracteres)
+5. Redeploy. Abrir `https://<seu-projeto>.pages.dev/login.html`, usar o `CENTRAL_SETUP` para
+   criar o 1º administrador (`ivan.silva`). Pronto — em `/admin/` → aba **Usuários** cadastra os coordenadores.
+
+## GitHub Pages (rede de segurança — só operacional) — opcional
+O workflow que publica **só o operacional** está em **`pages-operacional-github.yml.txt`**
+(não foi commitado em `.github/workflows/` porque o push automático não tem permissão de
+workflow). Para ativar:
+1. No GitHub, crie o arquivo `.github/workflows/pages-operacional.yml` (Add file → Create new
+   file) com o conteúdo de `pages-operacional-github.yml.txt`.
+2. **Settings → Pages → Build and deployment → Source = "GitHub Actions"**.
+
+Isso publica só `index.html` + `sbf.json` e **para de servir o `/admin/`** pelo github.io.
+⚠️ Enquanto o Source estiver em "Deploy from a branch", o `/admin/` fica acessível no github.io
+(embora o gate fail-closed já mande pro login). Então, se for manter o GitHub Pages, faça o
+passo acima; se não, **desligue o GitHub Pages** (Settings → Pages → Source = None) e use só o
+Cloudflare.
+
+## Segurança
+- Senha = PBKDF2-SHA256 (20k iterações — calibrado pro limite de ~10 ms de CPU do Cloudflare
+  grátis; o nº fica no hash, dá pra subir depois), só o hash no KV. Sessão = cookie HttpOnly
+  assinado (HMAC-SHA256, 12 h).
+- `CENTRAL_SECRET`/`CENTRAL_SETUP` ficam **no Cloudflare**, nunca no repositório.
+- O `/admin/` é trancado no servidor (porteiro) **e** no cliente (gate fail-closed).
 
 ## Ligar o login dos coordenadores (depois)
-Em `netlify/edge-functions/porteiro.js`, trocar o `config.path` para `"/*"` e liberar as
-rotas públicas (login/api/assets), como no Workspace Warehouse.
+Em `functions/_middleware.js`, ampliar a função `protegido()` para cobrir as rotas do app
+operacional também (e liberar `/login.html`, `/api/*`, `/login/*`).

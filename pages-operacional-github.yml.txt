@@ -1,0 +1,43 @@
+# GitHub Pages = fallback/rede de segurança dos COORDENADORES: publica SÓ o app operacional
+# (index.html + sbf.json). NÃO publica /admin/, /functions, /login — essas ficam só no
+# Cloudflare, com senha. Assim, se o Cloudflare cair, a contagem continua no ar pelo GitHub
+# Pages; e o admin nunca fica exposto aqui.
+#
+# ⚠️ Para este workflow virar o publicador do Pages, em Settings → Pages → "Build and
+# deployment" → Source = "GitHub Actions" (uma vez só).
+name: Pages (app operacional)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Montar só o operacional
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp sbf.json _site/ 2>/dev/null || true
+          touch _site/.nojekyll
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4

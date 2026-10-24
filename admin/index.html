@@ -740,26 +740,26 @@
 
   // ================= ACESSO + USUÁRIOS (adicionado) =================
   var uEu = '';
-  // Gate: no Netlify o porteiro já exige login para abrir /admin/. Aqui garantimos que
-  // só ADMINISTRADOR vê a Administração; coordenador é mandado de volta pro app. Sem
-  // backend (ex.: GitHub Pages) o fetch falha e a tela segue pública (como hoje).
+  // Gate: no Cloudflare o porteiro (_middleware) já exige login para abrir /admin/. Aqui
+  // garantimos que só ADMINISTRADOR vê a Administração; coordenador volta pro app. FAIL-CLOSED:
+  // qualquer falha (sem sessão / sem backend / erro) manda pro login — o admin nunca fica público.
   (function () {
+    function paraLogin() { location.replace('/login.html?volta=/admin/'); }
     fetch('/api/sessao', { credentials: 'same-origin' })
       .then(function (r) {
-        if (r.status === 401) { location.replace('/login.html?volta=/admin/'); return null; }
+        if (r.status === 401) { paraLogin(); return null; }
         return r.json().catch(function () { return null; });
       })
       .then(function (j) {
-        if (j && j.ok) {
-          if (!j.admin) { location.replace('/'); return; }
-          uEu = j.usuario || '';
-          var nome = (uEu.split(/[._\-\s]+/)[0] || uEu);
-          var ola = $('uOla'); if (ola) { ola.textContent = 'Olá, ' + nome; ola.hidden = false; }
-          var sair = $('uSair'); if (sair) sair.hidden = false;
-        }
-        var g = $('gate'); if (g) g.hidden = true; // sem backend → segue público
+        if (!j || !j.ok) { paraLogin(); return; }        // fail-closed: sem sessão válida → login
+        if (!j.admin) { location.replace('/'); return; }  // coordenador não acessa a Administração
+        uEu = j.usuario || '';
+        var nome = (uEu.split(/[._\-\s]+/)[0] || uEu);
+        var ola = $('uOla'); if (ola) { ola.textContent = 'Olá, ' + nome; ola.hidden = false; }
+        var sair = $('uSair'); if (sair) sair.hidden = false;
+        var g = $('gate'); if (g) g.hidden = true;
       })
-      .catch(function () { var g = $('gate'); if (g) g.hidden = true; });
+      .catch(function () { paraLogin(); });                // sem backend/erro → login (admin nunca público)
   })();
   if ($('uSair')) $('uSair').addEventListener('click', function () {
     fetch('/api/logout', { credentials: 'same-origin' }).catch(function () {}).then(function () { location.replace('/login.html'); });

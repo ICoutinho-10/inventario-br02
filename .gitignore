@@ -3,3 +3,4 @@ usuarios.json
 .netlify/
 .env
 *.log
+.wrangler/

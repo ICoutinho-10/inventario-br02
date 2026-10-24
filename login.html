@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Central de Análise de Inventário · Entrar</title>
+<link rel="icon" type="image/png" href="/login/byd.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
+<style>
+  :root { --ink:#eef3ff; --dim:#9fb0d8; --linha:rgba(120,170,255,.22); --azul:#2f7bff; --ciano:#22d3ee; --erro:#ff8095; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
+    font-family: "Manrope", system-ui, sans-serif; color: var(--ink);
+    background: #040a18 url("/login/fundo.webp") center / cover no-repeat fixed;
+  }
+  body::before { content: ""; position: fixed; inset: 0; background: linear-gradient(120deg, rgba(3,9,24,.92) 20%, rgba(3,9,24,.55) 70%, rgba(3,9,24,.75)); }
+  .cartao {
+    position: relative; width: min(400px, 100%); padding: 34px 30px 26px; border-radius: 20px;
+    background: rgba(8, 20, 42, .78); border: 1px solid var(--linha);
+    box-shadow: 0 24px 60px rgba(0,0,0,.5); backdrop-filter: blur(14px);
+  }
+  .marca { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
+  .marca img { width: 64px; height: auto; }
+  .marca strong { display: block; font-size: 20px; font-weight: 800; letter-spacing: 1.6px; }
+  .marca small { display: block; font-size: 11px; letter-spacing: 3px; color: var(--ciano); font-weight: 700; }
+  h1 { font-size: 17px; font-weight: 700; margin: 0 0 4px; }
+  p.sub { margin: 0 0 20px; color: var(--dim); font-size: 13px; }
+  label { display: block; font-size: 12px; font-weight: 700; color: var(--dim); margin: 14px 0 6px; letter-spacing: .3px; }
+  input {
+    width: 100%; padding: 12px 14px; border-radius: 11px; font: 600 15px "Manrope", system-ui, sans-serif;
+    color: var(--ink); background: rgba(255,255,255,.06); border: 1px solid var(--linha); outline: none;
+  }
+  input:focus { border-color: var(--ciano); box-shadow: 0 0 0 3px rgba(34,211,238,.18); }
+  button {
+    width: 100%; margin-top: 22px; padding: 13px; border: 0; border-radius: 11px; cursor: pointer;
+    font: 800 15px "Manrope", system-ui, sans-serif; color: #fff;
+    background: linear-gradient(135deg, var(--azul), var(--ciano)); transition: filter .15s, opacity .15s;
+  }
+  button:hover { filter: brightness(1.08); }
+  button:disabled { opacity: .6; cursor: wait; }
+  .erro { min-height: 18px; margin-top: 12px; font-size: 13px; font-weight: 700; color: var(--erro); }
+  .rodape { margin-top: 18px; font-size: 11px; color: var(--dim); text-align: center; }
+  .fundo-modal { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; padding: 16px; background: rgba(2,6,16,.72); backdrop-filter: blur(4px); }
+  .fundo-modal[hidden] { display: none; }
+  .modal { width: min(400px, 100%); padding: 26px 26px 22px; border-radius: 18px; background: #0a1a36; border: 1px solid var(--linha); box-shadow: 0 24px 60px rgba(0,0,0,.6); }
+  .modal h2 { margin: 0 0 6px; font-size: 18px; }
+  .aviso { margin: 0 0 6px; padding: 10px 12px; border-radius: 10px; font-size: 13px; font-weight: 700; color: #fde68a; background: rgba(251,191,36,.12); border: 1px solid rgba(251,191,36,.4); }
+</style>
+</head>
+<body>
+  <main class="cartao">
+    <div class="marca">
+      <img src="/login/byd.png" alt="BYD">
+      <div><strong>CENTRAL</strong><small>ANÁLISE DE INVENTÁRIO</small></div>
+    </div>
+    <h1>Entrar</h1>
+    <p class="sub">Área de administração — acesso restrito.</p>
+    <form id="form" autocomplete="on">
+      <label for="usuario">Usuário</label>
+      <input id="usuario" name="username" autocomplete="username" required autofocus placeholder="usuário (ex.: ivan.silva)">
+      <label for="senha">Senha</label>
+      <input id="senha" name="password" type="password" autocomplete="current-password" required>
+      <div id="bloco-setup" hidden>
+        <label for="senha2">Repita a senha</label>
+        <input id="senha2" type="password" autocomplete="new-password">
+        <label for="codigo">Código de primeiro acesso</label>
+        <input id="codigo" autocomplete="off" placeholder="código de criação do 1º administrador">
+      </div>
+      <button id="entrar" type="submit">Entrar</button>
+      <div class="erro" id="erro" role="alert"></div>
+    </form>
+    <div class="rodape">Central de Análise de Inventário · BYD</div>
+  </main>
+
+  <div class="fundo-modal" id="modal-senha" hidden role="dialog" aria-modal="true" aria-labelledby="t-nova">
+    <form class="modal" id="form-nova">
+      <h2 id="t-nova">Crie sua nova senha</h2>
+      <p class="aviso">A senha tem que ter no mínimo 8 dígitos (e ser diferente de 12345678).</p>
+      <label for="nova1">Nova senha</label>
+      <input id="nova1" type="password" autocomplete="new-password" minlength="8" required>
+      <label for="nova2">Repita a nova senha</label>
+      <input id="nova2" type="password" autocomplete="new-password" minlength="8" required>
+      <button id="salvar-nova" type="submit">Salvar e entrar</button>
+      <div class="erro" id="erro-nova" role="alert"></div>
+    </form>
+  </div>
+<script>
+  // Volta para a página pedida antes do login — só caminho interno (nunca outro site).
+  const pedido = new URLSearchParams(location.search).get("volta") || "/admin/";
+  const destino = pedido.startsWith("/") && !pedido.startsWith("//") ? pedido : "/admin/";
+  const form = document.getElementById("form"), erro = document.getElementById("erro"), botao = document.getElementById("entrar");
+  // PRIMEIRO ACESSO: sem nenhum usuário cadastrado, a tela cria o 1º administrador
+  // (precisa do código de uso único CENTRAL_SETUP). Depois disso, some.
+  let primeiroAcesso = false;
+  fetch("/api/setup-status").then(r => r.json()).then(j => {
+    if (!j.primeiroAcesso) return;
+    primeiroAcesso = true;
+    document.getElementById("bloco-setup").hidden = false;
+    document.querySelector("h1").textContent = "Primeiro acesso";
+    document.querySelector("p.sub").textContent = "Crie o usuário administrador. Ele cadastra os demais na Administração.";
+    form.senha.autocomplete = "new-password"; botao.textContent = "Criar administrador";
+  }).catch(() => {});
+  form.addEventListener("submit", async e => {
+    e.preventDefault();
+    erro.textContent = "";
+    if (primeiroAcesso && form.senha.value !== document.getElementById("senha2").value) { erro.textContent = "As senhas não conferem."; return; }
+    botao.disabled = true; botao.textContent = primeiroAcesso ? "Criando…" : "Entrando…";
+    try {
+      const r = await fetch(primeiroAcesso ? "/api/setup" : "/api/login", {
+        method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin",
+        body: JSON.stringify({ usuario: form.usuario.value, senha: form.senha.value, codigo: primeiroAcesso ? document.getElementById("codigo").value : undefined })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.ok) {
+        if (j.trocarSenha) { abrirNovaSenha(); botao.disabled = false; botao.textContent = "Entrar"; return; }
+        location.replace(destino); return;
+      }
+      erro.textContent = j.message || "Não foi possível entrar.";
+      form.senha.value = ""; form.senha.focus();
+    } catch {
+      erro.textContent = "Sem conexão. Tente de novo.";
+    }
+    botao.disabled = false; botao.textContent = primeiroAcesso ? "Criar administrador" : "Entrar";
+  });
+  // ---------- JANELA "CRIE SUA NOVA SENHA" ----------
+  const modal = document.getElementById("modal-senha"), formNova = document.getElementById("form-nova"), erroNova = document.getElementById("erro-nova");
+  function abrirNovaSenha() { modal.hidden = false; document.getElementById("nova1").focus(); }
+  formNova.addEventListener("submit", async e => {
+    e.preventDefault(); erroNova.textContent = "";
+    const n1 = document.getElementById("nova1").value, n2 = document.getElementById("nova2").value;
+    if (n1.length < 8) { erroNova.textContent = "A senha precisa ter no mínimo 8 dígitos."; return; }
+    if (n1 === "12345678") { erroNova.textContent = "Escolha uma senha diferente da inicial."; return; }
+    if (n1 !== n2) { erroNova.textContent = "As senhas não conferem."; return; }
+    const b = document.getElementById("salvar-nova"); b.disabled = true; b.textContent = "Salvando…";
+    try {
+      const r = await fetch("/api/trocar-senha", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ nova: n1 }) });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.ok) { location.replace(destino); return; }
+      erroNova.textContent = j.message || "Não foi possível salvar.";
+    } catch { erroNova.textContent = "Sem conexão. Tente de novo."; }
+    b.disabled = false; b.textContent = "Salvar e entrar";
+  });
+  // Entrou mas ainda está com a senha inicial (ex.: fechou a janela antes): reabre.
+  fetch("/api/sessao").then(r => r.ok ? r.json() : null).then(j => { if (!j || !j.ok) return; if (j.trocarSenha) abrirNovaSenha(); else location.replace(destino); }).catch(() => {});
+</script>
+</body>
+</html>

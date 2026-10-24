@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Inventário BR02 · Administração</title>
+<title>Central de Análise · BR02 · Administração</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
@@ -185,24 +185,46 @@
     .tese .fig { font-size: 44px; }
     .podio { grid-template-columns: 1fr; }
   }
+  /* --- acesso + aba Usuários (adicionado) --- */
+  #gate { position: fixed; inset: 0; z-index: 999; display: grid; place-items: center; background: #041426; color: var(--tx2); font-family: "DM Sans", system-ui, sans-serif; font-size: 14px; }
+  #gate[hidden] { display: none; }
+  .u-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .u-row .fld { flex: 1 1 180px; }
+  .u-row label { display: block; font-size: 12px; font-weight: 700; color: var(--tx2); margin-bottom: 5px; }
+  .u-msg { min-height: 18px; font-size: 13px; font-weight: 700; margin-top: 10px; }
+  .u-msg.ok { color: var(--ok); } .u-msg.er { color: #fca5a5; }
+  #uTab td .acoes { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .u-hist { position: fixed; z-index: 1000; width: 280px; max-height: 360px; overflow: auto; padding: 14px 16px; border-radius: 14px; background: #0a1a36; border: 1px solid var(--borda); box-shadow: 0 18px 44px rgba(0,0,0,.55); font-size: 13px; }
+  .u-hist[hidden] { display: none; }
+  .u-hist b.n { font-size: 26px; color: var(--acento); display: block; line-height: 1.1; }
+  .u-hist .lin { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed var(--borda); color: var(--tx2); }
+  .u-hist .lin span:last-child { color: var(--tx); font-weight: 700; }
+  .side .ola { color: var(--tx2); font-size: 12px; padding: 4px 0 0; }
+  .side .sair { color: #fca5a5; background: none; border: 0; cursor: pointer; font-weight: 700; font-size: 12.5px; text-align: left; padding: 4px 0; }
 </style>
 </head>
 <body>
+<div id="gate">Verificando acesso…</div>
 <div class="lay">
   <aside class="side">
-    <div class="marca"><div class="lg"><img alt="BYD" src="data:image/png;base64,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"></div><div><b>Inventário AUTO · BR02</b><small>Administração</small></div></div>
+    <div class="marca"><div class="lg"><img alt="BYD" src="data:image/png;base64,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"></div><div><b>Central de Análise · BR02</b><small>Administração</small></div></div>
     <nav class="nav" id="nav">
       <div class="mt">Menu</div>
       <button class="on" data-v="dash"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>Dashboard<span class="ct"></span></button>
       <button data-v="perf"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M17 11l2 2 4-4"/></svg>Performance<span class="ct" id="ctPerf"></span></button>
       <button data-v="hist"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg>Histórico<span class="ct" id="ctHist"></span></button>
       <button data-v="kdx"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>Contagem Kardex<span class="ct" id="ctKdx"></span></button>
+      <button data-v="usr"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>Usuários<span class="ct" id="ctUsr"></span></button>
     </nav>
     <div class="links">
       <a class="lk" id="lkPlan" href="https://docs.google.com/spreadsheets/d/1gC4MmQdrRkBqZT2AQXjap6i5ovgpFnPw1Edm5mwl9WE/edit" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>Abrir planilha</a>
       <a class="lk verde" href="https://icoutinho-10.github.io/inventario-br02/" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 7v10M12 7v10M16 7v10"/></svg>Abrir contagem</a>
       <a class="lk robo" href="roboinventario://abrir" title="Abre o Robô Inventário neste PC (precisa ter rodado o INSTALAR uma vez)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 17h6"/></svg>Abrir robô</a>
+      <a class="lk" href="https://script.google.com/home" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13l2 2-2 2M13 17h2"/></svg>Apps Script</a>
+      <a class="lk" href="/scripts-publicados/" target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Scripts publicados</a>
       <div class="vivo"><i id="dot"></i><span id="upd">conectando…</span></div>
+      <div class="ola" id="uOla" hidden></div>
+      <button class="sair" id="uSair" hidden>Sair</button>
     </div>
   </aside>
 
@@ -253,6 +275,26 @@
         </div>
       </div>
       <div id="kLista" style="display: grid; gap: 14px"></div>
+    </section>
+    <!-- USUÁRIOS -->
+    <section class="view" id="v-usr">
+      <div class="card">
+        <h2 style="margin:0 0 4px;font-size:15px">Novo acesso</h2>
+        <p class="sub" style="margin:0 0 12px;color:var(--tx3)">Os coordenadores passam o login; você adiciona aqui. Coordenador vê só o app; administrador vê esta Administração.</p>
+        <div class="u-row">
+          <div class="fld"><label>Usuário</label><input class="inp" id="uNom" placeholder="ex.: andre.souza" autocomplete="off" style="width:100%"></div>
+          <div class="fld"><label>Senha inicial (mín. 8)</label><input class="inp" id="uSen" type="password" autocomplete="new-password" style="width:100%"></div>
+          <label style="display:flex;align-items:center;gap:6px;margin:0 0 10px"><input type="checkbox" id="uAdm"> administrador</label>
+          <button class="btn" id="uCriar" style="background:var(--acento);color:#02121f;border-color:var(--acento)">Criar acesso</button>
+        </div>
+        <div class="u-msg" id="uMsgCriar"></div>
+      </div>
+      <div class="card">
+        <h2 style="margin:0 0 10px;font-size:15px">Usuários</h2>
+        <div class="tw"><table class="t" id="uTab"><thead><tr><th>Usuário</th><th>Perfil</th><th>Criado</th><th></th></tr></thead><tbody id="uLista"><tr><td colspan="4">Carregando…</td></tr></tbody></table></div>
+        <div class="u-msg" id="uMsgLista"></div>
+      </div>
+      <div class="u-hist" id="uHist" hidden role="tooltip"></div>
     </section>
   </main>
 </div>
@@ -686,6 +728,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('#nav button'), function (b) { b.classList.toggle('on', b.getAttribute('data-v') === v); });
     Array.prototype.forEach.call(document.querySelectorAll('.view'), function (s) { s.classList.toggle('on', s.id === 'v-' + v); });
     try { localStorage.setItem('adm_view', v); } catch (e) {}
+    if (v === 'usr') { uCarregar(); return; }
     desenhar();
   }
   Array.prototype.forEach.call(document.querySelectorAll('#nav button'), function (b) { b.addEventListener('click', function () { abrir(b.getAttribute('data-v')); }); });
@@ -694,6 +737,93 @@
   try { var v0 = localStorage.getItem('adm_view'); if (v0 && $('v-' + v0)) abrir(v0); } catch (e) {}
   carregar();
   setInterval(function () { if (!document.hidden) carregar(); }, 60000);
+
+  // ================= ACESSO + USUÁRIOS (adicionado) =================
+  var uEu = '';
+  // Gate: no Netlify o porteiro já exige login para abrir /admin/. Aqui garantimos que
+  // só ADMINISTRADOR vê a Administração; coordenador é mandado de volta pro app. Sem
+  // backend (ex.: GitHub Pages) o fetch falha e a tela segue pública (como hoje).
+  (function () {
+    fetch('/api/sessao', { credentials: 'same-origin' })
+      .then(function (r) {
+        if (r.status === 401) { location.replace('/login.html?volta=/admin/'); return null; }
+        return r.json().catch(function () { return null; });
+      })
+      .then(function (j) {
+        if (j && j.ok) {
+          if (!j.admin) { location.replace('/'); return; }
+          uEu = j.usuario || '';
+          var nome = (uEu.split(/[._\-\s]+/)[0] || uEu);
+          var ola = $('uOla'); if (ola) { ola.textContent = 'Olá, ' + nome; ola.hidden = false; }
+          var sair = $('uSair'); if (sair) sair.hidden = false;
+        }
+        var g = $('gate'); if (g) g.hidden = true; // sem backend → segue público
+      })
+      .catch(function () { var g = $('gate'); if (g) g.hidden = true; });
+  })();
+  if ($('uSair')) $('uSair').addEventListener('click', function () {
+    fetch('/api/logout', { credentials: 'same-origin' }).catch(function () {}).then(function () { location.replace('/login.html'); });
+  });
+
+  function uApi(corpo) {
+    return fetch('/api/acessos', { method: corpo ? 'POST' : 'GET', headers: { 'Content-Type': 'application/json' }, credentials: 'same-origin', body: corpo ? JSON.stringify(corpo) : undefined })
+      .then(function (r) {
+        if (r.status === 401) { location.replace('/login.html?volta=/admin/'); throw new Error('login'); }
+        return r.json().catch(function () { return {}; }).then(function (j) { if (!r.ok || !j.ok) throw new Error(j.message || 'Falha.'); return j; });
+      });
+  }
+  function uMsg(id, t, ok) { var e = $(id); if (!e) return; e.textContent = t; e.className = 'u-msg ' + (ok ? 'ok' : 'er'); }
+  function uCarregar() {
+    uApi().then(function (j) {
+      $('uLista').innerHTML = j.usuarios.map(function (u) {
+        return '<tr>' +
+          '<td><b>' + esc(u.usuario) + '</b>' + (u.usuario === uEu ? ' <span style="color:var(--tx3)">(você)</span>' : '') + (u.trocarSenha ? ' <span class="tag al">aguardando nova senha</span>' : '') + (u.origem === 'primeiro-acesso' ? ' <span style="color:var(--tx3)">· entrou sozinho</span>' : '') + '</td>' +
+          '<td>' + (u.admin ? '<span class="tag az">administrador</span>' : 'coordenador') + '</td>' +
+          '<td>' + (u.criadoEm ? new Date(u.criadoEm).toLocaleDateString('pt-BR') : '—') + '</td>' +
+          '<td><div class="acoes">' +
+            '<button class="btn" data-h="' + esc(u.usuario) + '">Histórico</button>' +
+            '<button class="btn" data-a="resetar" data-u="' + esc(u.usuario) + '">Resetar senha</button>' +
+            '<button class="btn" data-a="admin" data-u="' + esc(u.usuario) + '" data-val="' + (u.admin ? 0 : 1) + '">' + (u.admin ? 'Tirar admin' : 'Tornar admin') + '</button>' +
+            (u.usuario === uEu ? '' : '<button class="btn" data-a="remover" data-u="' + esc(u.usuario) + '" style="color:#fca5a5;border-color:rgba(248,113,113,.4)">Remover</button>') +
+          '</div></td></tr>';
+      }).join('') || '<tr><td colspan="4">Nenhum usuário.</td></tr>';
+    }).catch(function (e) { if (e.message === 'login') return; $('uLista').innerHTML = ''; uMsg('uMsgLista', e.message); });
+  }
+  if ($('uCriar')) $('uCriar').addEventListener('click', function () {
+    uApi({ acao: 'criar', usuario: $('uNom').value, senha: $('uSen').value, admin: $('uAdm').checked })
+      .then(function () { uMsg('uMsgCriar', 'Acesso "' + $('uNom').value.trim().toLowerCase() + '" criado. Passe a senha para a pessoa.', true); $('uNom').value = ''; $('uSen').value = ''; $('uAdm').checked = false; uCarregar(); })
+      .catch(function (e) { if (e.message !== 'login') uMsg('uMsgCriar', e.message); });
+  });
+  if ($('uLista')) $('uLista').addEventListener('click', function (e) {
+    var b = e.target.closest ? e.target.closest('button[data-a]') : null; if (!b) return;
+    var usuario = b.getAttribute('data-u'), acao = b.getAttribute('data-a');
+    var p;
+    if (acao === 'resetar') { if (!confirm('Resetar a senha de "' + usuario + '" para 12345678? No próximo acesso a pessoa cria uma nova.')) return; p = uApi({ acao: acao, usuario: usuario }).then(function () { uMsg('uMsgLista', 'Senha de "' + usuario + '" resetada para 12345678.', true); }); }
+    else if (acao === 'admin') { p = uApi({ acao: acao, usuario: usuario, admin: b.getAttribute('data-val') === '1' }).then(function () { uMsg('uMsgLista', 'Perfil atualizado.', true); }); }
+    else if (acao === 'remover') { if (!confirm('Remover o acesso de "' + usuario + '"? A pessoa perde o acesso na hora.')) return; p = uApi({ acao: acao, usuario: usuario }).then(function () { uMsg('uMsgLista', 'Acesso de "' + usuario + '" removido.', true); }); }
+    if (p) p.then(uCarregar).catch(function (err) { if (err.message !== 'login') uMsg('uMsgLista', err.message); });
+  });
+  // histórico (hover; clique também no celular)
+  var uHistPara = '';
+  function uFmt(iso) { return new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' }); }
+  function uMostrarHist(botao) {
+    var usuario = botao.getAttribute('data-h'); uHistPara = usuario;
+    var hist = $('uHist'); var r = botao.getBoundingClientRect();
+    hist.style.left = Math.max(10, Math.min(r.right - 280, innerWidth - 290)) + 'px';
+    hist.style.top = (r.bottom + 6 + 360 > innerHeight ? Math.max(10, r.top - 366) : r.bottom + 6) + 'px';
+    hist.innerHTML = 'Carregando…'; hist.hidden = false;
+    fetch('/api/acessos?historico=' + encodeURIComponent(usuario), { credentials: 'same-origin' }).then(function (x) { return x.json(); }).then(function (j) {
+      if (uHistPara !== usuario) return;
+      var lista = (j.ultimos || []);
+      hist.innerHTML = '<b>' + esc(usuario) + '</b><b class="n">' + (j.total || 0) + '</b><span style="color:var(--tx2)">acessos no total</span>' +
+        (lista.length ? '<div class="lin" style="margin-top:10px"><span>Último acesso</span><span>' + uFmt(lista[0]) + '</span></div><div style="margin:10px 0 4px;font-weight:800">Últimos acessos</div>' + lista.slice(0, 10).map(function (iso) { return '<div class="lin"><span>' + uFmt(iso) + '</span><span></span></div>'; }).join('') : '<div style="color:var(--tx2);margin-top:8px">Ainda não acessou.</div>');
+    }).catch(function () { hist.innerHTML = 'Não foi possível carregar.'; });
+  }
+  if ($('uLista')) {
+    $('uLista').addEventListener('mouseover', function (e) { var b = e.target.closest ? e.target.closest('button[data-h]') : null; if (b && uHistPara !== b.getAttribute('data-h')) uMostrarHist(b); });
+    $('uLista').addEventListener('mouseout', function (e) { var b = e.target.closest ? e.target.closest('button[data-h]') : null; if (b && !b.contains(e.relatedTarget)) { $('uHist').hidden = true; uHistPara = ''; } });
+    $('uLista').addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('button[data-h]') : null; if (b) uMostrarHist(b); });
+  }
 </script>
 </body>
 </html>

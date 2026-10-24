@@ -1,0 +1,13 @@
+{
+  "name": "central-analise-inventario",
+  "private": true,
+  "type": "module",
+  "version": "0.2.0",
+  "description": "Central de Análise de Inventário (BR02) — app público + login/administração no Netlify.",
+  "scripts": {
+    "usuarios": "node scripts/usuarios.mjs"
+  },
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0"
+  }
+}

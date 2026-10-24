@@ -1,0 +1,29 @@
+# Central de Análise de Inventário — deploy no Netlify.
+#
+# publish  = raiz do repo (index.html = o app; login.html / admin.html = área de ADM).
+# functions = /api/* (login, sessão, usuários, ambientes).
+# porteiro  = edge function; protege SÓ /admin e /scripts-publicados. O resto é público
+#             por enquanto (para ligar o login dos coordenadores depois, veja porteiro.js).
+#
+# Variáveis de ambiente (Netlify → Site configuration → Environment variables),
+# geradas por scripts/usuarios.mjs:
+#   CENTRAL_SECRET = segredo aleatório que assina a sessão
+#   CENTRAL_USERS  = bootstrap de usuários (só o HASH das senhas)
+#   CENTRAL_SETUP  = código de uso único para criar o 1º administrador
+
+[build]
+  publish = "."
+  functions = "netlify/functions"
+  edge_functions = "netlify/edge-functions"
+
+[functions]
+  node_bundler = "esbuild"
+
+# As páginas nunca ficam em cache velho no navegador; o sbf.json e assets podem.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "no-store"
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "same-origin"

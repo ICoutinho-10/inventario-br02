@@ -235,20 +235,11 @@
     .tese .fig { font-size: 44px; }
     .podio { grid-template-columns: 1fr; }
   }
-  /* ---------- seletor de tema ---------- */
-  .tema { position: relative; }
-  .tema-btn { gap: 9px; }
-  .tema-btn svg { opacity: .7; }
-  .tema-dot { width: 17px; height: 17px; border-radius: 6px; background: var(--grad); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); flex: 0 0 auto; }
-  .tema-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: 234px; padding: 7px; border-radius: 14px;
-               border: 1px solid var(--borda); background: linear-gradient(145deg, var(--card1), var(--card2)); box-shadow: 0 20px 50px rgba(0,0,0,.5); display: grid; gap: 3px; }
-  .tema-menu[hidden] { display: none; }
-  .tema-opt { display: flex; align-items: center; gap: 11px; width: 100%; height: 42px; padding: 0 10px; border: 0; background: transparent;
-              color: var(--tx); border-radius: 10px; cursor: pointer; font: 700 13px "DM Sans", system-ui, sans-serif; text-align: left; transition: .12s; }
-  .tema-opt:hover { background: var(--ctrl); }
-  .tema-opt.on { background: var(--ctrl2); box-shadow: inset 2px 0 0 var(--acento); }
-  .tema-opt .sw { width: 22px; height: 22px; border-radius: 7px; flex: 0 0 auto; box-shadow: inset 0 0 0 1px rgba(255,255,255,.22); }
-  .tema-opt small { margin-left: auto; font-size: 9.5px; color: var(--tx3); font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+  /* ---------- seletor de tema (fileira de bolinhas) ---------- */
+  .tema { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid var(--borda); border-radius: 12px; background: var(--ctrl); }
+  .sw-dot { width: 21px; height: 21px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255,255,255,.28); transition: transform .12s, box-shadow .12s; }
+  .sw-dot:hover { transform: scale(1.14); }
+  .sw-dot.on { transform: scale(1.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,.35), 0 0 0 2px var(--ctrl), 0 0 0 4px var(--acento); }
 
   /* --- acesso + aba Usuários (adicionado) --- */
   #gate { position: fixed; inset: 0; z-index: 999; display: grid; place-items: center; background: var(--bg); color: var(--tx2); font-family: "DM Sans", system-ui, sans-serif; font-size: 14px; }
@@ -304,18 +295,12 @@
         <span class="lbl">Dia do turno</span>
         <select class="sel" id="fDia"><option value="">Todos os dias</option></select>
         <button class="btn" id="bAtu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg>Atualizar</button>
-        <div class="tema" id="tema">
-          <button class="btn tema-btn" id="temaBtn" aria-haspopup="true" aria-expanded="false" title="Trocar tema">
-            <span class="tema-dot" id="temaDot"></span><span id="temaNome">Tema</span>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
-          <div class="tema-menu" id="temaMenu" hidden role="menu">
-            <button class="tema-opt" data-t="azul" role="menuitem"><span class="sw" style="background:linear-gradient(135deg,#38b9ff,#22d3ee)"></span>Azul-marinho<small>atual</small></button>
-            <button class="tema-opt" data-t="lime" role="menuitem"><span class="sw" style="background:linear-gradient(135deg,#B6FF2E,#10B981)"></span>Cyber Lime<small>neon</small></button>
-            <button class="tema-opt" data-t="cyan" role="menuitem"><span class="sw" style="background:linear-gradient(135deg,#00E5FF,#3B82F6)"></span>Electric Cyan<small>neon</small></button>
-            <button class="tema-opt" data-t="teal" role="menuitem"><span class="sw" style="background:linear-gradient(135deg,#2DD4BF,#22D3EE)"></span>Deep Teal<small>sóbrio</small></button>
-            <button class="tema-opt" data-t="claro" role="menuitem"><span class="sw" style="background:linear-gradient(135deg,#4F46E5,#2563EB)"></span>Claro<small>light</small></button>
-          </div>
+        <div class="tema" id="tema" role="group" aria-label="Tema de cores">
+          <button type="button" class="sw-dot" data-t="azul"  title="Azul-marinho"  aria-label="Azul-marinho"  style="background:linear-gradient(135deg,#38b9ff,#22d3ee)"></button>
+          <button type="button" class="sw-dot" data-t="lime"  title="Cyber Lime"    aria-label="Cyber Lime"    style="background:linear-gradient(135deg,#B6FF2E,#10B981)"></button>
+          <button type="button" class="sw-dot" data-t="cyan"  title="Electric Cyan" aria-label="Electric Cyan" style="background:linear-gradient(135deg,#00E5FF,#3B82F6)"></button>
+          <button type="button" class="sw-dot" data-t="teal"  title="Deep Teal"     aria-label="Deep Teal"     style="background:linear-gradient(135deg,#2DD4BF,#22D3EE)"></button>
+          <button type="button" class="sw-dot" data-t="claro" title="Claro"         aria-label="Tema claro"    style="background:linear-gradient(135deg,#4F46E5,#2563EB)"></button>
         </div>
       </div>
     </div>
@@ -902,34 +887,21 @@
     $('uLista').addEventListener('mouseout', function (e) { var b = e.target.closest ? e.target.closest('button[data-h]') : null; if (b && !b.contains(e.relatedTarget)) { $('uHist').hidden = true; uHistPara = ''; } });
     $('uLista').addEventListener('click', function (e) { var b = e.target.closest ? e.target.closest('button[data-h]') : null; if (b) uMostrarHist(b); });
   }
-  // ---------- seletor de tema ----------
+  // ---------- seletor de tema (bolinhas) ----------
   (function () {
-    var TEMAS = {
-      azul:  { nome: "Azul-marinho",  grad: "linear-gradient(135deg,#38b9ff,#22d3ee)" },
-      lime:  { nome: "Cyber Lime",    grad: "linear-gradient(135deg,#B6FF2E,#10B981)" },
-      cyan:  { nome: "Electric Cyan", grad: "linear-gradient(135deg,#00E5FF,#3B82F6)" },
-      teal:  { nome: "Deep Teal",     grad: "linear-gradient(135deg,#2DD4BF,#22D3EE)" },
-      claro: { nome: "Claro",         grad: "linear-gradient(135deg,#4F46E5,#2563EB)" }
-    };
+    var VALIDOS = ["azul", "lime", "cyan", "teal", "claro"];
     function salvo() { try { return localStorage.getItem("central_tema") || "azul"; } catch (e) { return "azul"; } }
     function aplica(t) {
-      if (!TEMAS[t]) t = "azul";
+      if (VALIDOS.indexOf(t) < 0) t = "azul";
       if (t === "azul") document.documentElement.removeAttribute("data-theme");
       else document.documentElement.setAttribute("data-theme", t);
       try { localStorage.setItem("central_tema", t); } catch (e) {}
-      var dot = $("temaDot"); if (dot) dot.style.background = TEMAS[t].grad;
-      var nm = $("temaNome"); if (nm) nm.textContent = TEMAS[t].nome;
-      Array.prototype.forEach.call(document.querySelectorAll(".tema-opt"), function (b) { b.classList.toggle("on", b.getAttribute("data-t") === t); });
+      Array.prototype.forEach.call(document.querySelectorAll(".sw-dot"), function (b) { b.classList.toggle("on", b.getAttribute("data-t") === t); });
       try { if (typeof desenhar === "function" && D) desenhar(); } catch (e) {}
     }
-    var btn = $("temaBtn"), menu = $("temaMenu"), box = $("tema");
-    if (btn && menu) {
-      btn.addEventListener("click", function (e) { e.stopPropagation(); var abrir = menu.hidden; menu.hidden = !abrir; btn.setAttribute("aria-expanded", String(abrir)); });
-      document.addEventListener("click", function (e) { if (box && !box.contains(e.target)) { menu.hidden = true; btn.setAttribute("aria-expanded", "false"); } });
-      Array.prototype.forEach.call(document.querySelectorAll(".tema-opt"), function (b) {
-        b.addEventListener("click", function () { aplica(b.getAttribute("data-t")); menu.hidden = true; btn.setAttribute("aria-expanded", "false"); });
-      });
-    }
+    Array.prototype.forEach.call(document.querySelectorAll(".sw-dot"), function (b) {
+      b.addEventListener("click", function () { aplica(b.getAttribute("data-t")); });
+    });
     aplica(salvo());
   })();
 </script>

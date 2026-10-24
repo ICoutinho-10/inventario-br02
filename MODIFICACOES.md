@@ -1,5 +1,17 @@
 # Modificações — Central de Análise de Inventário (BR02)
 
+## v0.4.0 — 24/10/2026 — Seletor de temas + logo do WS no painel
+- `admin/index.html`: **seletor de tema** (botão com degradê na barra superior) com 5 temas —
+  **Azul-marinho** (atual), **Cyber Lime** (neon), **Electric Cyan** (neon), **Deep Teal** e
+  **Claro** (modo claro). Escolha salva em `localStorage` (`central_tema`) e aplicada antes de
+  pintar (sem flash).
+- Refatoração: cores fixas do CSS viraram **variáveis** (`--ctrl`, `--ctrl2`, `--row-alt`,
+  `--row-hover`, `--on-accent`, `--tese1/2`, `--glow1/2`, `--grad`, `--accent-weak`), pra os
+  temas (inclusive claro) ficarem corretos. Degradês no chip ativo e no botão de tema.
+- **Logo**: trocado o BYD plano pelo **ícone do Workspace Warehouse** (prédio BYD neon) na barra
+  lateral + favicon (`login/ws-logo.png`).
+- Nota: os gráficos SVG ainda usam a paleta azul fixa (dá pra tematizar depois).
+
 ## v0.3.0 — 24/10/2026 — Migração do login para Cloudflare (admin trancado por senha)
 Decisão do Ivan: admin **100% com senha** e coordenadores **sem risco de ficar sem acesso**.
 Trocamos o host do login de Netlify para **Cloudflare** (grátis, permite uso comercial, muito

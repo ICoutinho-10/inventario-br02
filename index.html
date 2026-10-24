@@ -370,7 +370,7 @@
 </style>
 </head>
 <body>
-<nav class="side"><div class="mt">MENU</div><button type="button" class="on" data-v="f"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>Conferência Kardex</button><button type="button" data-v="c"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Contagem avulsa</button><button type="button" data-v="k"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>Imprimir Kardex</button><div class="tema"><div class="mt">TEMA</div><div class="sws"><button type="button" class="tw" data-t="roxo" title="Roxo"></button><button type="button" class="tw" data-t="marinho" title="Azul-marinho"></button><button type="button" class="tw" data-t="grafite" title="Grafite"></button><button type="button" class="tw" data-t="petroleo" title="Verde petróleo"></button></div></div></nav>
+<nav class="side"><div class="mt">MENU</div><button type="button" class="on" data-v="f"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>Conferência Kardex</button><button type="button" data-v="c"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Contagem avulsa</button><button type="button" data-v="k"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>Imprimir Kardex</button><button type="button" id="btnRobo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 17h6"/></svg>Robô</button><div class="tema"><div class="mt">TEMA</div><div class="sws"><button type="button" class="tw" data-t="roxo" title="Roxo"></button><button type="button" class="tw" data-t="marinho" title="Azul-marinho"></button><button type="button" class="tw" data-t="grafite" title="Grafite"></button><button type="button" class="tw" data-t="petroleo" title="Verde petróleo"></button></div></div></nav>
 <div class="app">
 <div class="top"><div class="topin">
   <div class="logo"><img alt="BYD" src="/login/byd.png"></div>
@@ -484,6 +484,38 @@
   </div>
   <div class="kmsg" id="kmsg"></div>
   <div class="kprev" id="kprev"><div id="kardex"><div class="kvazio">Digite um endereço (ex.: <b>T02 R33 B</b>) para ver o Kardex como ele sai na impressão.</div></div></div>
+</div>
+
+<style>
+  .robo-modal { position: fixed; inset: 0; z-index: 100; display: grid; place-items: center; padding: 18px; background: rgba(5,8,20,.68); backdrop-filter: blur(4px); }
+  .robo-modal[hidden] { display: none; }
+  .robo-card { position: relative; width: min(440px, 100%); background: #fff; color: #0F172A; border-radius: 22px; padding: 26px 24px 24px; box-shadow: 0 30px 80px rgba(0,0,0,.55); font-family: var(--font, "Manrope", system-ui, sans-serif); animation: roboIn .25s cubic-bezier(.22,1,.36,1) both; }
+  @keyframes roboIn { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+  .robo-x { position: absolute; right: 14px; top: 12px; width: 32px; height: 32px; border: 0; border-radius: 9px; background: #F1F5F9; color: #475569; font-size: 15px; cursor: pointer; }
+  .robo-x:hover { background: #E2E8F0; }
+  .robo-ic { width: 54px; height: 54px; border-radius: 15px; display: grid; place-items: center; font-size: 28px; background: linear-gradient(135deg, #10B981, #059669); margin-bottom: 13px; box-shadow: 0 8px 20px rgba(16,185,129,.35); }
+  .robo-card h2 { margin: 0 0 4px; font-size: 21px; font-weight: 800; }
+  .robo-sub { margin: 0 0 16px; color: #475569; font-size: 14px; font-weight: 600; line-height: 1.5; }
+  .robo-passos { margin: 0 0 14px; padding-left: 20px; display: grid; gap: 8px; font-size: 14px; color: #334155; line-height: 1.5; }
+  .robo-passos b { color: #0F172A; }
+  .robo-nota { margin: 0 0 18px; font-size: 12.5px; color: #64748B; background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 12px; padding: 11px 13px; line-height: 1.55; }
+  .robo-go { display: block; text-align: center; text-decoration: none; background: linear-gradient(135deg, #10B981, #059669); color: #fff; font-weight: 800; font-size: 15px; padding: 14px; border-radius: 13px; }
+  .robo-go:hover { filter: brightness(1.06); }
+</style>
+<div class="robo-modal" id="roboModal" hidden>
+  <div class="robo-card" role="dialog" aria-modal="true" aria-labelledby="roboTit">
+    <button type="button" class="robo-x" id="roboX" aria-label="Fechar">✕</button>
+    <div class="robo-ic">🤖</div>
+    <h2 id="roboTit">Robô do Inventário</h2>
+    <p class="robo-sub">Ele lança sozinho no TOTVS as diferenças da contagem — sem precisar digitar à mão.</p>
+    <ol class="robo-passos">
+      <li><b>Você conta e lança</b> as posições normalmente aqui no app.</li>
+      <li>As diferenças viram <b>Baixa (602)</b> e <b>Alta (202)</b> nas abas da planilha.</li>
+      <li>O Robô <b>lê essas abas e faz os movimentos no TOTVS</b> automaticamente.</li>
+    </ol>
+    <p class="robo-nota">Precisa ter o Robô instalado neste computador (rodar o <b>INSTALAR</b> uma vez). Ao abrir, confira os itens e clique em iniciar no próprio Robô.</p>
+    <a class="robo-go" href="roboinventario://abrir">Abrir o Robô</a>
+  </div>
 </div>
 
 <script>
@@ -1103,6 +1135,11 @@
   }
   Array.prototype.forEach.call(document.querySelectorAll('.side button[data-v]'), function (x) { x.addEventListener('click', function () { abrir(x.getAttribute('data-v')); }); });
   (function () { var a = ''; try { a = localStorage.getItem('inv_aba') || ''; } catch (e) {} abrir(a === 'k' || a === 'c' ? a : 'f'); })();
+
+  // ---- Robô (modal) ----
+  if ($('btnRobo')) $('btnRobo').addEventListener('click', function () { var m = $('roboModal'); if (m) m.hidden = false; });
+  if ($('roboX')) $('roboX').addEventListener('click', function () { var m = $('roboModal'); if (m) m.hidden = true; });
+  if ($('roboModal')) $('roboModal').addEventListener('click', function (e) { if (e.target === $('roboModal')) $('roboModal').hidden = true; });
 
   pintarSeg();
   recarregarEnderecos();

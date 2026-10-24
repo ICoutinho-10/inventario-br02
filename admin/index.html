@@ -241,6 +241,26 @@
   .sw-dot:hover { transform: scale(1.14); }
   .sw-dot.on { transform: scale(1.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,.35), 0 0 0 2px var(--ctrl), 0 0 0 4px var(--acento); }
 
+  /* ---------- calendário (filtro de período) ---------- */
+  .cal { position: relative; }
+  #calTx { font-weight: 700; }
+  .cal-pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: 272px; padding: 14px; border-radius: 14px;
+             border: 1px solid var(--borda); background: linear-gradient(145deg, var(--card1), var(--card2)); box-shadow: 0 20px 50px rgba(0,0,0,.5); }
+  .cal-pop[hidden] { display: none; }
+  .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .cal-mes { font-weight: 800; font-size: 14px; text-transform: capitalize; color: var(--tx); }
+  .cal-nav { width: 30px; height: 30px; border-radius: 8px; border: 1px solid var(--borda); background: var(--ctrl); color: var(--tx); cursor: pointer; font: 700 16px "DM Sans", sans-serif; line-height: 1; }
+  .cal-nav:hover { border-color: var(--acento); }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+  .cal-grid .wd { font-size: 10px; font-weight: 800; color: var(--tx3); text-align: center; padding: 3px 0 6px; text-transform: uppercase; }
+  .cal-grid .d { height: 32px; border-radius: 8px; border: 0; background: transparent; color: var(--tx2); cursor: pointer; font: 700 12.5px "DM Sans", sans-serif; transition: .1s; }
+  .cal-grid .d:hover { background: var(--ctrl); color: var(--tx); }
+  .cal-grid .d.fora { color: var(--tx4); opacity: .55; }
+  .cal-grid .d.hoje { box-shadow: inset 0 0 0 1.6px var(--acento); color: var(--tx); }
+  .cal-grid .d.sel { background: var(--grad); color: var(--on-accent); box-shadow: none; }
+  .cal-hoje { margin-top: 11px; width: 100%; height: 34px; border-radius: 9px; border: 1px solid var(--borda); background: var(--ctrl); color: var(--tx); cursor: pointer; font-weight: 700; font-size: 12.5px; }
+  .cal-hoje:hover { border-color: var(--acento); }
+
   /* --- acesso + aba Usuários (adicionado) --- */
   #gate { position: fixed; inset: 0; z-index: 999; display: grid; place-items: center; background: var(--bg); color: var(--tx2); font-family: "DM Sans", system-ui, sans-serif; font-size: 14px; }
   #gate[hidden] { display: none; }
@@ -292,8 +312,19 @@
         <p class="sub" id="sub">Carregando dados da planilha…</p>
       </div>
       <div class="ctr">
-        <span class="lbl">Dia do turno</span>
-        <select class="sel" id="fDia"><option value="">Todos os dias</option></select>
+        <input type="hidden" id="fDia" value="">
+        <div class="cal" id="cal">
+          <button type="button" class="btn" id="calBtn" aria-haspopup="true" aria-expanded="false" title="Filtrar por dia">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            <span id="calTx">Todos os dias</span>
+          </button>
+          <div class="cal-pop" id="calPop" hidden role="dialog" aria-label="Escolher dia">
+            <div class="cal-head"><button type="button" class="cal-nav" id="calPrev" aria-label="Mês anterior">‹</button><span class="cal-mes" id="calMes"></span><button type="button" class="cal-nav" id="calNext" aria-label="Próximo mês">›</button></div>
+            <div class="cal-grid" id="calGrid"></div>
+            <button type="button" class="cal-hoje" id="calHoje">Hoje</button>
+          </div>
+        </div>
+        <button type="button" class="btn" id="calLimpar" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar filtro</button>
         <button class="btn" id="bAtu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg>Atualizar</button>
         <div class="tema" id="tema" role="group" aria-label="Tema de cores">
           <button type="button" class="sw-dot" data-t="azul"  title="Azul-marinho"  aria-label="Azul-marinho"  style="background:linear-gradient(135deg,#38b9ff,#22d3ee)"></button>
@@ -425,9 +456,7 @@
       ULT = assin;
       D = preparar(j.dados);
       if (j.dados.planilha) $('lkPlan').href = j.dados.planilha;
-      var sel = $('fDia'), atual = sel.value;
-      sel.innerHTML = '<option value="">Todos os dias</option>' + D.dias.map(function (k) { return '<option value="' + k + '">Turno ' + diaBR(k) + '</option>'; }).join('');
-      if (atual && D.dias.indexOf(atual) >= 0) sel.value = atual;
+      // #fDia é controlado pelo calendário (filtro de período); mantém o valor escolhido.
       carregar.feito = true;
       desenhar();
     }).catch(function (e) {
@@ -919,6 +948,55 @@
       b.addEventListener("click", function () { aplica(b.getAttribute("data-t")); });
     });
     aplica(salvo());
+  })();
+
+  // ---------- calendário (filtro de período) ----------
+  (function () {
+    var cal = $('cal'), btn = $('calBtn'), pop = $('calPop'), grid = $('calGrid'), mesLbl = $('calMes'), tx = $('calTx'), limpar = $('calLimpar');
+    if (!btn) return;
+    var MES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+    var WD = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+    var hoje = new Date(), vis = new Date(hoje.getFullYear(), hoje.getMonth(), 1), sel = null;
+    function k2(n) { return (n < 10 ? '0' : '') + n; }
+    function keyDe(d) { return d.getFullYear() + '-' + k2(d.getMonth() + 1) + '-' + k2(d.getDate()); }
+    function render() {
+      mesLbl.textContent = MES[vis.getMonth()] + ' ' + vis.getFullYear();
+      var ini = new Date(vis.getFullYear(), vis.getMonth(), 1), start = new Date(ini);
+      start.setDate(1 - ini.getDay());
+      var h = WD.map(function (w) { return '<div class="wd">' + w + '</div>'; }).join('');
+      for (var i = 0; i < 42; i++) {
+        var d = new Date(start); d.setDate(start.getDate() + i);
+        var cls = 'd' + (d.getMonth() !== vis.getMonth() ? ' fora' : '') + (keyDe(d) === keyDe(hoje) ? ' hoje' : '') + (sel && keyDe(d) === keyDe(sel) ? ' sel' : '');
+        h += '<button type="button" class="' + cls + '" data-k="' + keyDe(d) + '">' + d.getDate() + '</button>';
+      }
+      grid.innerHTML = h;
+    }
+    function fecha() { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
+    function aplicaDia(key, label) {
+      $('fDia').value = key || '';
+      tx.textContent = label;
+      limpar.hidden = !key;
+      try { hEst.pag = 0; } catch (e) {}
+      try { kMax = 40; } catch (e) {}
+      try { if (typeof desenhar === 'function' && D) desenhar(); } catch (e) {}
+    }
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      var abrir = pop.hidden;
+      vis = sel ? new Date(sel.getFullYear(), sel.getMonth(), 1) : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      render(); pop.hidden = !abrir; btn.setAttribute('aria-expanded', String(abrir));
+    });
+    document.addEventListener('click', function (e) { if (cal && !cal.contains(e.target)) fecha(); });
+    $('calPrev').addEventListener('click', function () { vis = new Date(vis.getFullYear(), vis.getMonth() - 1, 1); render(); });
+    $('calNext').addEventListener('click', function () { vis = new Date(vis.getFullYear(), vis.getMonth() + 1, 1); render(); });
+    $('calHoje').addEventListener('click', function () { vis = new Date(hoje.getFullYear(), hoje.getMonth(), 1); render(); });
+    grid.addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('button[data-k]') : null; if (!b) return;
+      var key = b.getAttribute('data-k'); sel = new Date(key + 'T12:00:00'); render();
+      aplicaDia(key, k2(sel.getDate()) + '/' + k2(sel.getMonth() + 1) + '/' + sel.getFullYear());
+      fecha();
+    });
+    limpar.addEventListener('click', function () { sel = null; render(); aplicaDia('', 'Todos os dias'); });
   })();
 </script>
 </body>

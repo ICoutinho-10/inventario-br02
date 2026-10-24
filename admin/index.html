@@ -347,7 +347,7 @@
         <div class="u-row">
           <div class="fld"><label>Usuário</label><input class="inp" id="uNom" placeholder="ex.: andre.souza" autocomplete="off" style="width:100%"></div>
           <div class="fld"><label>Senha inicial (mín. 8)</label><input class="inp" id="uSen" type="password" autocomplete="new-password" style="width:100%"></div>
-          <label style="display:flex;align-items:center;gap:6px;margin:0 0 10px"><input type="checkbox" id="uAdm"> administrador</label>
+          <div style="flex:0 0 auto"><label>Perfil</label><select class="sel" id="uPapelSel" style="min-width:150px"><option value="coordenador">Coordenador</option><option value="analista">Analista</option><option value="adm">Administrador</option></select></div>
           <button class="btn" id="uCriar" style="background:var(--acento);color:var(--on-accent);border-color:var(--acento)">Criar acesso</button>
         </div>
         <div class="u-msg" id="uMsgCriar"></div>
@@ -802,10 +802,16 @@
   setInterval(function () { if (!document.hidden) carregar(); }, 60000);
 
   // ================= ACESSO + USUÁRIOS (adicionado) =================
-  var uEu = '';
-  // Gate: no Cloudflare o porteiro (_middleware) já exige login para abrir /admin/. Aqui
-  // garantimos que só ADMINISTRADOR vê a Administração; coordenador volta pro app. FAIL-CLOSED:
-  // qualquer falha (sem sessão / sem backend / erro) manda pro login — o admin nunca fica público.
+  var uEu = '', uPapel = '';
+  // Esconde opções exclusivas de ADM (Usuários + Scripts) para analista/coordenador.
+  function aplicarPermissoes() {
+    var usr = document.querySelector('#nav button[data-v="usr"]'); if (usr) usr.style.display = 'none';
+    Array.prototype.forEach.call(document.querySelectorAll('.links a[href="/scripts-publicados/"], .links a[href="https://script.google.com/home"]'), function (a) { a.style.display = 'none'; });
+    try { if (VIEW === 'usr') abrir('dash'); } catch (e) {}
+  }
+  // Gate: o porteiro (_middleware) já exige login para abrir /admin/. Qualquer perfil logado
+  // (adm/analista/coordenador) vê os dashboards; só ADM vê Usuários/Scripts. FAIL-CLOSED:
+  // qualquer falha (sem sessão / sem backend / erro) manda pro login.
   (function () {
     function paraLogin() { location.replace('/login.html?volta=/admin/'); }
     fetch('/api/sessao', { credentials: 'same-origin' })
@@ -815,8 +821,9 @@
       })
       .then(function (j) {
         if (!j || !j.ok) { paraLogin(); return; }        // fail-closed: sem sessão válida → login
-        if (!j.admin) { location.replace('/'); return; }  // coordenador não acessa a Administração
         uEu = j.usuario || '';
+        uPapel = j.papel || (j.admin ? 'adm' : 'coordenador');
+        if (uPapel !== 'adm') aplicarPermissoes();
         var nome = (uEu.split(/[._\-\s]+/)[0] || uEu);
         var ola = $('uOla'); if (ola) { ola.textContent = 'Olá, ' + nome; ola.hidden = false; }
         var sair = $('uSair'); if (sair) sair.hidden = false;
@@ -841,20 +848,23 @@
       $('uLista').innerHTML = j.usuarios.map(function (u) {
         return '<tr>' +
           '<td><b>' + esc(u.usuario) + '</b>' + (u.usuario === uEu ? ' <span style="color:var(--tx3)">(você)</span>' : '') + (u.trocarSenha ? ' <span class="tag al">aguardando nova senha</span>' : '') + (u.origem === 'primeiro-acesso' ? ' <span style="color:var(--tx3)">· entrou sozinho</span>' : '') + '</td>' +
-          '<td>' + (u.admin ? '<span class="tag az">administrador</span>' : 'coordenador') + '</td>' +
+          '<td>' + (u.papel === 'adm' ? '<span class="tag az">Administrador</span>' : u.papel === 'analista' ? '<span class="tag">Analista</span>' : 'Coordenador') + '</td>' +
           '<td>' + (u.criadoEm ? new Date(u.criadoEm).toLocaleDateString('pt-BR') : '—') + '</td>' +
           '<td><div class="acoes">' +
             '<button class="btn" data-h="' + esc(u.usuario) + '">Histórico</button>' +
             '<button class="btn" data-a="resetar" data-u="' + esc(u.usuario) + '">Resetar senha</button>' +
-            '<button class="btn" data-a="admin" data-u="' + esc(u.usuario) + '" data-val="' + (u.admin ? 0 : 1) + '">' + (u.admin ? 'Tirar admin' : 'Tornar admin') + '</button>' +
+            (u.usuario === uEu ? '' : '<select class="sel" data-sel="papel" data-u="' + esc(u.usuario) + '" style="min-width:140px;height:34px">' +
+              '<option value="coordenador"' + (u.papel === 'coordenador' ? ' selected' : '') + '>Coordenador</option>' +
+              '<option value="analista"' + (u.papel === 'analista' ? ' selected' : '') + '>Analista</option>' +
+              '<option value="adm"' + (u.papel === 'adm' ? ' selected' : '') + '>Administrador</option></select>') +
             (u.usuario === uEu ? '' : '<button class="btn" data-a="remover" data-u="' + esc(u.usuario) + '" style="color:#fca5a5;border-color:rgba(248,113,113,.4)">Remover</button>') +
           '</div></td></tr>';
       }).join('') || '<tr><td colspan="4">Nenhum usuário.</td></tr>';
     }).catch(function (e) { if (e.message === 'login') return; $('uLista').innerHTML = ''; uMsg('uMsgLista', e.message); });
   }
   if ($('uCriar')) $('uCriar').addEventListener('click', function () {
-    uApi({ acao: 'criar', usuario: $('uNom').value, senha: $('uSen').value, admin: $('uAdm').checked })
-      .then(function () { uMsg('uMsgCriar', 'Acesso "' + $('uNom').value.trim().toLowerCase() + '" criado. Passe a senha para a pessoa.', true); $('uNom').value = ''; $('uSen').value = ''; $('uAdm').checked = false; uCarregar(); })
+    uApi({ acao: 'criar', usuario: $('uNom').value, senha: $('uSen').value, papel: $('uPapelSel').value })
+      .then(function () { uMsg('uMsgCriar', 'Acesso "' + $('uNom').value.trim().toLowerCase() + '" criado (' + $('uPapelSel').value + '). Passe a senha para a pessoa.', true); $('uNom').value = ''; $('uSen').value = ''; $('uPapelSel').value = 'coordenador'; uCarregar(); })
       .catch(function (e) { if (e.message !== 'login') uMsg('uMsgCriar', e.message); });
   });
   if ($('uLista')) $('uLista').addEventListener('click', function (e) {
@@ -862,9 +872,15 @@
     var usuario = b.getAttribute('data-u'), acao = b.getAttribute('data-a');
     var p;
     if (acao === 'resetar') { if (!confirm('Resetar a senha de "' + usuario + '" para 12345678? No próximo acesso a pessoa cria uma nova.')) return; p = uApi({ acao: acao, usuario: usuario }).then(function () { uMsg('uMsgLista', 'Senha de "' + usuario + '" resetada para 12345678.', true); }); }
-    else if (acao === 'admin') { p = uApi({ acao: acao, usuario: usuario, admin: b.getAttribute('data-val') === '1' }).then(function () { uMsg('uMsgLista', 'Perfil atualizado.', true); }); }
     else if (acao === 'remover') { if (!confirm('Remover o acesso de "' + usuario + '"? A pessoa perde o acesso na hora.')) return; p = uApi({ acao: acao, usuario: usuario }).then(function () { uMsg('uMsgLista', 'Acesso de "' + usuario + '" removido.', true); }); }
     if (p) p.then(uCarregar).catch(function (err) { if (err.message !== 'login') uMsg('uMsgLista', err.message); });
+  });
+  if ($('uLista')) $('uLista').addEventListener('change', function (e) {
+    var s = e.target; if (!s || s.getAttribute('data-sel') !== 'papel') return;
+    var usuario = s.getAttribute('data-u'), papel = s.value;
+    uApi({ acao: 'papel', usuario: usuario, papel: papel })
+      .then(function () { uMsg('uMsgLista', 'Perfil de "' + usuario + '" alterado para ' + papel + '.', true); uCarregar(); })
+      .catch(function (err) { if (err.message !== 'login') { uMsg('uMsgLista', err.message); uCarregar(); } });
   });
   // histórico (hover; clique também no celular)
   var uHistPara = '';

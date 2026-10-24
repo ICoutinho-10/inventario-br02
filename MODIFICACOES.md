@@ -1,5 +1,13 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.6.0 — 24/10/2026 — Perfis (ADM/Analista/Coordenador) + botão de tema moderno
+- **Perfis com senha** no gestão: **ADM** (tudo), **Analista** (dashboards + mensagens, sem Usuários/Scripts),
+  **Coordenador** (só dashboards). Campo `papel` no KV (compat: `admin:true`→adm, resto→coordenador); admin
+  fixo `ivan.silva`. API: `/api/sessao` retorna `papel`; `/api/acessos` cria/altera por `papel` (ação `papel`),
+  só ADM. Tela ADM: gate libera qualquer perfil nos dashboards e **esconde Usuários/Scripts** pra não-ADM;
+  seletor de perfil ao criar e por usuário. Validado no `wrangler` (criação/login/papel/bloqueio).
+- **Botão de tema**: trocado o dropdown por **fileira de bolinhas** (mais moderno).
+
 ## v0.5.0 — 24/10/2026 — Gráficos seguem o tema + logo BYD consistente
 - `admin/index.html`: **gráficos tematizados** — trilhos, barras de accent e heatmap passaram a
   usar `var(--trilho)/var(--acento)/var(--azul)/var(--acento-rgb)`, então recolorem junto com o tema

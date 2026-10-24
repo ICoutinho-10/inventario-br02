@@ -34,11 +34,23 @@ export const SENHA_PADRAO = "12345678";
 export const ADMINS_FIXOS = ["ivan.silva"]; // administrador fixo (Ivan)
 export const USUARIO_DE_PC = /^[a-z][a-z0-9]*(\.[a-z0-9]+)+$/;
 
+// Perfis: adm (tudo), analista (dashboards + mensagens; sem Usuários/Scripts),
+// coordenador (só dashboards). Compat: registros antigos só tinham admin:true/false.
+export const PAPEIS = ["adm", "analista", "coordenador"];
+export function papelDe(usuario, cadastro) {
+  if (ADMINS_FIXOS.includes(usuario)) return "adm";
+  if (!cadastro) return "coordenador";
+  if (PAPEIS.includes(cadastro.papel)) return cadastro.papel;
+  return cadastro.admin ? "adm" : "coordenador";
+}
+const contaAdms = lista => Object.entries(lista).filter(([u, d]) => papelDe(u, d) === "adm").length;
+
 export async function autoCadastrar(kv, env, nome) {
   const usuario = normalizarUsuario(nome);
   const lista = await lerUsuarios(kv, env);
   if (lista[usuario]) return lista[usuario];
-  lista[usuario] = { hash: await gerarHash(SENHA_PADRAO), admin: ADMINS_FIXOS.includes(usuario), trocarSenha: true,
+  const adm = ADMINS_FIXOS.includes(usuario);
+  lista[usuario] = { hash: await gerarHash(SENHA_PADRAO), admin: adm, papel: adm ? "adm" : "coordenador", trocarSenha: true,
                      origem: "primeiro-acesso", criadoEm: new Date().toISOString() };
   await gravar(kv, lista);
   return lista[usuario];
@@ -62,12 +74,14 @@ export async function resetarSenha(kv, env, nome) {
   await gravar(kv, lista);
 }
 
-export async function criarUsuario(kv, env, nome, senha, admin = false) {
+export async function criarUsuario(kv, env, nome, senha, papel = "coordenador") {
   const usuario = normalizarUsuario(nome);
   if (!/^[a-z0-9._-]{3,40}$/.test(usuario)) throw new Error("Usuário: 3 a 40 letras/números (pode usar . _ -).");
   if (String(senha || "").length < 8) throw new Error("A senha precisa ter pelo menos 8 caracteres.");
+  if (papel === true) papel = "adm"; // compat (chamada antiga com boolean)
+  if (!PAPEIS.includes(papel)) papel = "coordenador";
   const lista = await lerUsuarios(kv, env);
-  lista[usuario] = { hash: await gerarHash(String(senha)), admin: Boolean(admin), criadoEm: new Date().toISOString() };
+  lista[usuario] = { hash: await gerarHash(String(senha)), papel, admin: papel === "adm", criadoEm: new Date().toISOString() };
   await gravar(kv, lista);
   return usuario;
 }
@@ -81,14 +95,16 @@ export async function trocarSenha(kv, env, nome, senha) {
   await gravar(kv, lista);
 }
 
-export async function definirAdmin(kv, env, nome, admin) {
+export async function definirPapel(kv, env, nome, papel) {
   const usuario = normalizarUsuario(nome);
+  if (!PAPEIS.includes(papel)) throw new Error("Perfil inválido.");
   const lista = await lerUsuarios(kv, env);
   if (!lista[usuario]) throw new Error("Usuário não encontrado.");
-  if (!admin && Object.values(lista).filter(u => u.admin).length <= 1 && lista[usuario].admin) {
+  if (ADMINS_FIXOS.includes(usuario) && papel !== "adm") throw new Error("Este usuário é administrador fixo.");
+  if (papel !== "adm" && papelDe(usuario, lista[usuario]) === "adm" && contaAdms(lista) <= 1) {
     throw new Error("Precisa existir pelo menos 1 administrador.");
   }
-  lista[usuario] = { ...lista[usuario], admin: Boolean(admin) };
+  lista[usuario] = { ...lista[usuario], papel, admin: papel === "adm" };
   await gravar(kv, lista);
 }
 
@@ -96,7 +112,7 @@ export async function removerUsuario(kv, env, nome) {
   const usuario = normalizarUsuario(nome);
   const lista = await lerUsuarios(kv, env);
   if (!lista[usuario]) return;
-  if (lista[usuario].admin && Object.values(lista).filter(u => u.admin).length <= 1) {
+  if (papelDe(usuario, lista[usuario]) === "adm" && contaAdms(lista) <= 1) {
     throw new Error("Não dá para remover o último administrador.");
   }
   delete lista[usuario];

@@ -3,7 +3,7 @@
 // passam por aqui: o app (index.html / admin) continua lendo/gravando direto no Apps Script
 // da planilha. Storage de usuários/histórico = Cloudflare KV (binding CENTRAL_KV).
 import { assinarSessao, lerSessao, cookieSessao, cookieSair, conferirSenha, normalizarUsuario, igualSeguro } from "../lib/sessao.js";
-import { lerUsuarios, criarUsuario, trocarSenha, definirAdmin, removerUsuario, autoCadastrar, definirPropriaSenha, resetarSenha, SENHA_PADRAO, ADMINS_FIXOS, USUARIO_DE_PC } from "../lib/usuarios.js";
+import { lerUsuarios, criarUsuario, trocarSenha, definirPapel, papelDe, PAPEIS, removerUsuario, autoCadastrar, definirPropriaSenha, resetarSenha, SENHA_PADRAO, ADMINS_FIXOS, USUARIO_DE_PC } from "../lib/usuarios.js";
 import { registrarAcesso, lerHistorico } from "../lib/acessos.js";
 
 const json = (corpo, status = 200, extra = {}) => new Response(JSON.stringify(corpo), {
@@ -62,7 +62,8 @@ export const onRequest = async (context) => {
   if (!sessao) return json({ ok: false, login: true, message: "Faça login." }, 401);
   const cadastro = (await lerUsuarios(kv, env))[sessao.usuario];
   if (!cadastro) return json({ ok: false, login: true, message: "Acesso removido." }, 401, { "Set-Cookie": cookieSair() });
-  const ehAdmin = ADMINS_FIXOS.includes(sessao.usuario) || Boolean(cadastro.admin);
+  const papel = papelDe(sessao.usuario, cadastro);
+  const ehAdmin = papel === "adm";
   if (cadastro.trocarSenha && !["sessao", "trocar-senha"].includes(rota)) {
     return json({ ok: false, trocarSenha: true, message: "Crie sua nova senha para continuar." }, 403);
   }
@@ -70,7 +71,7 @@ export const onRequest = async (context) => {
   try {
     switch (rota) {
       case "sessao":
-        return json({ ok: true, usuario: sessao.usuario, admin: ehAdmin, trocarSenha: Boolean(cadastro.trocarSenha) });
+        return json({ ok: true, usuario: sessao.usuario, admin: ehAdmin, papel, trocarSenha: Boolean(cadastro.trocarSenha) });
       case "trocar-senha": {
         let corpo = {};
         try { corpo = await request.json(); } catch { /* vazio */ }
@@ -84,14 +85,14 @@ export const onRequest = async (context) => {
         }
         if (request.method === "GET") {
           const lista = await lerUsuarios(kv, env);
-          return json({ ok: true, usuarios: Object.entries(lista).map(([u, d]) => ({ usuario: u, admin: Boolean(d.admin) || ADMINS_FIXOS.includes(u), criadoEm: d.criadoEm ?? null, trocarSenha: Boolean(d.trocarSenha), origem: d.origem ?? null })).sort((a, b) => a.usuario.localeCompare(b.usuario)) });
+          return json({ ok: true, usuarios: Object.entries(lista).map(([u, d]) => ({ usuario: u, papel: papelDe(u, d), admin: papelDe(u, d) === "adm", criadoEm: d.criadoEm ?? null, trocarSenha: Boolean(d.trocarSenha), origem: d.origem ?? null })).sort((a, b) => a.usuario.localeCompare(b.usuario)) });
         }
         let corpo = {};
         try { corpo = await request.json(); } catch { /* vazio */ }
         try {
-          if (corpo.acao === "criar") await criarUsuario(kv, env, corpo.usuario, corpo.senha, Boolean(corpo.admin));
+          if (corpo.acao === "criar") await criarUsuario(kv, env, corpo.usuario, corpo.senha, corpo.papel || "coordenador");
           else if (corpo.acao === "senha") await trocarSenha(kv, env, corpo.usuario, corpo.senha);
-          else if (corpo.acao === "admin") await definirAdmin(kv, env, corpo.usuario, Boolean(corpo.admin));
+          else if (corpo.acao === "papel") await definirPapel(kv, env, corpo.usuario, corpo.papel);
           else if (corpo.acao === "resetar") await resetarSenha(kv, env, corpo.usuario);
           else if (corpo.acao === "remover") {
             if (normalizarUsuario(corpo.usuario) === sessao.usuario) throw new Error("Você não pode remover o seu próprio acesso.");

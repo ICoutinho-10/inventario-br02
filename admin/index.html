@@ -3,6 +3,18 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  // O /admin/ só funciona no Cloudflare (tem login/servidor). No GitHub Pages (github.io)
+  // não há servidor, então encaminhamos para o endereço com senha. A contagem pública (/)
+  // do github.io continua normal.
+  (function () {
+    try {
+      if (location.hostname.indexOf("github.io") !== -1) {
+        location.replace("https://inventario-br02.pages.dev/admin/");
+      }
+    } catch (e) {}
+  })();
+</script>
 <title>Central de Análise · BR02 · Administração</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

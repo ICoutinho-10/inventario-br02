@@ -1,4 +1,4 @@
-// Usuários da Central, guardados no Cloudflare KV (binding CENTRAL_KV, chave "usuarios:lista").
+// Usuários da Gestão de Desempenho, guardados no Cloudflare KV (binding CENTRAL_KV, chave "usuarios:lista").
 // Geridos PELA TELA de Administração (sem redeploy). Só hash de senha.
 // Formato: { "<usuario>": { hash, admin, criadoEm } }
 // Compatível com CENTRAL_USERS (env, bootstrap opcional): entram como usuários comuns.

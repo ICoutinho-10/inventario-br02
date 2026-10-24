@@ -1,4 +1,4 @@
-// Sessão e senhas da Central (Cloudflare Pages Functions / Workers — Web Crypto).
+// Sessão e senhas da Gestão de Desempenho (Cloudflare Pages Functions / Workers — Web Crypto).
 //
 // Sessão = cookie HttpOnly "central_sessao" = base64url(JSON {u, exp}) + "." + HMAC-SHA256.
 // O porteiro (_middleware.js) e a API conferem a MESMA assinatura.

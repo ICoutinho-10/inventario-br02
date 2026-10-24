@@ -1,4 +1,4 @@
-# Modificações — Central de Análise de Inventário (BR02)
+# Modificações — Gestão de Desempenho de Inventário (BR02)
 
 ## v0.4.0 — 24/10/2026 — Seletor de temas + logo do WS no painel
 - `admin/index.html`: **seletor de tema** (botão com degradê na barra superior) com 5 temas —

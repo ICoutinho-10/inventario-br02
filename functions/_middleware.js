@@ -1,4 +1,4 @@
-// PORTEIRO da Central (Cloudflare Pages middleware — roda antes de tudo). Protege SÓ a
+// PORTEIRO da Gestão de Desempenho (Cloudflare Pages middleware — roda antes de tudo). Protege SÓ a
 // área de ADM e os scripts publicados; o resto (app operacional, login, assets) é público.
 // Sem sessão válida numa página de ADM → manda pro /login.html. Confere a MESMA assinatura
 // HMAC do functions/lib/sessao.js.

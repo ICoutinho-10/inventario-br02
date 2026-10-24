@@ -1,4 +1,4 @@
-// /api/* da Central (Cloudflare Pages Function, catch-all). Login, sessão e administração
+// /api/* da Gestão de Desempenho (Cloudflare Pages Function, catch-all). Login, sessão e administração
 // (usuários). Tudo exige sessão, menos login/logout/setup. Os dados de inventário NÃO
 // passam por aqui: o app (index.html / admin) continua lendo/gravando direto no Apps Script
 // da planilha. Storage de usuários/histórico = Cloudflare KV (binding CENTRAL_KV).
@@ -17,8 +17,8 @@ export const onRequest = async (context) => {
   const rota = (params && params.path ? [].concat(params.path).join("/") : url.pathname.replace(/^\/api\/?/, "")).replace(/\/+$/, "");
   const segredo = env.CENTRAL_SECRET;
   const kv = env.CENTRAL_KV;
-  if (!segredo) return json({ ok: false, message: "Central sem CENTRAL_SECRET configurado." }, 500);
-  if (!kv) return json({ ok: false, message: "Central sem KV (CENTRAL_KV) configurado." }, 500);
+  if (!segredo) return json({ ok: false, message: "Gestão de Desempenho sem CENTRAL_SECRET configurado." }, 500);
+  if (!kv) return json({ ok: false, message: "Gestão de Desempenho sem KV (CENTRAL_KV) configurado." }, 500);
 
   // ---------- login / logout (públicos) ----------
   if (rota === "login" && request.method === "POST") {

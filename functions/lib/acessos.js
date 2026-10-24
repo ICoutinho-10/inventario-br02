@@ -1,4 +1,4 @@
-// Histórico de acessos da Central — visto só pelo administrador na tela de Administração.
+// Histórico de acessos da Gestão de Desempenho — visto só pelo administrador na tela de Administração.
 // Cloudflare KV (binding CENTRAL_KV), 1 chave por usuário: "hist:u:<usuario>" =
 // { total, ultimos: [ISO...] } (guarda os 100 mais recentes). Login = 1 acesso; aberturas
 // a menos de 30 min da anterior contam como o mesmo acesso.

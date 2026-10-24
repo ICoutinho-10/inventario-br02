@@ -1,4 +1,4 @@
-# Central de Análise de Inventário · BR02
+# Gestão de Desempenho de Inventário · BR02
 
 Portal do Warehouse. O **app operacional** (contagem/conferência) é público e lança na
 planilha pela API do Apps Script. A **Administração** (`/admin/`) — dashboard, performance,

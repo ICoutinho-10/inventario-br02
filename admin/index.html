@@ -344,7 +344,7 @@
           <option value="3º turno">3º turno</option>
         </select>
         <button class="btn" id="bAtu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg>Atualizar</button>
-        <button class="btn" id="bReset" title="Resetar SBF e MB52 do turno"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg>Resetar SBF/MB52</button>
+        <button class="btn" id="bReset" title="Atualizar SBF e MB52 do turno"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg>Atualizar SBF/MB52</button>
         <div class="tema" id="tema" role="group" aria-label="Tema de cores">
           <button type="button" class="sw-dot" data-t="azul"  title="Azul-marinho"  aria-label="Azul-marinho"  style="background:linear-gradient(135deg,#38b9ff,#22d3ee)"></button>
           <button type="button" class="sw-dot" data-t="lime"  title="Cyber Lime"    aria-label="Cyber Lime"    style="background:linear-gradient(135deg,#B6FF2E,#10B981)"></button>
@@ -411,10 +411,10 @@
     </section>
   <div class="rmodal" id="resetModal" hidden>
     <div class="rbox">
-      <div class="rhead"><span>Resetar SBF e MB52</span><button type="button" class="rx" id="rClose" aria-label="Fechar">×</button></div>
+      <div class="rhead"><span>Atualizar SBF e MB52</span><button type="button" class="rx" id="rClose" aria-label="Fechar">×</button></div>
       <p class="rsub" id="rSub">Carregando…</p>
       <div id="rTurnos"></div>
-      <p class="rnote">Faça depois de colar a nova SBF e MB52 na planilha. Seg–sex: cada turno precisa do seu reset. Sáb: basta o 1º reset do dia.</p>
+      <p class="rnote">Faça depois de colar a nova SBF e MB52 na planilha. Seg–sex: cada turno precisa da sua atualização. Sáb: basta a 1ª atualização do dia.</p>
     </div>
   </div>
   </main>
@@ -863,12 +863,12 @@
   $('bAtu').addEventListener('click', function () { ULT = ''; carregar(true); });
   // ---- Resetar SBF/MB52 por turno ----
   function resetStatusRender(st) {
-    $('rSub').textContent = 'Dia ' + (st.dia ? st.dia.split('-').reverse().join('/') : '-') + (st.domingo ? ' · domingo (liberado)' : st.sabado ? ' · sábado (basta o 1º reset)' : '') + (st.trava ? '' : ' · trava ainda DESLIGADA (não bloqueia)');
+    $('rSub').textContent = 'Dia ' + (st.dia ? st.dia.split('-').reverse().join('/') : '-') + (st.domingo ? ' · domingo (liberado)' : st.sabado ? ' · sábado (basta a 1ª atualização)' : '') + (st.trava ? '' : ' · trava ainda DESLIGADA (não bloqueia)');
     var turnos = ['1º turno', '2º turno', '3º turno'];
     $('rTurnos').innerHTML = turnos.map(function (t) {
       var r = (st.resets || {})[t];
       var info = r ? ('atualizado ' + r.dataHora + (r.usuario ? ' · ' + esc(r.usuario) : '')) : 'ainda não atualizado hoje';
-      return '<div class="rrow"><div><b>' + t + '</b><small>' + info + '</small></div><button type="button" class="btn rbtn" data-turno="' + t + '">Resetar</button></div>';
+      return '<div class="rrow"><div><b>' + t + '</b><small>' + info + '</small></div><button type="button" class="btn rbtn" data-turno="' + t + '">Atualizar</button></div>';
     }).join('');
     Array.prototype.forEach.call($('rTurnos').querySelectorAll('.rbtn'), function (b) {
       b.addEventListener('click', function () { resetTurno(b.getAttribute('data-turno'), b); });
@@ -885,7 +885,7 @@
     fetch(API, { method: 'POST', body: JSON.stringify({ acao: 'resetar_base', turno: turno, usuario: uEu }) })
       .then(function (r) { return r.json(); })
       .then(function (j) { if (!j.ok) throw new Error(j.erro || 'erro'); resetStatusRender(j.dados); })
-      .catch(function (e) { alert('Falha ao resetar: ' + (e && e.message ? e.message : e)); if (btn) { btn.disabled = false; btn.textContent = 'Resetar'; } });
+      .catch(function (e) { alert('Falha ao atualizar: ' + (e && e.message ? e.message : e)); if (btn) { btn.disabled = false; btn.textContent = 'Atualizar'; } });
   }
   if ($('bReset')) $('bReset').addEventListener('click', function () { $('resetModal').hidden = false; resetStatusLoad(); });
   if ($('rClose')) $('rClose').addEventListener('click', function () { $('resetModal').hidden = true; });

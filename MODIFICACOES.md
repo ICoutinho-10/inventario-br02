@@ -1,5 +1,11 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.8.1 — 25/10/2026 — Perfis: Administrador / Coordenador / Time Inventário
+- Perfis passam a ser **ADMINISTRADOR**, **COORDENADOR** e **TIME INVENTÁRIO** (Time = igual Coordenador:
+  dashboards + reset, sem Usuários/Scripts). "Analista" antigo vira Coordenador (compat em `papelDe`).
+- O **perfil aparece ao lado do nome** ("Olá, Fulano · Administrador"). Seletores de perfil (criar + por
+  usuário) e a tabela de Usuários atualizados. Todos os perfis veem o botão Resetar SBF/MB52.
+
 ## v0.8.0 — 25/10/2026 — Trava SBF/MB52 por turno + botão Resetar (chave DESLIGADA)
 - Backend (Apps Script **V24**): aba **CONTROLE** registra o reset por (dia, turno) com data/hora + usuário.
   Rotas `api=status_turnos` e `api=resetar_base`. `checarTrava_` em salvarContagem/salvarLote bloqueia com

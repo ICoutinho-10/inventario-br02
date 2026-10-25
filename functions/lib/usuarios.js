@@ -34,12 +34,14 @@ export const SENHA_PADRAO = "12345678";
 export const ADMINS_FIXOS = ["ivan.silva"]; // administrador fixo (Ivan)
 export const USUARIO_DE_PC = /^[a-z][a-z0-9]*(\.[a-z0-9]+)+$/;
 
-// Perfis: adm (tudo), analista (dashboards + mensagens; sem Usuários/Scripts),
-// coordenador (só dashboards). Compat: registros antigos só tinham admin:true/false.
-export const PAPEIS = ["adm", "analista", "coordenador"];
+// Perfis: adm = Administrador (tudo), coordenador = Coordenador (dashboards + reset; sem Usuários/Scripts),
+// time = Time Inventário (igual coordenador). Compat: "analista" antigo vira coordenador; registros
+// antigos só tinham admin:true/false.
+export const PAPEIS = ["adm", "coordenador", "time"];
 export function papelDe(usuario, cadastro) {
   if (ADMINS_FIXOS.includes(usuario)) return "adm";
   if (!cadastro) return "coordenador";
+  if (cadastro.papel === "analista") return "coordenador"; // legado
   if (PAPEIS.includes(cadastro.papel)) return cadastro.papel;
   return cadastro.admin ? "adm" : "coordenador";
 }

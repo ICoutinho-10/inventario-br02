@@ -1,5 +1,11 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.8.5 — 25/10/2026 — Quantidades com milhar e decimal
+- Corrigida a leitura de quantidade no lançamento avulso e no Kardex: `10.520`/`10,520` passa a
+  significar `10520`, em vez de `10,52`.
+- Decimais reais de até duas casas continuam permitidos (`1,2` para itens em KG, por exemplo).
+- Formatos ambíguos ou inválidos são bloqueados antes do envio para a planilha.
+
 ## v0.8.4 — 25/10/2026 — Destino de impressão Expedição Auto
 - O botão da ficha Kardex agora identifica explicitamente **Expedição Auto** como destino.
 - Impressora de rede cadastrada no ambiente: `\\10.42.1.253\Expedição_Auto` (`10.42.11.189`).

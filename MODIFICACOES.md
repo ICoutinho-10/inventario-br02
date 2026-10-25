@@ -1,5 +1,12 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.8.2 — 25/10/2026 — Reset sem aba CONTROLE + rastreio na coluna "Atualizado em:" (hist)
+- Backend (Apps Script **V25**): o reset deixou de usar a aba CONTROLE — agora fica em **ScriptProperties**
+  (`resets_turno`, JSON por dia, poda ~120 dias). `status_turnos`/`resetar_base`/`checarTrava_` iguais, só mudou onde guarda.
+- **HISTÓRICO ganhou a coluna "Atualizado em:"** (Ivan criou em R): por linha contada, mostra
+  *data/hora · turno · responsável* do(s) reset(s) do dia daquela linha (achada por nome). Preenche no
+  recálculo do histórico. ⚠️ Mudou o storage → resets antigos (aba CONTROLE) não valem; resetar de novo.
+
 ## v0.8.1 — 25/10/2026 — Perfis: Administrador / Coordenador / Time Inventário
 - Perfis passam a ser **ADMINISTRADOR**, **COORDENADOR** e **TIME INVENTÁRIO** (Time = igual Coordenador:
   dashboards + reset, sem Usuários/Scripts). "Analista" antigo vira Coordenador (compat em `papelDe`).

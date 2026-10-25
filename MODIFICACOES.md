@@ -1,5 +1,12 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.8.4 — 25/10/2026 — Destino de impressão Expedição Auto
+- O botão da ficha Kardex agora identifica explicitamente **Expedição Auto** como destino.
+- Impressora de rede cadastrada no ambiente: `\\10.42.1.253\Expedição_Auto` (`10.42.11.189`).
+- A impressão continua usando a janela nativa do sistema (`window.print()`), compatível com computador e
+  celular. Por segurança, navegadores não permitem ao site selecionar silenciosamente a impressora;
+  no celular ela precisa estar disponível via serviço de impressão da rede (Mopria/AirPrint ou equivalente).
+
 ## v0.8.3 — 25/10/2026 — Nomes multi-seleção + trava ligável no painel + botão "Atualizar"
 - App de contagem: o **Conferente** virou **lista suspensa multi-seleção** (estilo Google Sheets): abre a
   lista de nomes já usados (`api=conferentes`, nomes distintos separando por "/") com ✓, dá pra marcar

@@ -1,5 +1,17 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.8.0 — 25/10/2026 — Trava SBF/MB52 por turno + botão Resetar (chave DESLIGADA)
+- Backend (Apps Script **V24**): aba **CONTROLE** registra o reset por (dia, turno) com data/hora + usuário.
+  Rotas `api=status_turnos` e `api=resetar_base`. `checarTrava_` em salvarContagem/salvarLote bloqueia com
+  **"Aguardando atualização SBF e MB52 pelo time de inventário."** — seg–sex por turno, **sáb** basta o 1º reset,
+  **dom** liberado. ⚠️ **`TRAVA_ATIVA=false`** por enquanto (NÃO bloqueia ainda) — ligar só após validar o reset,
+  senão travaria TODA contagem na hora. O reset também limpa o cache da base (relê a SBF/MB52 recém-coladas).
+- Painel (`admin`): botão **"Resetar SBF/MB52"** (todos os perfis) abre modal com os 3 turnos, última
+  data/hora + quem resetou, e um Resetar por turno. Usa o usuário logado.
+- **Pendente:** ligar `TRAVA_ATIVA`; mostrar a trava/mensagem no app de contagem; perfis
+  ADMINISTRADOR/COORDENADOR/TIME INVENTÁRIO; snapshot SBF/MB52 por turno no histórico; impressora
+  Expedição Auto (ficha Kardex).
+
 ## v0.7.2 — 25/10/2026 — Autocomplete de código na contagem avulsa
 - App: o campo **Código** no avulso ganhou **autocomplete por prefixo** (igual ao endereço):
   digita 1+ número → lista SKUs que começam com aquilo (descrição abaixo); Enter/clique escolhe,

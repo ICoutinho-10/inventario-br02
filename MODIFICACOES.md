@@ -1,5 +1,12 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.7.2 — 25/10/2026 — Autocomplete de código na contagem avulsa
+- App: o campo **Código** no avulso ganhou **autocomplete por prefixo** (igual ao endereço):
+  digita 1+ número → lista SKUs que começam com aquilo (descrição abaixo); Enter/clique escolhe,
+  setas navegam. Não atrapalha o leitor: Enter sem navegar na lista = busca o que foi digitado/bipado.
+- Backend (Apps Script **Versão 23**): nova rota **api=skus** → `listarSkus()` devolve código+descrição
+  **SEM saldo** (mantém a contagem às cegas). O cliente carrega a lista 1× e recarrega quando a base (SBF/MB52) muda.
+
 ## v0.7.1 — 25/10/2026 — Conferente: múltiplos nomes (chips editáveis/removíveis)
 O campo **Conferente** virou **chips**: digite o nome + **Enter** (ou vírgula) pra adicionar; dá pra
 pôr **2+ pessoas**; **clicar no nome edita** (volta pro campo), **× remove**. Vale nos dois modos

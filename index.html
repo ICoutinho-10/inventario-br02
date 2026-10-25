@@ -67,6 +67,7 @@
   .opt.sel { color: var(--red); }
   .opt.sel::after { content: "✓"; font-weight: 800; }
   .opt mark { background: none; color: var(--red); }
+  .opt .cdesc { display: block; color: var(--dim); font-weight: 600; font-size: 12px; margin-top: 1px; }
   .opt.novo { color: var(--warn); font-weight: 600; font-size: 14px; }
   .opts .info { padding: 9px 14px; font-size: 12px; color: var(--dim); }
 
@@ -420,6 +421,7 @@
     <div class="field">
       <svg class="scan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M8 7v10M12 7v10M16 7v10"/></svg>
       <input id="cod" placeholder="Bipe ou digite o código" inputmode="text" autocapitalize="characters">
+      <div class="opts" id="codopts" role="listbox"></div>
     </div>
     <div class="desc" id="desc"></div>
 
@@ -561,6 +563,7 @@
     function post(corpo) { return fetch(API, { method: 'POST', body: JSON.stringify(corpo), redirect: 'follow' }); }
     var ROTAS = {
       listarEnderecos: function () { return get('base'); },
+      listarSkus: function () { return get('skus'); },
       buscarProduto: function (codigo, locacao) { return get('buscar', { codigo: codigo, locacao: locacao }); },
       ultimosLancamentos: function (qtd) { return get('ultimos', { qtd: qtd }); },
       salvarContagem: function (d) { var c = { acao: 'salvar' }; for (var k in d) c[k] = d[k]; return post(c); },
@@ -589,6 +592,7 @@
 </script>
 <script>
   var ENDERECOS = [];
+  var SKUS = [], SKU_IDX = [];
   var BASE_T = '';
   var $ = function (id) { return document.getElementById(id); };
   var estado = { resp: '', loc: '', turno: '', nomes: [] };
@@ -722,11 +726,54 @@
     setTimeout(function () { fecharLista(); $('loc').value = estado.loc; }, 150);
   });
 
-  // ---- código: bipar (Enter do leitor) ou digitar ----
+  // ---- código: autocomplete por prefixo (como o endereço) + bipar/digitar ----
+  var codFiltrados = [], codAtivo = -1;
+  function codNorm(s) { return String(s || '').toUpperCase().replace(/\s+/g, ''); }
+  function codListar() {
+    var termo = codNorm($('cod').value), box = $('codopts');
+    if (termo.length < 1 || !SKU_IDX.length) { box.classList.remove('on'); box.innerHTML = ''; codFiltrados = []; return; }
+    var comeca = [], contem = [];
+    for (var i = 0; i < SKU_IDX.length; i++) {
+      var p = SKU_IDX[i].k.indexOf(termo);
+      if (p === 0) comeca.push(SKU_IDX[i]); else if (p > 0) contem.push(SKU_IDX[i]);
+    }
+    codFiltrados = comeca.concat(contem);
+    if (!codFiltrados.length) { box.classList.remove('on'); box.innerHTML = ''; return; }
+    var frag = document.createDocumentFragment();
+    codFiltrados.slice(0, 80).forEach(function (o, idx) {
+      var d = document.createElement('div');
+      d.className = 'opt' + (idx === codAtivo ? ' ativo' : '');
+      d.setAttribute('role', 'option');
+      var tpos = o.k.indexOf(termo), b = document.createElement('b');
+      if (tpos >= 0) { b.appendChild(document.createTextNode(o.v.slice(0, tpos))); var mk = document.createElement('mark'); mk.textContent = o.v.slice(tpos, tpos + termo.length); b.appendChild(mk); b.appendChild(document.createTextNode(o.v.slice(tpos + termo.length))); } else b.textContent = o.v;
+      var sm = document.createElement('small'); sm.className = 'cdesc'; sm.textContent = o.d || '';
+      d.appendChild(b); d.appendChild(sm);
+      d.addEventListener('mousedown', function (ev) { ev.preventDefault(); });
+      d.addEventListener('click', function () { codEscolher(o.v); });
+      frag.appendChild(d);
+    });
+    box.innerHTML = ''; box.appendChild(frag);
+    if (codFiltrados.length > 80) { var inf = document.createElement('div'); inf.className = 'info'; inf.textContent = 'Mostrando 80 de ' + codFiltrados.length + ' — digite mais números.'; box.appendChild(inf); }
+    box.classList.add('on');
+  }
+  function codMarcar() { var it = $('codopts').querySelectorAll('.opt'); for (var i = 0; i < it.length; i++) it[i].classList.toggle('ativo', i === codAtivo); if (it[codAtivo]) it[codAtivo].scrollIntoView({ block: 'nearest' }); }
+  function codFechar() { $('codopts').classList.remove('on'); codAtivo = -1; }
+  function codEscolher(v) { $('cod').value = v; codFechar(); ultimoBuscado = ''; buscar(); $('qtd').focus(); }
+  $('cod').addEventListener('input', function () { codAtivo = -1; codListar(); });
+  $('cod').addEventListener('blur', function () { setTimeout(function () { codFechar(); buscar(); }, 160); });
   $('cod').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') { e.preventDefault(); buscar(); $('qtd').focus(); }
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      if (!codFiltrados.length) return;
+      e.preventDefault(); $('codopts').classList.add('on');
+      var max = Math.min(codFiltrados.length, 80) - 1;
+      codAtivo = codAtivo < 0 ? 0 : Math.max(0, Math.min(max, codAtivo + (e.key === 'ArrowDown' ? 1 : -1)));
+      codMarcar();
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (codAtivo >= 0 && codFiltrados[codAtivo]) codEscolher(codFiltrados[codAtivo].v);
+      else { codFechar(); buscar(); $('qtd').focus(); }
+    } else if (e.key === 'Escape') { codFechar(); }
   });
-  $('cod').addEventListener('blur', buscar);
   var ultimoBuscado = '';
   function buscar() {
     var c = $('cod').value.trim();
@@ -831,7 +878,7 @@
         $('upd').textContent = 'Atualizado às ' + r.agora;
         $('nHist').textContent = r.total ? '· ' + r.total : '';
         desenharLista(r.itens || []);
-        if (String(r.baseT) !== String(BASE_T)) recarregarEnderecos();
+        if (String(r.baseT) !== String(BASE_T)) { recarregarEnderecos(); recarregarSkus(); }
       })
       .withFailureHandler(function () { $('dot').className = 'dot off'; $('upd').textContent = 'Sem conexão — tentando de novo'; })
       .ultimosLancamentos(15);
@@ -844,6 +891,12 @@
       if ($('opts').classList.contains('on')) listar();
       montarKfl();
     }).listarEnderecos();
+  }
+  function recarregarSkus() {
+    google.script.run.withSuccessHandler(function (r) {
+      SKUS = r.skus || SKUS;
+      SKU_IDX = SKUS.map(function (x) { return { v: String(x[0]), d: String(x[1] || ''), k: String(x[0]).toUpperCase() }; });
+    }).listarSkus();
   }
   function desenharLista(itens) {
     var ul = $('hist');
@@ -1202,6 +1255,7 @@
 
   pintarSeg();
   recarregarEnderecos();
+  recarregarSkus();
   atualizarLista();
   setInterval(function () { if (!document.hidden) atualizarLista(); }, 20000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) atualizarLista(); });

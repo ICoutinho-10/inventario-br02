@@ -43,6 +43,8 @@
   .box input { height: 34px; padding: 0; border: 0; border-radius: 0; box-shadow: none; font-size: 17px; background: transparent; }
   .box input:focus { box-shadow: none; }
   .box input::placeholder { font-size: 14px; }
+  .box select { width: 100%; height: 34px; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; font-size: 17px; font-weight: 600; color: inherit; cursor: pointer; }
+  .box select:focus { outline: none; box-shadow: none; }
   .box .seta { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--dim); pointer-events: none; }
   .box .in { position: relative; }
   .box .in input { padding-right: 22px; }
@@ -129,8 +131,8 @@
            border-radius: 16px; padding: 14px 16px; margin-bottom: 18px; }
   .ktool .kf { flex: 1 1 220px; min-width: 200px; }
   .ktool label.kl { display: block; font-size: 11px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; color: #A6B0E8; margin: 0 0 6px; }
-  .ktool input.ki { height: 42px; font-size: 16px; background: rgba(10,12,40,.6); color: #EEF1FF; border: 1.5px solid rgba(120,130,240,.35); border-radius: 10px; }
-  .ktool input.ki:focus { border-color: #22D3EE; box-shadow: 0 0 0 3px rgba(34,211,238,.18); }
+  .ktool input.ki, .ktool select.ki { height: 42px; font-size: 16px; background: rgba(10,12,40,.6); color: #EEF1FF; border: 1.5px solid rgba(120,130,240,.35); border-radius: 10px; }
+  .ktool input.ki:focus, .ktool select.ki:focus { border-color: #22D3EE; box-shadow: 0 0 0 3px rgba(34,211,238,.18); }
   .kseg { display: flex; background: rgba(10,12,40,.6); border: 1px solid rgba(120,130,240,.35); border-radius: 10px; padding: 3px; gap: 3px; min-width: 230px; }
   .kseg button { flex: 1; height: 34px; border: 0; border-radius: 8px; background: transparent; color: #A6B0E8; font-family: var(--font); font-weight: 800; font-size: 13px; cursor: pointer; padding: 0 12px; }
   .kseg button.on { background: #EEF1FF; color: #111827; }
@@ -352,8 +354,8 @@
   /* ===== Barra de filtros em modo claro ===== */
   .ktool { background: #fff; border: 1px solid #E6E8F0; box-shadow: 0 10px 30px rgba(0,0,0,.25); color: var(--ink); }
   .ktool label.kl { color: #64748B; }
-  .ktool input.ki { background: #F8F9FC; color: #0F172A; border: 1.5px solid #D5D9E5; }
-  .ktool input.ki:focus { border-color: #10B981; box-shadow: 0 0 0 4px rgba(16,185,129,.15); background: #fff; }
+  .ktool input.ki, .ktool select.ki { background: #F8F9FC; color: #0F172A; border: 1.5px solid #D5D9E5; }
+  .ktool input.ki:focus, .ktool select.ki:focus { border-color: #10B981; box-shadow: 0 0 0 4px rgba(16,185,129,.15); background: #fff; }
   .ktool .sw { background: #F8F9FC; border: 1.5px dashed #D5D9E5; color: var(--ink); }
   .ktool .sw .tx small { color: #64748B; }
   .ktool .sw.on { border: 1.5px solid #F59E0B; background: #FFFBEB; }
@@ -383,6 +385,17 @@
       <span class="k"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Conferente</span>
       <input id="resp" placeholder="Seu nome" autocomplete="off">
     </label>
+    <label class="box" for="turno">
+      <span class="k"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Turno</span>
+      <select id="turno">
+        <option value="">—</option>
+        <option value="1º turno">1º turno</option>
+        <option value="2º turno">2º turno</option>
+        <option value="3º turno">3º turno</option>
+      </select>
+    </label>
+  </div>
+  <div class="sess">
     <label class="box" for="loc">
       <span class="k"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 5-8 12-8 12s-8-7-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>Endereço</span>
       <span class="in">
@@ -425,6 +438,15 @@
     <div class="fr">
       <label class="kl" for="fresp">Conferente</label>
       <input class="ki" id="fresp" placeholder="Seu nome" autocomplete="off">
+    </div>
+    <div class="fr">
+      <label class="kl" for="fturno">Turno</label>
+      <select class="ki" id="fturno">
+        <option value="">—</option>
+        <option value="1º turno">1º turno</option>
+        <option value="2º turno">2º turno</option>
+        <option value="3º turno">3º turno</option>
+      </select>
     </div>
     <div class="kf">
       <label class="kl" for="ff">Endereço</label>
@@ -559,7 +581,7 @@
   var ENDERECOS = [];
   var BASE_T = '';
   var $ = function (id) { return document.getElementById(id); };
-  var estado = { resp: '', loc: '' };
+  var estado = { resp: '', loc: '', turno: '' };
 
   // ---- memória do aparelho (mantém último conferente e endereço) ----
   function ler(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
@@ -567,8 +589,11 @@
   function limpa(v) { return String(v || '').trim().toUpperCase().replace(/\s+/g, ' '); }
   estado.resp = ler('inv_resp');
   estado.loc = ler('inv_loc');
+  estado.turno = ler('inv_turno') || '';
   $('resp').value = estado.resp;
   $('loc').value = estado.loc;
+  if ($('turno')) $('turno').value = estado.turno;
+  if ($('fturno')) $('fturno').value = estado.turno;
   $('seg').checked = ler('inv_seg') === '1';
   function pintarSeg() { $('sw').classList.toggle('on', $('seg').checked); $('btnTx').textContent = $('seg').checked ? 'Lançar 2ª contagem' : 'Lançar contagem'; }
   $('seg').addEventListener('change', function () { gravar('inv_seg', this.checked ? '1' : ''); pintarSeg(); $('cod').focus(); });
@@ -577,6 +602,9 @@
   function salvarResp() { estado.resp = limpa($('resp').value); $('resp').value = estado.resp; gravar('inv_resp', estado.resp); }
   $('resp').addEventListener('change', salvarResp);
   $('resp').addEventListener('blur', salvarResp);
+  function salvarTurno(v) { estado.turno = v || ''; gravar('inv_turno', estado.turno); if ($('turno')) $('turno').value = estado.turno; if ($('fturno')) $('fturno').value = estado.turno; }
+  if ($('turno')) $('turno').addEventListener('change', function () { salvarTurno($('turno').value); });
+  if ($('fturno')) $('fturno').addEventListener('change', function () { salvarTurno($('fturno').value); });
   $('resp').addEventListener('keydown', function (e) {
     if (e.key === 'Enter') { e.preventDefault(); salvarResp(); (estado.loc ? $('cod') : $('loc')).focus(); }
   });
@@ -704,7 +732,7 @@
     if (!cod) { mostrar('err', 'Bipe ou digite o código do material.'); $('cod').focus(); return; }
     if (!/^\d+([.,]\d+)?$/.test(qtd)) { mostrar('err', 'Informe a quantidade encontrada.'); $('qtd').focus(); return; }
 
-    var dados = { responsavel: estado.resp, locacao: estado.loc, codigo: cod, quantidade: qtd, segunda: $('seg').checked, origem: 'Avulsa' };
+    var dados = { responsavel: estado.resp, locacao: estado.loc, codigo: cod, quantidade: qtd, segunda: $('seg').checked, origem: 'Avulsa', turno: estado.turno };
     $('btn').disabled = true; $('btnTx').textContent = 'Conferindo…';
     jaLidoAntes([{ locacao: dados.locacao, codigo: cod }], dados.segunda, function (subst) {
       if (subst === null) { mostrar('warn', 'Lançamento cancelado.'); pronto(); return; }
@@ -1098,7 +1126,7 @@
         if (/inválida/i.test(m)) { proximo(); return; }   // planilha ainda sem o lançamento em lote: envia um por um
         pend.forEach(function (it) { it.estado = 'erro'; it.erro = m; }); erros = pend.length; idx = pend.length; proximo();
       })
-      .salvarLote({ responsavel: estado.resp, segunda: $('fseg').checked, substituir: !!subst, origem: 'Kardex', itens: pend.map(function (it) { return { locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)) }; }) });
+      .salvarLote({ responsavel: estado.resp, segunda: $('fseg').checked, substituir: !!subst, origem: 'Kardex', turno: estado.turno, itens: pend.map(function (it) { return { locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)) }; }) });
     function proximo() {
       if (idx >= pend.length) {
         fRodando = false; atualizarLista();
@@ -1111,7 +1139,7 @@
       google.script.run
         .withSuccessHandler(function () { it.estado = 'feito'; feitos++; fDesenhar(); proximo(); })
         .withFailureHandler(function (e) { it.estado = 'erro'; it.erro = e && e.message ? e.message : String(e); erros++; fDesenhar(); proximo(); })
-        .salvarContagem({ responsavel: estado.resp, locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)), segunda: $('fseg').checked, substituir: !!subst });
+        .salvarContagem({ responsavel: estado.resp, locacao: it.local, codigo: it.sku, quantidade: String(fNum(it.fis)), segunda: $('fseg').checked, substituir: !!subst, origem: 'Kardex', turno: estado.turno });
     }
   }
 
@@ -1129,7 +1157,7 @@
     document.body.classList.toggle('v-f', v === 'f');
     Array.prototype.forEach.call(document.querySelectorAll('.side button[data-v]'), function (x) { x.classList.toggle('on', x.getAttribute('data-v') === v); });
     try { localStorage.setItem('inv_aba', v); } catch (e) {}
-    if (v === 'f') { $('fresp').value = estado.resp || ''; fCab(); }
+    if (v === 'f') { $('fresp').value = estado.resp || ''; if ($('fturno')) $('fturno').value = estado.turno || ''; fCab(); }
     if (v === 'k' && !$('kconf').value && estado.resp) $('kconf').value = estado.resp.charAt(0) + estado.resp.slice(1).toLowerCase();
     if (v === 'k') { if (!$('kf').value && estado.loc) { $('kf').value = estado.loc; visualizar(); } ajustarZoom(); }
   }

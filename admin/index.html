@@ -326,6 +326,12 @@
           </div>
         </div>
         <button type="button" class="btn" id="calLimpar" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>Limpar filtro</button>
+        <select class="btn" id="fTurno" title="Filtrar por turno" aria-label="Filtrar por turno">
+          <option value="">Todos os turnos</option>
+          <option value="1º turno">1º turno</option>
+          <option value="2º turno">2º turno</option>
+          <option value="3º turno">3º turno</option>
+        </select>
         <button class="btn" id="bAtu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg>Atualizar</button>
         <div class="tema" id="tema" role="group" aria-label="Tema de cores">
           <button type="button" class="sw-dot" data-t="azul"  title="Azul-marinho"  aria-label="Azul-marinho"  style="background:linear-gradient(135deg,#38b9ff,#22d3ee)"></button>
@@ -428,11 +434,12 @@
       var u = parseD(r[11]);
       return { prod: String(r[0]), desc: r[1], arm: r[2], end: String(r[3]), saldo: num(r[4]), cont: num(r[5]), dif: num(r[6]), lancar: num(r[7]),
                mov: String(r[8] || ''), n: num(r[9]), resp: String(r[10] || ''), ult: u, dia: u ? diaKey(u) : '', obs: r[12] || '',
-               mb52: r[13] === '' ? null : num(r[13]), consol: num(r[14]), pct: typeof r[15] === 'number' ? r[15] : null, custo: num((d.custo || {})[r[0]]) };
+               mb52: r[13] === '' ? null : num(r[13]), consol: num(r[14]), pct: typeof r[15] === 'number' ? r[15] : null, custo: num((d.custo || {})[r[0]]),
+               origem: String(r[17] || ''), turno: String(r[18] || '') };
     });
     d.L = d.lanc.filter(function (r) { return !/ANULAD|CANCEL/i.test(r[5]); }).map(function (r) {
       var t = parseD(r[0]); var td = t ? diaTurno(t) : null;
-      return { t: t, dia: td ? diaKey(td) : '', sku: r[1], end: r[2], q: num(r[3]), conf: r[4] || '(sem nome)', st: r[5], seg: /2/.test(r[5]), origem: r[6] || '' };
+      return { t: t, dia: td ? diaKey(td) : '', sku: r[1], end: r[2], q: num(r[3]), conf: r[4] || '(sem nome)', st: r[5], seg: /2/.test(r[5]), origem: r[6] || '', turno: r[7] || '' };
     });
     var dias = {};
     d.H.forEach(function (h) { if (h.dia) dias[h.dia] = 1; });
@@ -442,7 +449,12 @@
   }
   function filtrados() {
     var dia = $('fDia').value;
-    return { dia: dia, H: D.H.filter(function (h) { return !dia || h.dia === dia; }), L: D.L.filter(function (l) { return !dia || l.dia === dia; }) };
+    var tn = $('fTurno') ? $('fTurno').value : '';
+    return {
+      dia: dia, turno: tn,
+      H: D.H.filter(function (h) { return (!dia || h.dia === dia) && (!tn || (h.turno && h.turno.indexOf(tn) >= 0)); }),
+      L: D.L.filter(function (l) { return (!dia || l.dia === dia) && (!tn || l.turno === tn); })
+    };
   }
 
   function carregar(manual) {
@@ -472,7 +484,7 @@
     var F = filtrados();
     var titulo = { dash: ['Visão geral', 'Dashboard'], perf: ['Pessoas', 'Performance de contagem'], hist: ['Registro', 'Histórico'], kdx: ['Posições', 'Contagem Kardex'] }[VIEW];
     $('eb').textContent = titulo[0]; $('tit').textContent = titulo[1];
-    $('sub').textContent = (F.dia ? 'Turno de ' + diaBR(F.dia) + ' (06:00 até 05:59 do dia seguinte)' : 'Todos os dias de contagem') + ' · ' + n0(F.H.length) + ' posições · ' + n0(F.L.length) + ' lançamentos';
+    $('sub').textContent = (F.dia ? 'Turno de ' + diaBR(F.dia) + ' (06:00 até 05:59 do dia seguinte)' : 'Todos os dias de contagem') + (F.turno ? ' · ' + F.turno : '') + ' · ' + n0(F.H.length) + ' posições · ' + n0(F.L.length) + ' lançamentos';
     $('ctHist').textContent = n0(F.H.length);
     $('ctKdx').textContent = n0(uniq(F.H.map(function (h) { return h.end; })).length);
     $('ctPerf').textContent = n0(uniq(F.L.map(function (l) { return l.conf; })).length);
@@ -826,6 +838,7 @@
   }
   Array.prototype.forEach.call(document.querySelectorAll('#nav button'), function (b) { b.addEventListener('click', function () { abrir(b.getAttribute('data-v')); }); });
   $('fDia').addEventListener('change', function () { hEst.pag = 0; kMax = 40; desenhar(); });
+  if ($('fTurno')) $('fTurno').addEventListener('change', function () { var cl = $('calLimpar'); if (cl) cl.hidden = !$('fDia').value && !$('fTurno').value; hEst.pag = 0; kMax = 40; desenhar(); });
   $('bAtu').addEventListener('click', function () { ULT = ''; carregar(true); });
   try { var v0 = localStorage.getItem('adm_view'); if (v0 && $('v-' + v0)) abrir(v0); } catch (e) {}
   carregar();
@@ -976,7 +989,7 @@
     function aplicaDia(key, label) {
       $('fDia').value = key || '';
       tx.textContent = label;
-      limpar.hidden = !key;
+      limpar.hidden = !key && !($('fTurno') && $('fTurno').value);
       try { hEst.pag = 0; } catch (e) {}
       try { kMax = 40; } catch (e) {}
       try { if (typeof desenhar === 'function' && D) desenhar(); } catch (e) {}
@@ -997,7 +1010,7 @@
       aplicaDia(key, k2(sel.getDate()) + '/' + k2(sel.getMonth() + 1) + '/' + sel.getFullYear());
       fecha();
     });
-    limpar.addEventListener('click', function () { sel = null; render(); aplicaDia('', 'Todos os dias'); });
+    limpar.addEventListener('click', function () { sel = null; if ($('fTurno')) $('fTurno').value = ''; render(); aplicaDia('', 'Todos os dias'); });
   })();
 </script>
 </body>

@@ -1,5 +1,24 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.7.0 — 25/10/2026 — Origem + Turno (ponta a ponta: contagem → planilha → Gestão)
+Captura a **Origem** (Kardex/Avulsa) e o **Turno** (1º/2º/3º) de cada contagem, grava na planilha
+e deixa a Gestão filtrar por turno (para KPIs).
+
+- **Nomes das colunas (achadas por nome, posição não importa):** na aba **Lançamentos** o Ivan
+  criou `Origem do Lançamento` (G) e `Turno` (I); na aba **HISTÓRICO**, `Origem da contagem` (E)
+  e `Turno` (N). São nomes **diferentes** p/ origem em cada aba — é de propósito, cada CAB casa com a sua.
+- **Apps Script (Versão 22, mesma URL `/exec`):** `CAB_LANC` += `Origem do Lançamento`,`Turno`;
+  `CAB_HIST` += `Origem da contagem`,`Turno`. `salvarContagem` (default Avulsa) e `salvarLote`
+  (default Kardex) gravam origem+turno. O `atualizarHistorico_` agrega origem/turno por posição
+  (lista distinta) e o `dadosAdmin` devolve origem+turno por lançamento. Editado direto no editor
+  (Monaco) e republicado. Validado: `api=admin` → `ok:true`, HISTÓRICO com 19 colunas.
+- **App de contagem (`index.html`):** seletor de **Turno** ao lado do Conferente nos dois modos
+  (avulsa e Kardex), salvo em `localStorage` (`inv_turno`) e enviado em cada lançamento. Corrigido
+  o fallback do Kardex que salvava sem `origem` (agora manda `origem:'Kardex'` + turno).
+- **Gestão (`admin/index.html`):** filtro **Turno** (3 turnos) na barra, aplicado a H e L;
+  "Limpar filtro" zera o turno; parse de origem/turno em H e L.
+- Nota: lançamentos antigos ficam com origem/turno vazios (normal); passam a preencher a partir de agora.
+
 ## v0.6.0 — 24/10/2026 — Perfis (ADM/Analista/Coordenador) + botão de tema moderno
 - **Perfis com senha** no gestão: **ADM** (tudo), **Analista** (dashboards + mensagens, sem Usuários/Scripts),
   **Coordenador** (só dashboards). Campo `papel` no KV (compat: `admin:true`→adm, resto→coordenador); admin

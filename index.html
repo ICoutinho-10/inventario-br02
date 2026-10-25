@@ -45,6 +45,14 @@
   .box input::placeholder { font-size: 14px; }
   .box select { width: 100%; height: 34px; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: transparent; font-size: 17px; font-weight: 600; color: inherit; cursor: pointer; }
   .box select:focus { outline: none; box-shadow: none; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+  .chips:empty { display: none; }
+  .chip { display: inline-flex; align-items: center; gap: 2px; border-radius: 999px; padding: 3px 5px 3px 10px; font-size: 13px; font-weight: 800; background: #EEF2FF; color: #3730A3; }
+  .chip .nm { cursor: pointer; }
+  .chip .x { border: 0; background: transparent; color: inherit; font-size: 15px; line-height: 1; cursor: pointer; padding: 0 3px; opacity: .55; }
+  .chip .x:hover { opacity: 1; }
+  .ktool .chips { margin: 0 0 6px; }
+  .ktool .chip { background: rgba(120,130,240,.25); color: #E3E8FF; }
   .box .seta { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--dim); pointer-events: none; }
   .box .in { position: relative; }
   .box .in input { padding-right: 22px; }
@@ -381,10 +389,11 @@
 
 <form class="wrap" id="f" autocomplete="off">
   <div class="sess">
-    <label class="box" for="resp">
+    <div class="box nmbox">
       <span class="k"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Conferente</span>
-      <input id="resp" placeholder="Seu nome" autocomplete="off">
-    </label>
+      <div class="chips" id="names"></div>
+      <input id="resp" placeholder="Nome + Enter (pode 2+)" autocomplete="off">
+    </div>
     <label class="box" for="turno">
       <span class="k"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Turno</span>
       <select id="turno">
@@ -437,7 +446,8 @@
   <div class="ktool">
     <div class="fr">
       <label class="kl" for="fresp">Conferente</label>
-      <input class="ki" id="fresp" placeholder="Seu nome" autocomplete="off">
+      <div class="chips" id="fnames"></div>
+      <input class="ki" id="fresp" placeholder="Nome + Enter (pode 2+)" autocomplete="off">
     </div>
     <div class="fr">
       <label class="kl" for="fturno">Turno</label>
@@ -581,7 +591,7 @@
   var ENDERECOS = [];
   var BASE_T = '';
   var $ = function (id) { return document.getElementById(id); };
-  var estado = { resp: '', loc: '', turno: '' };
+  var estado = { resp: '', loc: '', turno: '', nomes: [] };
 
   // ---- memória do aparelho (mantém último conferente e endereço) ----
   function ler(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } }
@@ -590,7 +600,8 @@
   estado.resp = ler('inv_resp');
   estado.loc = ler('inv_loc');
   estado.turno = ler('inv_turno') || '';
-  $('resp').value = estado.resp;
+  estado.nomes = estado.resp ? estado.resp.split(' / ').map(function (s) { return s.trim(); }).filter(Boolean) : [];
+  renderNomes();
   $('loc').value = estado.loc;
   if ($('turno')) $('turno').value = estado.turno;
   if ($('fturno')) $('fturno').value = estado.turno;
@@ -598,15 +609,32 @@
   function pintarSeg() { $('sw').classList.toggle('on', $('seg').checked); $('btnTx').textContent = $('seg').checked ? 'Lançar 2ª contagem' : 'Lançar contagem'; }
   $('seg').addEventListener('change', function () { gravar('inv_seg', this.checked ? '1' : ''); pintarSeg(); $('cod').focus(); });
 
-  // ---- conferente: campo direto ----
-  function salvarResp() { estado.resp = limpa($('resp').value); $('resp').value = estado.resp; gravar('inv_resp', estado.resp); }
+  // ---- conferente: nomes (chips, 1+ pessoas, editável/removível) ----
+  function syncNomes() { estado.resp = estado.nomes.join(' / '); gravar('inv_resp', estado.resp); renderNomes(); }
+  function addNome(v) { v = limpa(v); if (!v) return; if (estado.nomes.indexOf(v) < 0) estado.nomes.push(v); syncNomes(); }
+  function commitNome(inp) { if (!inp) return; addNome(inp.value); inp.value = ''; }
+  function renderNomes() {
+    [['names', 'resp'], ['fnames', 'fresp']].forEach(function (p) {
+      var box = $(p[0]); if (!box) return;
+      box.innerHTML = estado.nomes.map(function (n, i) {
+        return '<span class="chip"><span class="nm" data-i="' + i + '" title="Editar">' + esc(n) + '</span><button type="button" class="x" data-i="' + i + '" aria-label="Remover">×</button></span>';
+      }).join('');
+      Array.prototype.forEach.call(box.querySelectorAll('.x'), function (b) {
+        b.addEventListener('click', function () { estado.nomes.splice(+b.getAttribute('data-i'), 1); syncNomes(); });
+      });
+      Array.prototype.forEach.call(box.querySelectorAll('.nm'), function (s) {
+        s.addEventListener('click', function () { var i = +s.getAttribute('data-i'), n = estado.nomes[i]; estado.nomes.splice(i, 1); syncNomes(); var inp = $(p[1]); if (inp) { inp.value = n; inp.focus(); } });
+      });
+    });
+  }
+  function salvarResp() { commitNome($('resp')); }
   $('resp').addEventListener('change', salvarResp);
   $('resp').addEventListener('blur', salvarResp);
   function salvarTurno(v) { estado.turno = v || ''; gravar('inv_turno', estado.turno); if ($('turno')) $('turno').value = estado.turno; if ($('fturno')) $('fturno').value = estado.turno; }
   if ($('turno')) $('turno').addEventListener('change', function () { salvarTurno($('turno').value); });
   if ($('fturno')) $('fturno').addEventListener('change', function () { salvarTurno($('fturno').value); });
   $('resp').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter') { e.preventDefault(); salvarResp(); (estado.loc ? $('cod') : $('loc')).focus(); }
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commitNome($('resp')); if (estado.resp) (estado.loc ? $('cod') : $('loc')).focus(); }
   });
 
   // ---- endereço: caixa de seleção com pesquisa ----
@@ -1075,9 +1103,11 @@
   }
   $('ff').addEventListener('input', function () { clearTimeout(fTimer); fTimer = setTimeout(fCarregar, 600); });
   $('ff').addEventListener('keydown', function (e) { if (e.key === 'Enter') { clearTimeout(fTimer); fCarregar(); } });
-  $('fresp').value = estado.resp || '';
+  $('fresp').value = '';
   fHistDesenhar();
-  $('fresp').addEventListener('change', function () { estado.resp = limpa($('fresp').value); $('fresp').value = estado.resp; gravar('inv_resp', estado.resp); $('resp').value = estado.resp; fCab(); });
+  $('fresp').addEventListener('change', function () { commitNome($('fresp')); fCab(); });
+  $('fresp').addEventListener('blur', function () { commitNome($('fresp')); fCab(); });
+  $('fresp').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commitNome($('fresp')); fCab(); } });
   $('fseg').addEventListener('change', function () { $('fsw').classList.toggle('on', $('fseg').checked); });
   $('fadd').addEventListener('click', function () {
     var f = $('ff').value.trim().toUpperCase();
@@ -1101,6 +1131,7 @@
   }
   $('fgo').addEventListener('click', function () {
     if (fRodando) return;
+    commitNome($('fresp'));
     if (!estado.resp) { fMsg('Informe o conferente.', true); $('fresp').focus(); return; }
     var pend = fItens.filter(function (it) { return it.estado !== 'feito'; });
     for (var i = 0; i < pend.length; i++) {
@@ -1157,7 +1188,7 @@
     document.body.classList.toggle('v-f', v === 'f');
     Array.prototype.forEach.call(document.querySelectorAll('.side button[data-v]'), function (x) { x.classList.toggle('on', x.getAttribute('data-v') === v); });
     try { localStorage.setItem('inv_aba', v); } catch (e) {}
-    if (v === 'f') { $('fresp').value = estado.resp || ''; if ($('fturno')) $('fturno').value = estado.turno || ''; fCab(); }
+    if (v === 'f') { $('fresp').value = ''; if ($('fturno')) $('fturno').value = estado.turno || ''; renderNomes(); fCab(); }
     if (v === 'k' && !$('kconf').value && estado.resp) $('kconf').value = estado.resp.charAt(0) + estado.resp.slice(1).toLowerCase();
     if (v === 'k') { if (!$('kf').value && estado.loc) { $('kf').value = estado.loc; visualizar(); } ajustarZoom(); }
   }

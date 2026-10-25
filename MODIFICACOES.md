@@ -1,5 +1,13 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.7.1 — 25/10/2026 — Conferente: múltiplos nomes (chips editáveis/removíveis)
+O campo **Conferente** virou **chips**: digite o nome + **Enter** (ou vírgula) pra adicionar; dá pra
+pôr **2+ pessoas**; **clicar no nome edita** (volta pro campo), **× remove**. Vale nos dois modos
+(avulsa e Kardex), **sincronizado**, e mantém o Turno. O `responsavel` enviado é a junção por `" / "`
+(mesmo formato já usado na planilha, ex. `WEVERTON / VICTOR`). `estado.resp`/`inv_resp` continuam
+string unida (compatível com todo o resto do código). Fecha o pedido "nome acrescentável/editável/
+excluir + `+` pra 2 pessoas".
+
 ## v0.7.0 — 25/10/2026 — Origem + Turno (ponta a ponta: contagem → planilha → Gestão)
 Captura a **Origem** (Kardex/Avulsa) e o **Turno** (1º/2º/3º) de cada contagem, grava na planilha
 e deixa a Gestão filtrar por turno (para KPIs).

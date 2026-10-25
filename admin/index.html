@@ -413,6 +413,7 @@
     <div class="rbox">
       <div class="rhead"><span>Atualizar SBF e MB52</span><button type="button" class="rx" id="rClose" aria-label="Fechar">×</button></div>
       <p class="rsub" id="rSub">Carregando…</p>
+      <div id="rTrava" style="margin:2px 0 10px"></div>
       <div id="rTurnos"></div>
       <p class="rnote">Faça depois de colar a nova SBF e MB52 na planilha. Seg–sex: cada turno precisa da sua atualização. Sáb: basta a 1ª atualização do dia.</p>
     </div>
@@ -864,6 +865,13 @@
   // ---- Resetar SBF/MB52 por turno ----
   function resetStatusRender(st) {
     $('rSub').textContent = 'Dia ' + (st.dia ? st.dia.split('-').reverse().join('/') : '-') + (st.domingo ? ' · domingo (liberado)' : st.sabado ? ' · sábado (basta a 1ª atualização)' : '') + (st.trava ? '' : ' · trava ainda DESLIGADA (não bloqueia)');
+    var rt = $('rTrava');
+    if (rt) {
+      if (uPapel === 'adm') {
+        rt.innerHTML = '<label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--tx);cursor:pointer;padding:9px 0;border-top:1px solid var(--borda)"><input type="checkbox" id="rTravaChk"' + (st.trava ? ' checked' : '') + '> <span>Bloquear contagem enquanto o turno não for atualizado <b>(' + (st.trava ? 'LIGADO' : 'desligado') + ')</b></span></label>';
+        var chk = $('rTravaChk'); if (chk) chk.addEventListener('change', function () { setTravaAtiva(chk.checked, chk); });
+      } else rt.innerHTML = '';
+    }
     var turnos = ['1º turno', '2º turno', '3º turno'];
     $('rTurnos').innerHTML = turnos.map(function (t) {
       var r = (st.resets || {})[t];
@@ -886,6 +894,14 @@
       .then(function (r) { return r.json(); })
       .then(function (j) { if (!j.ok) throw new Error(j.erro || 'erro'); resetStatusRender(j.dados); })
       .catch(function (e) { alert('Falha ao atualizar: ' + (e && e.message ? e.message : e)); if (btn) { btn.disabled = false; btn.textContent = 'Atualizar'; } });
+  }
+  function setTravaAtiva(on, chk) {
+    if (chk) chk.disabled = true;
+    fetch(API, { method: 'POST', body: JSON.stringify({ acao: 'trava', ligar: on, usuario: uEu }) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { if (!j.ok) throw new Error(j.erro || 'erro'); resetStatusRender(j.dados); })
+      .catch(function (e) { alert('Falha: ' + (e && e.message ? e.message : e)); })
+      .finally(function () { if (chk) chk.disabled = false; });
   }
   if ($('bReset')) $('bReset').addEventListener('click', function () { $('resetModal').hidden = false; resetStatusLoad(); });
   if ($('rClose')) $('rClose').addEventListener('click', function () { $('resetModal').hidden = true; });

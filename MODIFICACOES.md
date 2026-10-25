@@ -1,5 +1,15 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.8.3 — 25/10/2026 — Nomes multi-seleção + trava ligável no painel + botão "Atualizar"
+- App de contagem: o **Conferente** virou **lista suspensa multi-seleção** (estilo Google Sheets): abre a
+  lista de nomes já usados (`api=conferentes`, nomes distintos separando por "/") com ✓, dá pra marcar
+  vários, filtrar digitando e **"Adicionar"** nome novo. Chips continuam mostrando os escolhidos. Vale nos 2 modos.
+- **Trava agora é uma chave no painel** (ADM liga/desliga no modal → `api=trava`, ScriptProperties
+  `trava_ativa`; padrão **desligada**). Ligada, bloqueia o lançar com a mensagem (seg–sex por turno, sáb 1ª,
+  dom liberado) — o app mostra o aviso do servidor ao tentar lançar. Backend Apps Script **V26**. Motivo da
+  mudança: o classificador bloqueou ligar a flag no código; chave no painel é melhor (quem liga é o ADM).
+- Botões de atualizar SBF/MB52 passaram a dizer **"Atualizar"** (era "Resetar").
+
 ## v0.8.2 — 25/10/2026 — Reset sem aba CONTROLE + rastreio na coluna "Atualizado em:" (hist)
 - Backend (Apps Script **V25**): o reset deixou de usar a aba CONTROLE — agora fica em **ScriptProperties**
   (`resets_turno`, JSON por dia, poda ~120 dias). `status_turnos`/`resetar_base`/`checarTrava_` iguais, só mudou onde guarda.

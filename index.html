@@ -53,6 +53,20 @@
   .chip .x:hover { opacity: 1; }
   .ktool .chips { margin: 0 0 6px; }
   .ktool .chip { background: rgba(120,130,240,.25); color: #E3E8FF; }
+  .nmbox { position: relative; }
+  .ktool .fr { position: relative; }
+  .nmdd { display: none; position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 40; max-height: 46vh; overflow-y: auto; background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 14px 34px rgba(15,23,42,.16); }
+  .nmdd.on { display: block; }
+  .nmdd .o { display: flex; align-items: center; gap: 9px; padding: 11px 13px; font-weight: 700; font-size: 15px; cursor: pointer; border-bottom: 1px solid var(--line); color: inherit; }
+  .nmdd .o:last-child { border-bottom: 0; }
+  .nmdd .o .ck { width: 19px; height: 19px; border: 2px solid var(--dim); border-radius: 6px; flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 12px; line-height: 1; }
+  .nmdd .o.sel .ck { background: var(--indigo); border-color: var(--indigo); }
+  .nmdd .o.add { color: var(--indigo); }
+  .ktool .nmdd { background: #0e1330; border-color: rgba(120,130,240,.4); }
+  .ktool .nmdd .o { color: #EEF1FF; border-color: rgba(120,130,240,.18); }
+  .ktool .nmdd .o .ck { border-color: rgba(200,205,255,.5); }
+  .ktool .nmdd .o.sel .ck { background: #22D3EE; border-color: #22D3EE; color: #06283b; }
+  .ktool .nmdd .o.add { color: #7CF3FF; }
   .box .seta { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--dim); pointer-events: none; }
   .box .in { position: relative; }
   .box .in input { padding-right: 22px; }
@@ -393,7 +407,8 @@
     <div class="box nmbox">
       <span class="k"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>Conferente</span>
       <div class="chips" id="names"></div>
-      <input id="resp" placeholder="Nome + Enter (pode 2+)" autocomplete="off">
+      <input id="resp" placeholder="Toque para escolher ou digite" autocomplete="off">
+      <div class="nmdd" id="namesdd"></div>
     </div>
     <label class="box" for="turno">
       <span class="k"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Turno</span>
@@ -449,7 +464,8 @@
     <div class="fr">
       <label class="kl" for="fresp">Conferente</label>
       <div class="chips" id="fnames"></div>
-      <input class="ki" id="fresp" placeholder="Nome + Enter (pode 2+)" autocomplete="off">
+      <input class="ki" id="fresp" placeholder="Toque para escolher ou digite" autocomplete="off">
+      <div class="nmdd" id="fnamesdd"></div>
     </div>
     <div class="fr">
       <label class="kl" for="fturno">Turno</label>
@@ -564,6 +580,7 @@
     var ROTAS = {
       listarEnderecos: function () { return get('base'); },
       listarSkus: function () { return get('skus'); },
+      listarConferentes: function () { return get('conferentes'); },
       buscarProduto: function (codigo, locacao) { return get('buscar', { codigo: codigo, locacao: locacao }); },
       ultimosLancamentos: function (qtd) { return get('ultimos', { qtd: qtd }); },
       salvarContagem: function (d) { var c = { acao: 'salvar' }; for (var k in d) c[k] = d[k]; return post(c); },
@@ -593,6 +610,7 @@
 <script>
   var ENDERECOS = [];
   var SKUS = [], SKU_IDX = [];
+  var CONFERENTES = [];
   var BASE_T = '';
   var $ = function (id) { return document.getElementById(id); };
   var estado = { resp: '', loc: '', turno: '', nomes: [] };
@@ -614,7 +632,7 @@
   $('seg').addEventListener('change', function () { gravar('inv_seg', this.checked ? '1' : ''); pintarSeg(); $('cod').focus(); });
 
   // ---- conferente: nomes (chips, 1+ pessoas, editável/removível) ----
-  function syncNomes() { estado.resp = estado.nomes.join(' / '); gravar('inv_resp', estado.resp); renderNomes(); }
+  function syncNomes() { estado.resp = estado.nomes.join(' / '); gravar('inv_resp', estado.resp); renderNomes(); try { if (typeof fCab === 'function' && document.body.classList.contains('v-f')) fCab(); } catch (e) {} }
   function addNome(v) { v = limpa(v); if (!v) return; if (estado.nomes.indexOf(v) < 0) estado.nomes.push(v); syncNomes(); }
   function commitNome(inp) { if (!inp) return; addNome(inp.value); inp.value = ''; }
   function renderNomes() {
@@ -632,13 +650,42 @@
     });
   }
   function salvarResp() { commitNome($('resp')); }
+  function toggleNome(n) { n = limpa(n); if (!n) return; var i = estado.nomes.indexOf(n); if (i >= 0) estado.nomes.splice(i, 1); else estado.nomes.push(n); syncNomes(); }
+  function nmHide(id) { var dd = $(id); if (dd) dd.classList.remove('on'); }
+  function nmRender(inputId, ddId) {
+    var inp = $(inputId), dd = $(ddId); if (!dd || !inp) return;
+    var termo = limpa(inp.value);
+    var lista = CONFERENTES.slice();
+    estado.nomes.forEach(function (n) { if (lista.indexOf(n) < 0) lista.push(n); });
+    lista.sort();
+    var filt = termo ? lista.filter(function (n) { return n.indexOf(termo) >= 0; }) : lista;
+    var html = filt.slice(0, 60).map(function (n) {
+      var sel = estado.nomes.indexOf(n) >= 0;
+      return '<div class="o' + (sel ? ' sel' : '') + '" data-n="' + esc(n) + '"><span class="ck">' + (sel ? '✓' : '') + '</span>' + esc(n) + '</div>';
+    }).join('');
+    if (termo && lista.indexOf(termo) < 0) html += '<div class="o add" data-add="' + esc(termo) + '"><span class="ck">+</span>Adicionar "' + esc(termo) + '"</div>';
+    if (!html) html = '<div class="o" style="color:var(--dim);cursor:default">Digite um nome para adicionar</div>';
+    dd.innerHTML = html;
+    Array.prototype.forEach.call(dd.querySelectorAll('.o[data-n]'), function (o) {
+      o.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      o.addEventListener('click', function () { toggleNome(o.getAttribute('data-n')); nmRender(inputId, ddId); });
+    });
+    Array.prototype.forEach.call(dd.querySelectorAll('.o[data-add]'), function (o) {
+      o.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      o.addEventListener('click', function () { addNome(o.getAttribute('data-add')); inp.value = ''; nmRender(inputId, ddId); });
+    });
+    dd.classList.add('on');
+  }
   $('resp').addEventListener('change', salvarResp);
-  $('resp').addEventListener('blur', salvarResp);
+  $('resp').addEventListener('focus', function () { nmRender('resp', 'namesdd'); });
+  $('resp').addEventListener('input', function () { nmRender('resp', 'namesdd'); });
+  $('resp').addEventListener('blur', function () { setTimeout(function () { nmHide('namesdd'); }, 160); });
   function salvarTurno(v) { estado.turno = v || ''; gravar('inv_turno', estado.turno); if ($('turno')) $('turno').value = estado.turno; if ($('fturno')) $('fturno').value = estado.turno; }
   if ($('turno')) $('turno').addEventListener('change', function () { salvarTurno($('turno').value); });
   if ($('fturno')) $('fturno').addEventListener('change', function () { salvarTurno($('fturno').value); });
   $('resp').addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commitNome($('resp')); if (estado.resp) (estado.loc ? $('cod') : $('loc')).focus(); }
+    if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commitNome($('resp')); nmRender('resp', 'namesdd'); }
+    else if (e.key === 'Escape') { nmHide('namesdd'); }
   });
 
   // ---- endereço: caixa de seleção com pesquisa ----
@@ -878,7 +925,7 @@
         $('upd').textContent = 'Atualizado às ' + r.agora;
         $('nHist').textContent = r.total ? '· ' + r.total : '';
         desenharLista(r.itens || []);
-        if (String(r.baseT) !== String(BASE_T)) { recarregarEnderecos(); recarregarSkus(); }
+        if (String(r.baseT) !== String(BASE_T)) { recarregarEnderecos(); recarregarSkus(); recarregarConferentes(); }
       })
       .withFailureHandler(function () { $('dot').className = 'dot off'; $('upd').textContent = 'Sem conexão — tentando de novo'; })
       .ultimosLancamentos(15);
@@ -897,6 +944,9 @@
       SKUS = r.skus || SKUS;
       SKU_IDX = SKUS.map(function (x) { return { v: String(x[0]), d: String(x[1] || ''), k: String(x[0]).toUpperCase() }; });
     }).listarSkus();
+  }
+  function recarregarConferentes() {
+    google.script.run.withSuccessHandler(function (r) { CONFERENTES = (r.conferentes || []).slice(); }).listarConferentes();
   }
   function desenharLista(itens) {
     var ul = $('hist');
@@ -1159,8 +1209,10 @@
   $('fresp').value = '';
   fHistDesenhar();
   $('fresp').addEventListener('change', function () { commitNome($('fresp')); fCab(); });
-  $('fresp').addEventListener('blur', function () { commitNome($('fresp')); fCab(); });
-  $('fresp').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commitNome($('fresp')); fCab(); } });
+  $('fresp').addEventListener('focus', function () { nmRender('fresp', 'fnamesdd'); });
+  $('fresp').addEventListener('input', function () { nmRender('fresp', 'fnamesdd'); });
+  $('fresp').addEventListener('blur', function () { setTimeout(function () { nmHide('fnamesdd'); fCab(); }, 160); });
+  $('fresp').addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commitNome($('fresp')); nmRender('fresp', 'fnamesdd'); } else if (e.key === 'Escape') { nmHide('fnamesdd'); } });
   $('fseg').addEventListener('change', function () { $('fsw').classList.toggle('on', $('fseg').checked); });
   $('fadd').addEventListener('click', function () {
     var f = $('ff').value.trim().toUpperCase();
@@ -1256,6 +1308,7 @@
   pintarSeg();
   recarregarEnderecos();
   recarregarSkus();
+  recarregarConferentes();
   atualizarLista();
   setInterval(function () { if (!document.hidden) atualizarLista(); }, 20000);
   document.addEventListener('visibilitychange', function () { if (!document.hidden) atualizarLista(); });

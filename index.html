@@ -398,7 +398,7 @@
 <nav class="side"><div class="mt">MENU</div><button type="button" class="on" data-v="f"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="m9 14 2 2 4-4"/></svg>Conferência Kardex</button><button type="button" data-v="c"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 6h11M9 12h11M9 18h11M4 6h.01M4 12h.01M4 18h.01"/></svg>Contagem avulsa</button><button type="button" data-v="k"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2M6 14h12v7H6z"/></svg>Imprimir Kardex</button><button type="button" id="btnRobo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 4v4M9 13h.01M15 13h.01M9 17h6"/></svg>Robô</button><div class="tema"><div class="mt">TEMA</div><div class="sws"><button type="button" class="tw" data-t="roxo" title="Roxo"></button><button type="button" class="tw" data-t="marinho" title="Azul-marinho"></button><button type="button" class="tw" data-t="grafite" title="Grafite"></button><button type="button" class="tw" data-t="petroleo" title="Verde petróleo"></button></div></div></nav>
 <div class="app">
 <div class="top"><div class="topin">
-  <div class="logo"><img alt="BYD" src="/login/byd.png"></div>
+  <div class="logo"><img alt="BYD" src="login/byd.png"></div>
   <div class="tt"><b>Inventário AUTO · BR02</b><small>Contagem de estoque<span class="pv"> · Pós-Vendas</span></small></div>
 </div></div>
 
@@ -489,7 +489,7 @@
   <div class="kmsg" id="fmsg"></div>
   <div class="fcard">
     <div class="ftit" id="ftit"></div>
-    <div class="fhead"><div><img alt="BYD" id="flogo" src="/login/byd.png"></div><div>KARDEX - MP / MERCADORIA</div><div id="fconf">Conferido Por:</div><div>FILIAL&nbsp;&nbsp;&nbsp;AUTO</div></div>
+    <div class="fhead"><div><img alt="BYD" id="flogo" src="login/byd.png"></div><div>KARDEX - MP / MERCADORIA</div><div id="fconf">Conferido Por:</div><div>FILIAL&nbsp;&nbsp;&nbsp;AUTO</div></div>
     <div class="fscroll"><table class="ft">
       <thead><tr><th>SEQ</th><th>CÓDIGO SAP</th><th>DESCRIÇÃO</th><th>LOCAL</th><th class="esf">QTDE SBF</th><th>QTDE KARDEX FÍSICO</th><th>SITUAÇÃO</th></tr></thead>
       <tbody id="fbody"><tr><td colspan="7" class="fvazio">Digite o endereço para carregar os itens do SBF.</td></tr></tbody>
@@ -1037,7 +1037,7 @@
     for (var p = 0; p < pags; p++) {
       h += '<div class="kpg"><div class="ktit">' + esc(k.titulo) + '</div><div class="kwrap"><table class="kx"><colgroup>' +
            cols.map(function (w) { return '<col style="width:' + w + 'px">'; }).join('') + '</colgroup>';
-      h += '<tr class="r1"><td></td><td class="klogo"><img alt="BYD" src="/login/byd.png"></td><td>KARDEX - MP / MERCADORIA</td>' +
+      h += '<tr class="r1"><td></td><td class="klogo"><img alt="BYD" src="login/byd.png"></td><td>KARDEX - MP / MERCADORIA</td>' +
            '<td colspan="4" class="kcp">Conferido Por: <span class="ked" contenteditable="true" spellcheck="false" data-k="kconf">' + esc(kNome('kconf')) + '</span> / Criado Por: <span class="ked" contenteditable="true" spellcheck="false" data-k="kcria">' + esc(kNome('kcria')) + '</span></td><td colspan="3">FILIAL&nbsp;&nbsp;&nbsp;&nbsp;AUTO</td></tr>';
       h += '<tr class="r2"><th>SEQ</th><th>CÓDIGO SAP</th><th>DESCRICÃO</th><th>LOCAL</th><th colspan="6">QUANT.</th></tr>';
       for (var i = 0; i < POR; i++) {

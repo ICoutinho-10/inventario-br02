@@ -1037,7 +1037,7 @@
     for (var p = 0; p < pags; p++) {
       h += '<div class="kpg"><div class="ktit">' + esc(k.titulo) + '</div><div class="kwrap"><table class="kx"><colgroup>' +
            cols.map(function (w) { return '<col style="width:' + w + 'px">'; }).join('') + '</colgroup>';
-      h += '<tr class="r1"><td></td><td class="klogo"><img alt="BYD" src="data:image/png;base64,' + k.logo + '"></td><td>KARDEX - MP / MERCADORIA</td>' +
+      h += '<tr class="r1"><td></td><td class="klogo"><img alt="BYD" src="/login/byd.png"></td><td>KARDEX - MP / MERCADORIA</td>' +
            '<td colspan="4" class="kcp">Conferido Por: <span class="ked" contenteditable="true" spellcheck="false" data-k="kconf">' + esc(kNome('kconf')) + '</span> / Criado Por: <span class="ked" contenteditable="true" spellcheck="false" data-k="kcria">' + esc(kNome('kcria')) + '</span></td><td colspan="3">FILIAL&nbsp;&nbsp;&nbsp;&nbsp;AUTO</td></tr>';
       h += '<tr class="r2"><th>SEQ</th><th>CÓDIGO SAP</th><th>DESCRICÃO</th><th>LOCAL</th><th colspan="6">QUANT.</th></tr>';
       for (var i = 0; i < POR; i++) {
@@ -1100,8 +1100,7 @@
         if (end === f || end.indexOf(f) === 0) s.e[end].forEach(function (x) { itens.push({ sku: s.p[x[0]], desc: s.d[x[0]], local: end, qtd: x[1] }); });
       });
       itens.sort(function (a, b) { return a.local.localeCompare(b.local, 'pt-BR', { numeric: true }) || a.sku.localeCompare(b.sku, 'pt-BR', { numeric: true }); });
-      var src = document.querySelector('.logo img').getAttribute('src');
-      return { titulo: f, fonte: 'sbf', itens: itens, almoxarife: estado.resp || '', logo: src.slice(src.indexOf(',') + 1), gerado: s.gerado };
+      return { titulo: f, fonte: 'sbf', itens: itens, almoxarife: estado.resp || '', logo: '', gerado: s.gerado };
     });
   }
   function visualizar(depois) {

@@ -1127,6 +1127,11 @@
     kMsg('Carregando ' + p.filtro.toUpperCase() + '…');
     var ok = function (k) {
         if (n !== kPedido) return;
+        var enderecoExato = p.filtro.trim().toUpperCase().replace(/\s+/g, ' ');
+        k.itens = (k.itens || []).filter(function (item) {
+          return String(item.local || '').trim().toUpperCase().replace(/\s+/g, ' ') === enderecoExato;
+        });
+        k.titulo = enderecoExato;
         kAtual = { chave: p.filtro.toUpperCase() + '|' + p.fonte, k: k };
         var nome = k.fonte === 'sbf' ? 'no SBF' : k.fonte === 'inv2' ? 'com 2ª contagem' : 'inventariados';
         montarKardex(k);

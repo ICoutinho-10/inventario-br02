@@ -1,5 +1,20 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.9.1 — 26/10/2026 — Correções backend: Kardex por último dia + rota `jalido`
+- **Kardex somava datas diferentes.** Causa: um arquivo esquecido no projeto Apps Script
+  (`Sem título.gs`, experimento "V30") tinha uma cópia própria de `kardex`/`salvarLote` que,
+  por carregar por último, sobrescrevia as funções corretas. A `kardex` dele somava todas as
+  contagens da posição (ex.: 15 de 23/10 + 11 de 26/10 = 26). Corrigido: a função ativa passou
+  a considerar **apenas o último dia com contagem** (zera o anterior quando há dia mais novo).
+- **"Sempre perguntar substituir" não funcionava pelo link.** O app (commits anteriores) passou a
+  consultar `jaLido` no servidor antes de lançar, mas a **rota `jalido` não existia no roteador** do
+  Apps Script — o servidor respondia `Ação inválida: jaLido`, o que (pela ponte) **cancelava todo
+  lançamento** com "não foi possível verificar". Adicionada a rota
+  `acao === 'jaLido' || acao === 'jalido' → jaLido(d)`. Agora a posição já contada é detectada
+  mesmo após recarregar a página e a pergunta **Substituir?** aparece.
+- Backend Apps Script republicado (Versão 36, mesma URL `/exec`). Sem alteração em arquivos do repo
+  além deste registro — as correções são no projeto Apps Script (fora do Git).
+
 ## v0.9.0 — 26/10/2026 — Estilo WS: botão de cores circular + fonte DM Sans na contagem
 - Gestão: o seletor de tema virou um **botão circular (estilo WS)** no topo que abre um popover com as
   **5 cores** (azul/lime/cyan/teal/claro) — nada se perde; só o botão ficou no padrão WS.

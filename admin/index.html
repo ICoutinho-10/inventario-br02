@@ -206,20 +206,6 @@
   .heat .hc { height: 26px; border-radius: 5px; display: grid; place-items: center; font-weight: 700; color: var(--on-accent); min-width: 30px; }
   .heat .hn { color: var(--tx2); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; display: flex; align-items: center; }
   .heat .hh { color: var(--tx4); text-align: center; }
-  .perf-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .72fr); gap: 14px; }
-  .mapas-pos { display: grid; gap: 14px; }
-  .mapa-pos { border: 1px solid var(--borda2); border-radius: 12px; padding: 12px; background: var(--ctrl2); overflow: hidden; }
-  .mapa-pos-h { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin-bottom: 9px; }
-  .mapa-pos-h b { font: 800 14px Manrope, 'DM Sans', system-ui, sans-serif; color: var(--tx); }
-  .mapa-pos-h span { color: var(--tx3); font-size: 11px; white-space: nowrap; }
-  .pos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(82px, 1fr)); gap: 5px; }
-  .pos-cel { min-height: 54px; border: 1px solid rgba(var(--acento-rgb),.15); border-radius: 7px; padding: 7px; color: var(--tx); overflow: hidden; }
-  .pos-cel b { display: block; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .pos-cel strong { display: block; margin-top: 4px; font: 800 16px Manrope, 'DM Sans', system-ui, sans-serif; }
-  .pos-cel small { display: block; color: var(--tx2); font-size: 9px; }
-  .escala { display: flex; align-items: center; justify-content: flex-end; gap: 6px; color: var(--tx3); font-size: 10px; margin: 8px 0 12px; }
-  .escala i { width: 22px; height: 8px; border-radius: 3px; }
-  @media (max-width: 920px) { .perf-grid { grid-template-columns: 1fr; } }
 
   /* pódio */
   .podio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -600,30 +586,6 @@
     for (var i = 1; i < t.length; i++) { var d = (t[i] - t[i - 1]) / 36e5; if (d <= .5) h += d; }
     return Math.max(h, t.length ? 0.25 : 0);
   }
-  function padraoEndereco(end) {
-    var e = String(end || '').trim().toUpperCase(), m;
-    if ((m = e.match(/^(AP)[\.\s-]/))) return 'AP';
-    if ((m = e.match(/^(T\d{1,2})\b/))) return m[1];
-    if ((m = e.match(/^(R\d{1,2})[\.\s-]/))) return m[1];
-    if ((m = e.match(/^([A-Z]{1,4})[\.\s-]/))) return m[1];
-    return 'OUTROS';
-  }
-  function natural(a, b) { return String(a).localeCompare(String(b), 'pt-BR', { numeric: true, sensitivity: 'base' }); }
-  function mapaPosicoes(H) {
-    var grupos = groupBy(H.filter(function (x) { return x.end; }), function (x) { return x.end; }).map(function (g) {
-      return { end: g.k, pecas: soma(g.itens, function (x) { return Math.max(0, x.cont); }), skus: uniq(g.itens.map(function (x) { return x.prod; })).length, pos: g.itens.length, padrao: padraoEndereco(g.k) };
-    });
-    var max = Math.max.apply(null, grupos.map(function (x) { return x.pecas; }).concat([1]));
-    var familias = groupBy(grupos, function (x) { return x.padrao; }).sort(function (a, b) { return natural(a.k, b.k); });
-    if (!familias.length) return '<div class="vazio">Sem endereços para montar o mapa.</div>';
-    return '<div class="escala"><span>menos peças</span><i style="background:rgba(var(--acento-rgb),.18)"></i><i style="background:rgba(var(--acento-rgb),.5)"></i><i style="background:rgba(var(--acento-rgb),.95)"></i><span>mais peças</span></div><div class="mapas-pos">' + familias.map(function (f) {
-      f.itens.sort(function (a, b) { return natural(a.end, b.end); });
-      return '<section class="mapa-pos"><div class="mapa-pos-h"><b>Padrão ' + esc(f.k) + '</b><span>' + n0(f.itens.length) + ' endereços · ' + n0(soma(f.itens, function (x) { return x.pecas; })) + ' peças</span></div><div class="pos-grid">' + f.itens.map(function (x) {
-        var intensidade = x.pecas ? .14 + .82 * Math.log(1 + x.pecas) / Math.log(1 + max) : .06;
-        return '<div class="pos-cel" style="background:rgba(var(--acento-rgb),' + intensidade.toFixed(2) + ')" title="' + esc(x.end) + ': ' + n0(x.pecas) + ' peças, ' + n0(x.skus) + ' códigos em ' + n0(x.pos) + ' posições"><b>' + esc(x.end) + '</b><strong class="num">' + n0(x.pecas) + '</strong><small>' + n0(x.skus) + ' código' + (x.skus === 1 ? '' : 's') + '</small></div>';
-      }).join('') + '</div></section>';
-    }).join('') + '</div>';
-  }
 
   function trocas(H) {
     var porSku = groupBy(H.filter(function (h) { return h.mov !== 'OK'; }), function (h) { return h.prod + '|' + h.dia; });
@@ -734,10 +696,8 @@
       var hs = 0; groupBy(it, function (l) { return l.dia; }).forEach(function (x) { hs += horasAtivas(x.itens); });
       var meus = H.filter(function (h) { return h.resp.split(', ').indexOf(g.k) >= 0; });
       var ok = meus.filter(function (h) { return h.mov === 'OK'; }).length;
-      var nSkus = uniq(it.map(function (l) { return l.sku; })).length;
-      return { nome: g.k, lanc: it.length, pos: pos.length, ends: uniq(it.map(function (l) { return l.end; })).length, skus: nSkus,
+      return { nome: g.k, lanc: it.length, pos: pos.length, ends: uniq(it.map(function (l) { return l.end; })).length, skus: uniq(it.map(function (l) { return l.sku; })).length,
                pecas: soma(it, function (l) { return l.q; }), ini: ts[0], fim: ts[ts.length - 1], horas: hs, ritmo: hs ? it.length / hs : 0,
-               codHora: hs ? nSkus / hs : 0, minCod: nSkus ? hs * 60 / nSkus : 0,
                acur: meus.length ? ok / meus.length : null, seg: it.filter(function (l) { return l.seg; }).length, horasArr: it };
     });
     var ord = perfOrd;
@@ -750,7 +710,6 @@
     var cols = [['nome', 'Conferente', ''], ['lanc', 'Lançamentos', 'linhas enviadas', 'Cada vez que o conferente clicou em Lançar uma quantidade (1 linha na aba Lançamentos)'],
                 ['pos', 'Posições', 'SKU + endereço', 'Combinações SKU + endereço diferentes. Lançamentos maior que Posições = mesma posição lançada mais de uma vez (recontagem, 2ª contagem ou quantidade lançada em partes)'],
                 ['ends', 'Endereços', 'locais diferentes', 'Quantos endereços físicos diferentes a pessoa contou'], ['skus', 'SKUs', 'códigos diferentes', 'Quantos códigos de peça diferentes a pessoa contou'],
-                ['codHora', 'Códigos/h', 'códigos por tempo', 'Códigos distintos ÷ horas ativas'], ['minCod', 'Média/código', 'minutos por código', 'Horas ativas ÷ códigos distintos. Pausas acima de 30 minutos não entram'],
                 ['pecas', 'Peças', 'soma das qtdes', 'Soma das quantidades lançadas'], ['ini', 'Início', '1º lançamento', 'Data e hora do primeiro lançamento'], ['fim', 'Último', 'último lançamento', 'Data e hora do último lançamento'],
                 ['horas', 'Horas ativas', 'tempo contando', 'Tempo entre lançamentos, sem contar pausas longas'], ['ritmo', 'Ritmo', 'lançamentos/hora', 'Lançamentos ÷ horas ativas'],
                 ['acur', 'Acurácia', 'posições OK', 'Posições da pessoa em que a contagem bateu com o saldo TOTVS ÷ posições contadas'], ['seg', '2ª contagens', 'recontagens', 'Lançamentos marcados como 2ª contagem']];
@@ -760,13 +719,13 @@
       return '<th data-c="' + c[0] + '" class="' + (i ? 'n' : '') + '"' + (c[3] ? ' title="' + esc(c[3]) + '"' : '') + '>' + c[1] + (ord.c === c[0] ? '<span class="ar">' + (ord.d < 0 ? '▼' : '▲') + '</span>' : '') + (c[2] ? '<small class="thsub">' + c[2] + '</small>' : '') + '</th>';
     }).join('') + '</tr></thead><tbody>' + P.map(function (p) {
       return '<tr><td><b>' + esc(p.nome) + '</b></td><td class="n num"><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><span style="display:inline-block;width:70px;height:6px;border-radius:3px;background:var(--trilho);overflow:hidden"><i style="display:block;height:100%;width:' + (100 * p.lanc / mx) + '%;background:var(--acento)"></i></span>' + n0(p.lanc) + '</div></td>' +
-        '<td class="n num">' + n0(p.pos) + '</td><td class="n num">' + n0(p.ends) + '</td><td class="n num">' + n0(p.skus) + '</td><td class="n num"><b>' + n(p.codHora.toFixed(1)) + '</b></td><td class="n num">' + n(p.minCod.toFixed(1)) + ' min</td><td class="n num">' + n0(p.pecas) + '</td>' +
+        '<td class="n num">' + n0(p.pos) + '</td><td class="n num">' + n0(p.ends) + '</td><td class="n num">' + n0(p.skus) + '</td><td class="n num">' + n0(p.pecas) + '</td>' +
         '<td class="n num">' + dtBR(p.ini) + '</td><td class="n num">' + dtBR(p.fim) + '</td><td class="n num">' + n(Math.round(p.horas * 10) / 10) + ' h</td>' +
         '<td class="n num"><b>' + n(Math.round(p.ritmo * 10) / 10) + '</b></td><td class="n num">' + (p.acur == null ? '—' : '<span class="tag ' + (p.acur >= .95 ? 'ok' : p.acur >= .8 ? 'al' : 'bx') + '">' + pc(p.acur, 0) + '</span>') + '</td><td class="n num">' + n0(p.seg) + '</td></tr>';
     }).join('') + '</tbody></table></div></div>';
-    // heatmap de códigos distintos por pessoa x hora
+    // heatmap pessoa x hora
     var horas = []; for (var i = 0; i < 24; i++) horas.push((i + 6) % 24);
-    var mat = P.map(function (p) { var a = new Array(24).fill(0), vistos = {}; p.horasArr.forEach(function (l) { if (l.t) { var ix = (l.t.getHours() + 18) % 24, k = ix + '|' + l.sku; if (!vistos[k]) { vistos[k] = 1; a[ix]++; } } }); return a; });
+    var mat = P.map(function (p) { var a = new Array(24).fill(0); p.horasArr.forEach(function (l) { if (l.t) a[(l.t.getHours() + 18) % 24]++; }); return a; });
     var usadas = horas.map(function (x, i) { return mat.some(function (a) { return a[i]; }); });
     var i0 = usadas.indexOf(true), i1 = 23 - usadas.slice().reverse().indexOf(true);
     var mxh = Math.max.apply(null, mat.map(function (a) { return Math.max.apply(null, a); }).concat([1]));
@@ -780,11 +739,7 @@
       }
     });
     hm += '</div>';
-    var endRanking = P.slice().sort(function (a, b) { return b.ends - a.ends; }).map(function (p) { return { r: p.nome, s: n0(p.skus) + ' códigos · ' + n0(p.pos) + ' posições', v: p.ends, t: n0(p.ends) }; });
-    h += '<div class="card"><p class="eyebrow">Códigos por tempo</p><h3>Códigos distintos por conferente e hora</h3><p class="sc">Cada célula conta códigos únicos naquela hora — faixas apagadas indicam pausa ou troca de turno</p>' + hm + '</div>';
-    h += '<div class="perf-grid"><div class="card"><p class="eyebrow">Produtividade espacial</p><h3>Endereços por pessoa</h3><p class="sc">Quantidade de endereços físicos distintos atendidos por conferente</p>' + barrasH(endRanking, 0, 'var(--acento)') + '</div>' +
-      '<div class="card"><p class="eyebrow">Leitura</p><h3>Três visões complementares</h3><p class="sc"><b>Tempo:</b> códigos únicos por hora. <b>Pessoa:</b> alcance de endereços. <b>Espaço:</b> concentração de peças nas posições físicas.</p><div class="leg" style="margin-top:14px"><span><em>Códigos/h</em> = códigos distintos ÷ horas ativas</span><span><em>Média/código</em> = minutos ativos ÷ códigos distintos</span><span><em>Pausa</em> acima de 30 min não entra no tempo ativo</span></div></div></div>';
-    h += '<div class="card"><p class="eyebrow">Mapa físico por padrão</p><h3>Peças por posição</h3><p class="sc">Cada bloco representa um endereço. Os padrões são separados porque correspondem a áreas físicas diferentes; a cor usa escala logarítmica para destacar concentrações sem esconder posições menores.</p>' + mapaPosicoes(H) + '</div>';
+    h += '<div class="card"><p class="eyebrow">Mapa de calor</p><h3>Lançamentos por conferente e hora</h3><p class="sc">Mostra quando cada um contou — faixas apagadas são pausas ou troca de turno</p>' + hm + '</div>';
     $('v-perf').innerHTML = h;
     Array.prototype.forEach.call($('pTab').querySelectorAll('th'), function (th) {
       th.addEventListener('click', function () { var c = th.getAttribute('data-c'); perfOrd = { c: c, d: perfOrd.c === c ? -perfOrd.d : (c === 'nome' ? 1 : -1) }; perf(filtrados()); });

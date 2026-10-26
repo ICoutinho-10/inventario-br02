@@ -944,18 +944,34 @@
   // Mesma posição no mesmo turno NUNCA soma: cb(true) = substituir a anterior · cb(null) = cancelar
   function jaLidoAntes(itens, segunda, cb) {
     if (segunda) { cb(false); return; }   // 2ª contagem já substitui a 1ª
-    var feito = false, t = setTimeout(function () { if (!feito) { feito = true; cb(true); } }, 8000);
+    // Nunca libera uma possível substituição sem consultar a planilha.
+    // Antes, após 8 s (ou em falha de rede), cb(true) autorizava o lançamento
+    // silenciosamente e a pergunta de substituição não aparecia.
+    var feito = false, t = setTimeout(function () {
+      if (feito) return;
+      feito = true;
+      mostrar('err', 'Não foi possível verificar se este endereço já foi lançado. Tente novamente.');
+      fMsg('Não foi possível verificar se este endereço já foi lançado. Tente novamente.', true);
+      cb(null);
+    }, 15000);
     google.script.run
       .withSuccessHandler(function (r) {
         if (feito) return; feito = true; clearTimeout(t);
         var l = (r && r.lidos) || [];
-        if (!l.length) { cb(true); return; }
+        if (!l.length) { cb(false); return; }
         var lista = l.slice(0, 8).map(function (x) {
           return '<li><b>' + esc(x.codigo) + '</b> em <b>' + esc(x.locacao) + '</b> — ' + fmtN(x.qtd) + ' un. por ' + esc(x.resp || '—') + (x.hora ? ' às ' + esc(x.hora) : '') + (x.n > 1 ? ' (' + x.n + ' lançamentos)' : '') + '</li>';
         }).join('') + (l.length > 8 ? '<li>… e mais ' + (l.length - 8) + '</li>' : '');
         avisoLido((l.length === 1 ? 'Esta posição já foi lida neste turno' : l.length + ' posições já foram lidas neste turno'), lista, cb);
       })
-      .withFailureHandler(function () { if (feito) return; feito = true; clearTimeout(t); cb(true); })
+      .withFailureHandler(function () {
+        if (feito) return;
+        feito = true;
+        clearTimeout(t);
+        mostrar('err', 'Não foi possível verificar se este endereço já foi lançado. Tente novamente.');
+        fMsg('Não foi possível verificar se este endereço já foi lançado. Tente novamente.', true);
+        cb(null);
+      })
       .jaLido(itens);
   }
   function fmtN(v) { return String(Math.round((Number(v) || 0) * 1000) / 1000).replace('.', ','); }

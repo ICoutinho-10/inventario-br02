@@ -908,6 +908,7 @@
   function enviarAvulsa(dados, qtd) {
     google.script.run
       .withSuccessHandler(function (r) {
+        solicitarRecalculoHistorico(0);
         atualizarLista();
         mostrar(r.cadastrado ? 'ok' : 'warn',
           '✔ ' + r.produto + ' · ' + qtd + ' un. em ' + dados.locacao + (r.cadastrado ? '' : ' — código fora da base, avise o responsável.'));
@@ -920,6 +921,22 @@
         pronto();
       })
       .salvarContagem(dados);
+  }
+
+  // HISTÓRICO é a visão consolidada; LANÇAMENTOS continua como log técnico oculto.
+  // Se outro recálculo estiver em andamento, tenta novamente para não deixar o último lote para trás.
+  function solicitarRecalculoHistorico(tentativa) {
+    tentativa = tentativa || 0;
+    google.script.run
+      .withSuccessHandler(function (r) {
+        if (r && r.ocupado && tentativa < 4) {
+          setTimeout(function () { solicitarRecalculoHistorico(tentativa + 1); }, 3000);
+        }
+      })
+      .withFailureHandler(function () {
+        if (tentativa < 4) setTimeout(function () { solicitarRecalculoHistorico(tentativa + 1); }, 3000);
+      })
+      .recalcular();
   }
 
   // ---- aviso: posição já lida neste turno ----
@@ -1301,7 +1318,7 @@
     var feitos = 0, erros = 0, idx = 0;
     $('fgoTx').textContent = 'Lançando ' + pend.length + ' ite' + (pend.length > 1 ? 'ns' : 'm') + '…';
     google.script.run
-      .withSuccessHandler(function () { pend.forEach(function (it) { it.estado = 'feito'; }); feitos = pend.length; idx = pend.length; google.script.run.recalcular(); proximo(); })
+      .withSuccessHandler(function () { pend.forEach(function (it) { it.estado = 'feito'; }); feitos = pend.length; idx = pend.length; solicitarRecalculoHistorico(0); proximo(); })
       .withFailureHandler(function (e) {
         var m = e && e.message ? e.message : String(e);
         if (/inválida/i.test(m)) { proximo(); return; }   // planilha ainda sem o lançamento em lote: envia um por um
@@ -1312,6 +1329,7 @@
       if (idx >= pend.length) {
         fRodando = false; atualizarLista();
         if (erros) { fDesenhar(); fMsg(feitos + ' lançado(s), ' + erros + ' com erro — clique em Lançar de novo para reenviar os que falharam.', true); return; }
+        solicitarRecalculoHistorico(0);
         fConcluir();
         return;
       }

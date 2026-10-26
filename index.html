@@ -587,7 +587,8 @@
       recalcular: function () { return post({ acao: 'recalcular' }); },
       salvarLote: function (d) { var c = { acao: 'salvarLote' }; for (var k in d) c[k] = d[k]; return post(c); },
       kardex: function (filtro, fonte) { return get('kardex', { filtro: filtro, fonte: fonte }); },
-      jaLido: function (itens) { return get('jalido', { itens: JSON.stringify(itens) }); }
+      jaLido: function (itens) { return get('jalido', { itens: JSON.stringify(itens) }); },
+      statusTurnos: function () { return get('status_turnos'); }
     };
     function runner(ok, falha) {
       var r = {
@@ -693,6 +694,34 @@
   function salvarTurno(v) { estado.turno = v || ''; gravar('inv_turno', estado.turno); if ($('turno')) $('turno').value = estado.turno; if ($('fturno')) $('fturno').value = estado.turno; }
   if ($('turno')) $('turno').addEventListener('change', function () { salvarTurno($('turno').value); });
   if ($('fturno')) $('fturno').addEventListener('change', function () { salvarTurno($('fturno').value); });
+
+  // Bloqueio fail-closed: nenhum lançamento em dia útil sem snapshot SBF/MB52 do turno.
+  function validarBaseTurno(ok, falha) {
+    if (!estado.turno) {
+      mostrar('err', 'Selecione o turno antes de lançar.');
+      if (falha) falha();
+      return;
+    }
+    google.script.run
+      .withSuccessHandler(function (st) {
+        var liberado = !!(st && (st.domingo || (st.sabado ? st.algum : st.resets && st.resets[estado.turno])));
+        if (!liberado) {
+          var msg = 'BLOQUEADO: SBF/MB52 do ' + estado.turno + ' ainda não foi atualizada hoje.';
+          mostrar('err', msg);
+          if (typeof fMsg === 'function') fMsg(msg, true);
+          if (falha) falha();
+          return;
+        }
+        ok(st);
+      })
+      .withFailureHandler(function () {
+        var msg = 'BLOQUEADO: não foi possível confirmar a atualização SBF/MB52. Tente novamente.';
+        mostrar('err', msg);
+        if (typeof fMsg === 'function') fMsg(msg, true);
+        if (falha) falha();
+      })
+      .statusTurnos();
+  }
   $('resp').addEventListener('keydown', function (e) {
     if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); commitNome($('resp')); nmRender('resp', 'namesdd'); }
     else if (e.key === 'Escape') { nmHide('namesdd'); }
@@ -867,12 +896,14 @@
     qtd = String(qtdNumero);
     var dados = { responsavel: estado.resp, locacao: estado.loc, codigo: cod, quantidade: qtd, segunda: $('seg').checked, origem: 'Avulsa', turno: estado.turno };
     $('btn').disabled = true; $('btnTx').textContent = 'Conferindo…';
-    jaLidoAntes([{ locacao: dados.locacao, codigo: cod }], dados.segunda, function (subst) {
-      if (subst === null) { mostrar('warn', 'Lançamento cancelado.'); pronto(); return; }
-      if (subst) dados.substituir = true;
-      $('btnTx').textContent = 'Salvando…';
-      enviarAvulsa(dados, qtd);
-    });
+    validarBaseTurno(function () {
+      jaLidoAntes([{ locacao: dados.locacao, codigo: cod }], dados.segunda, function (subst) {
+        if (subst === null) { mostrar('warn', 'Lançamento cancelado.'); pronto(); return; }
+        if (subst) dados.substituir = true;
+        $('btnTx').textContent = 'Salvando…';
+        enviarAvulsa(dados, qtd);
+      });
+    }, pronto);
   });
   function enviarAvulsa(dados, qtd) {
     google.script.run
@@ -1259,10 +1290,12 @@
     }
     fRodando = true; fConfirmar = false; $('fgo').classList.remove('conf'); $('fgo').disabled = true;
     $('fgoTx').textContent = 'Conferindo…';
-    jaLidoAntes(pend.map(function (it) { return { locacao: it.local, codigo: it.sku }; }), $('fseg').checked, function (subst) {
-      if (subst === null) { fRodando = false; $('fgo').disabled = false; fDesenhar(); fMsg('Lançamento cancelado.'); return; }
-      fLancar(pend, subst);
-    });
+    validarBaseTurno(function () {
+      jaLidoAntes(pend.map(function (it) { return { locacao: it.local, codigo: it.sku }; }), $('fseg').checked, function (subst) {
+        if (subst === null) { fRodando = false; $('fgo').disabled = false; fDesenhar(); fMsg('Lançamento cancelado.'); return; }
+        fLancar(pend, subst);
+      });
+    }, function () { fRodando = false; $('fgo').disabled = false; fDesenhar(); });
   });
   function fLancar(pend, subst) {
     var feitos = 0, erros = 0, idx = 0;

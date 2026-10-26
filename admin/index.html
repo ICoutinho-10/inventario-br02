@@ -207,6 +207,42 @@
   .heat .hn { color: var(--tx2); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 8px; display: flex; align-items: center; }
   .heat .hh { color: var(--tx4); text-align: center; }
 
+  /* mapa operacional de endereços */
+  .end-rank { display: grid; gap: 10px; }
+  .end-rank-row { display: grid; grid-template-columns: minmax(135px, 210px) 1fr auto; align-items: center; gap: 10px; }
+  .end-rank-row .nm { color: var(--tx2); font-size: 12px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .end-rank-row .trk { height: 18px; background: var(--trilho); border-radius: 5px; overflow: hidden; display: flex; }
+  .end-rank-row .trk i { display: block; height: 100%; }
+  .end-rank-row .val { min-width: 115px; text-align: right; color: var(--tx2); font-size: 11px; }
+  .end-rank-row .val b { color: var(--bx); font-size: 13px; }
+  .end-leg { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; color: var(--tx3); font-size: 11px; margin: 10px 0 14px; }
+  .end-leg span { display: inline-flex; align-items: center; gap: 5px; }
+  .end-leg i { width: 10px; height: 10px; border-radius: 3px; }
+  .end-map { display: grid; gap: 12px; }
+  .end-area { border: 1px solid var(--borda2); border-radius: 12px; background: var(--ctrl2); overflow: hidden; }
+  .end-area summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; cursor: pointer; color: var(--tx); font-weight: 800; }
+  .end-area summary small { color: var(--tx3); font-weight: 500; }
+  .end-area-body { display: grid; gap: 12px; padding: 0 12px 12px; }
+  .end-rua { display: grid; grid-template-columns: 115px 1fr; gap: 10px; align-items: start; }
+  .end-rua-t { padding-top: 10px; color: var(--tx2); font-size: 11px; font-weight: 800; }
+  .end-rua-t small { display: block; color: var(--tx4); font-weight: 500; margin-top: 3px; }
+  .end-cells { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 5px; }
+  .end-cell { min-height: 64px; padding: 7px; border: 1px solid var(--borda2); border-radius: 7px; background: rgba(var(--acento-rgb),.10); color: var(--tx); overflow: hidden; }
+  .end-cell.ok100 { background: rgba(52,211,153,.16); border-color: rgba(52,211,153,.42); }
+  .end-cell.temdiv { border-color: rgba(248,113,113,.42); }
+  .end-cell .loc { display: block; font-size: 10px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .end-cell .nums { display: flex; align-items: baseline; gap: 7px; margin-top: 7px; font-size: 10px; color: var(--tx3); }
+  .end-cell .nums b { font-size: 16px; }
+  .end-cell .nums .ko { color: var(--bx); }
+  .end-cell .nums .sim { color: var(--ok); }
+  @media (max-width: 720px) {
+    .end-rank-row { grid-template-columns: 110px 1fr; }
+    .end-rank-row .val { grid-column: 2; text-align: left; }
+    .end-rua { grid-template-columns: 1fr; }
+    .end-rua-t { padding-top: 0; }
+    .end-cells { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+
   /* pódio */
   .podio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
   .pd { position: relative; overflow: hidden; }
@@ -484,7 +520,9 @@
     fetch(API + '?api=admin&t=' + Date.now()).then(function (r) { return r.json(); }).then(function (j) {
       $('bAtu').disabled = false;
       if (!j.ok) throw new Error(j.erro || 'erro');
-      var assin = j.dados.hist.length + '|' + j.dados.lanc.length + '|' + (j.dados.lanc.length ? j.dados.lanc[j.dados.lanc.length - 1][0] : '');
+      var hashStatus = 0;
+      j.dados.hist.forEach(function (r) { var s = String(r[0]) + '|' + String(r[3]) + '|' + String(r[6]) + '|' + String(r[8]); for (var z = 0; z < s.length; z++) hashStatus = ((hashStatus << 5) - hashStatus + s.charCodeAt(z)) | 0; });
+      var assin = j.dados.hist.length + '|' + j.dados.lanc.length + '|' + (j.dados.lanc.length ? j.dados.lanc[j.dados.lanc.length - 1][0] : '') + '|' + hashStatus;
       $('dot').className = ''; $('upd').textContent = 'Ao vivo · atualizado ' + j.dados.gerado.slice(11, 16);
       $('erro').style.display = 'none';
       if (assin === ULT && D) return;
@@ -586,6 +624,47 @@
     for (var i = 1; i < t.length; i++) { var d = (t[i] - t[i - 1]) / 36e5; if (d <= .5) h += d; }
     return Math.max(h, t.length ? 0.25 : 0);
   }
+  function atuaisPorCodigo(H) {
+    var o = {};
+    H.forEach(function (x) {
+      var k = x.prod + '|' + x.end, a = o[k];
+      if (!a || (x.ult || 0) >= (a.ult || 0)) o[k] = x;
+    });
+    return Object.keys(o).map(function (k) { return o[k]; });
+  }
+  function partesEndereco(end) {
+    var e = String(end || '').trim().toUpperCase(), m;
+    if ((m = e.match(/^AP[\.\s-](\w+)[\.\s-](\w+)$/))) return { area: 'AP', rua: 'Rua ' + m[1], pos: 'Passo ' + m[2], ord: m[1] + '|' + m[2] };
+    if ((m = e.match(/^(T\d+)\s+(R\d+)\s+([AB])\s+(P\d+|CX\d+)$/))) return { area: m[1], rua: m[2] + ' · lado ' + m[3], pos: m[4].replace(/^P/, 'Passo ').replace(/^CX/, 'Caixa '), ord: m[2] + '|' + m[3] + '|' + m[4] };
+    if ((m = e.match(/^(T\d+)\s+(R\d+)\s+([AB])$/))) return { area: m[1], rua: m[2] + ' · lado ' + m[3], pos: 'Sem passo', ord: m[2] + '|' + m[3] };
+    if ((m = e.match(/^(T\d+)\s+(R\d+)\s+(P\d+|CX\d+)$/))) return { area: m[1], rua: m[2], pos: m[3].replace(/^P/, 'Passo ').replace(/^CX/, 'Caixa '), ord: m[2] + '|' + m[3] };
+    if ((m = e.match(/^(R\d+)[\.\s-]([A-Z]+)(\d+)\s*([ABC])?$/))) return { area: m[1], rua: 'Corredor ' + m[2], pos: 'Nível ' + m[3] + (m[4] ? ' · lado ' + m[4] : ''), ord: m[2] + '|' + m[3] + '|' + (m[4] || '') };
+    var t = e.split(/\s+/); return { area: t[0] || 'OUTROS', rua: t.slice(0, 2).join(' ') || 'Outros', pos: t.slice(2).join(' ') || e, ord: e };
+  }
+  function enderecosResumo(H) {
+    return groupBy(atuaisPorCodigo(H), function (x) { return x.end; }).map(function (g) {
+      var p = partesEndereco(g.k), ok = g.itens.filter(function (x) { return x.mov === 'OK'; }).length;
+      return { end: g.k, area: p.area, rua: p.rua, pos: p.pos, ord: p.ord, total: g.itens.length, ok: ok, div: g.itens.length - ok,
+               bx: g.itens.filter(function (x) { return x.mov === 'BAIXA 602'; }).length, al: g.itens.filter(function (x) { return x.mov === 'ALTA 202'; }).length };
+    });
+  }
+  function mapaEnderecos(E) {
+    var areas = groupBy(E, function (x) { return x.area; }).sort(function (a, b) {
+      var da = soma(a.itens, function (x) { return x.div; }), db = soma(b.itens, function (x) { return x.div; });
+      return db - da || a.k.localeCompare(b.k, 'pt-BR', { numeric: true });
+    });
+    return '<div class="end-map">' + areas.map(function (a, ai) {
+      var div = soma(a.itens, function (x) { return x.div; }), ok = soma(a.itens, function (x) { return x.ok; });
+      var ruas = groupBy(a.itens, function (x) { return x.rua; }).sort(function (x, y) { return x.k.localeCompare(y.k, 'pt-BR', { numeric: true }); });
+      return '<details class="end-area"' + (ai === 0 ? ' open' : '') + '><summary><span>' + esc(a.k) + '</span><small>' + n0(a.itens.length) + ' endereços · ' + n0(ok) + ' códigos OK · ' + n0(div) + ' divergentes</small></summary><div class="end-area-body">' + ruas.map(function (r) {
+        r.itens.sort(function (x, y) { return x.ord.localeCompare(y.ord, 'pt-BR', { numeric: true }); });
+        return '<div class="end-rua"><div class="end-rua-t">' + esc(r.k) + '<small>' + n0(r.itens.length) + ' posições</small></div><div class="end-cells">' + r.itens.map(function (x) {
+          var titulo = x.end + ': ' + x.ok + ' códigos OK de ' + x.total + (x.div ? '; ' + x.div + ' divergentes (' + x.bx + ' baixa, ' + x.al + ' alta)' : '; 100% OK');
+          return '<div class="end-cell ' + (x.div ? 'temdiv' : 'ok100') + '" title="' + esc(titulo) + '"><span class="loc">' + esc(x.pos) + '</span><div class="nums"><b class="sim">' + n0(x.ok) + '</b> OK' + (x.div ? '<b class="ko">' + n0(x.div) + '</b> div.' : '') + '</div></div>';
+        }).join('') + '</div></div>';
+      }).join('') + '</div></details>';
+    }).join('') + '</div>';
+  }
 
   function trocas(H) {
     var porSku = groupBy(H.filter(function (h) { return h.mov !== 'OK'; }), function (h) { return h.prod + '|' + h.dia; });
@@ -606,6 +685,8 @@
     var top = H.filter(function (h) { return h.mov !== 'OK'; }).map(function (h) { return { h: h, v: h.dif * h.custo }; })
       .sort(function (a, b) { return Math.abs(b.v) - Math.abs(a.v) || Math.abs(b.h.dif) - Math.abs(a.h.dif); });
     var maior = top[0];
+    var endResumo = enderecosResumo(H);
+    var topEnd = endResumo.filter(function (x) { return x.div; }).sort(function (a, b) { return b.div - a.div || b.total - a.total || a.end.localeCompare(b.end, 'pt-BR', { numeric: true }); }).slice(0, 10);
     var narr = (F.dia ? 'No turno de <b>' + diaBR(F.dia) + '</b>, ' : 'No inventário até agora, ') +
       '<b>' + k.confs.length + ' conferente' + (k.confs.length !== 1 ? 's' : '') + '</b> contaram <b>' + n0(k.pos) + ' posições</b> (' + n0(k.ends) + ' endereços, ' + n0(k.skus) + ' SKUs, ' + n0(k.pecas) + ' peças). ' +
       '<b>' + pc(k.acur) + '</b> conferem com o TOTVS; <b>' + n0(k.bx.length) + '</b> pedem baixa 602 (' + n0(k.qbx) + ' pç' + (k.vbx ? ', ' + brl.format(k.vbx) : '') + ') e <b>' + n0(k.al.length) + '</b> pedem alta 202 (' + n0(k.qal) + ' pç' + (k.val ? ', ' + brl.format(k.val) : '') + ').' +
@@ -658,16 +739,17 @@
     var rk = groupBy(L, function (l) { return l.conf; }).map(function (g) { return { r: g.k, v: g.itens.length }; }).sort(function (a, b) { return b.v - a.v; });
     h += '<div class="card"><p class="eyebrow">Equipe</p><h3>Lançamentos por conferente</h3><p class="sc">Detalhe completo no menu Performance</p>' + barrasH(rk.slice(0, 10), 0, 'linear-gradient(90deg,var(--azul),var(--acento))') + '</div>';
     h += '</div>';
-    // corredores + MB52 + dias
-    var cor = groupBy(H, function (x) { return corredor(x.end); }).map(function (g) {
-      var ok = g.itens.filter(function (x) { return x.mov === 'OK'; }).length;
-      return { r: g.k, v: g.itens.length, ac: ok / g.itens.length };
-    }).sort(function (a, b) { return b.v - a.v; }).slice(0, 10);
+    // ranking e mapa por endereço — uma ocorrência por código + endereço
+    var mxEnd = Math.max.apply(null, topEnd.map(function (x) { return x.total; }).concat([1]));
+    h += '<div class="card"><p class="eyebrow">Prioridade operacional</p><h3>10 endereços com mais códigos divergentes</h3><p class="sc">Ranking pela quantidade de códigos ainda divergentes. O trecho verde mostra códigos já OK no mesmo endereço.</p>' +
+      '<div class="end-leg"><span><i style="background:var(--bx)"></i>Códigos divergentes</span><span><i style="background:var(--ok)"></i>Códigos OK</span></div>' +
+      (topEnd.length ? '<div class="end-rank">' + topEnd.map(function (x) { return '<div class="end-rank-row"><div class="nm" title="' + esc(x.end) + '">' + esc(x.end) + '</div><div class="trk"><i style="width:' + (100 * x.div / mxEnd) + '%;background:var(--bx)"></i><i style="width:' + (100 * x.ok / mxEnd) + '%;background:var(--ok)"></i></div><div class="val"><b>' + n0(x.div) + ' divergentes</b> · ' + n0(x.ok) + ' OK</div></div>'; }).join('') + '</div>' : '<div class="vazio">Todos os códigos estão OK.</div>') + '</div>';
+    h += '<div class="card"><p class="eyebrow">Estoque desenhado</p><h3>Mapa de endereços por rua, corredor, nível e passo</h3><p class="sc">Cada bloco é uma posição física e conta códigos, não peças. Verde = 100% dos códigos OK. Azul padrão com borda vermelha = ainda há divergência. Abra ou feche cada área para navegar.</p>' +
+      '<div class="end-leg"><span><i style="background:rgba(52,211,153,.45)"></i>100% OK</span><span><i style="background:rgba(var(--acento-rgb),.18);border:1px solid rgba(248,113,113,.6)"></i>Com divergência</span></div>' + mapaEnderecos(endResumo) + '</div>';
+    // MB52 + dias
     var bk = [0, 0, 0, 0, 0];
     k.cob.forEach(function (v) { bk[v < .5 ? 0 : v < .9 ? 1 : v < .995 ? 2 : v <= 1.005 ? 3 : 4]++; });
-    h += '<div class="g3">';
-    h += '<div class="card"><p class="eyebrow">Mapa</p><h3>Corredores mais contados</h3><p class="sc">Posições contadas e acurácia por corredor</p>' +
-         barrasH(cor.map(function (c) { return { r: c.r, v: c.v, c: corAc(c.ac), t: n0(c.v) + ' · ' + pc(c.ac, 0) }; })) + '</div>';
+    h += '<div class="g2b">';
     h += '<div class="card"><p class="eyebrow">MB52</p><h3>% consolidada por SKU</h3><p class="sc">Contagem consolidada do dia ÷ MB52</p>' +
          barrasV(bk, ['< 50%', '50–90%', '90–99%', '100%', '> 100%'], function (v, i) { return ['#f87171', '#fb923c', '#fbbf24', '#34d399', '#60a5fa'][i]; }, 230, 380) + '</div>';
     var dias = D.dias.slice().reverse().map(function (dk) {
@@ -696,8 +778,10 @@
       var hs = 0; groupBy(it, function (l) { return l.dia; }).forEach(function (x) { hs += horasAtivas(x.itens); });
       var meus = H.filter(function (h) { return h.resp.split(', ').indexOf(g.k) >= 0; });
       var ok = meus.filter(function (h) { return h.mov === 'OK'; }).length;
-      return { nome: g.k, lanc: it.length, pos: pos.length, ends: uniq(it.map(function (l) { return l.end; })).length, skus: uniq(it.map(function (l) { return l.sku; })).length,
+      var nSkus = uniq(it.map(function (l) { return l.sku; })).length;
+      return { nome: g.k, lanc: it.length, pos: pos.length, ends: uniq(it.map(function (l) { return l.end; })).length, skus: nSkus,
                pecas: soma(it, function (l) { return l.q; }), ini: ts[0], fim: ts[ts.length - 1], horas: hs, ritmo: hs ? it.length / hs : 0,
+               codHora: hs ? nSkus / hs : 0, minCod: nSkus ? hs * 60 / nSkus : 0,
                acur: meus.length ? ok / meus.length : null, seg: it.filter(function (l) { return l.seg; }).length, horasArr: it };
     });
     var ord = perfOrd;
@@ -705,11 +789,12 @@
     var top3 = P.slice().sort(function (a, b) { return b.lanc - a.lanc; }).slice(0, 3);
     var h = '<div class="podio">' + top3.map(function (p, i) {
       return '<div class="card pd"><span class="lugar">' + (i + 1) + 'º</span><p class="eyebrow">' + ['Mais lançamentos', '2º lugar', '3º lugar'][i] + '</p><div class="nm">' + esc(p.nome) + '</div>' +
-        '<div class="kv"><div><b class="num">' + n0(p.lanc) + '</b><small>lançamentos</small></div><div><b class="num">' + n(Math.round(p.ritmo * 10) / 10) + '</b><small>lanç/h</small></div><div><b class="num" style="color:' + (p.acur == null ? 'var(--tx3)' : corAc(p.acur)) + '">' + (p.acur == null ? '—' : pc(p.acur, 0)) + '</b><small>acurácia</small></div></div></div>';
+        '<div class="kv"><div><b class="num">' + n0(p.lanc) + '</b><small>lançamentos</small></div><div><b class="num">' + n(p.codHora.toFixed(1)) + '</b><small>códigos/h</small></div><div><b class="num">' + n(p.minCod.toFixed(1)) + '</b><small>min/código</small></div><div><b class="num" style="color:' + (p.acur == null ? 'var(--tx3)' : corAc(p.acur)) + '">' + (p.acur == null ? '—' : pc(p.acur, 0)) + '</b><small>acurácia</small></div></div></div>';
     }).join('') + '</div>';
     var cols = [['nome', 'Conferente', ''], ['lanc', 'Lançamentos', 'linhas enviadas', 'Cada vez que o conferente clicou em Lançar uma quantidade (1 linha na aba Lançamentos)'],
                 ['pos', 'Posições', 'SKU + endereço', 'Combinações SKU + endereço diferentes. Lançamentos maior que Posições = mesma posição lançada mais de uma vez (recontagem, 2ª contagem ou quantidade lançada em partes)'],
                 ['ends', 'Endereços', 'locais diferentes', 'Quantos endereços físicos diferentes a pessoa contou'], ['skus', 'SKUs', 'códigos diferentes', 'Quantos códigos de peça diferentes a pessoa contou'],
+                ['codHora', 'Códigos/h', 'códigos por tempo', 'Códigos distintos divididos pelas horas ativas'], ['minCod', 'Média/código', 'minutos por código', 'Minutos ativos divididos pelos códigos distintos; pausas acima de 30 minutos não entram'],
                 ['pecas', 'Peças', 'soma das qtdes', 'Soma das quantidades lançadas'], ['ini', 'Início', '1º lançamento', 'Data e hora do primeiro lançamento'], ['fim', 'Último', 'último lançamento', 'Data e hora do último lançamento'],
                 ['horas', 'Horas ativas', 'tempo contando', 'Tempo entre lançamentos, sem contar pausas longas'], ['ritmo', 'Ritmo', 'lançamentos/hora', 'Lançamentos ÷ horas ativas'],
                 ['acur', 'Acurácia', 'posições OK', 'Posições da pessoa em que a contagem bateu com o saldo TOTVS ÷ posições contadas'], ['seg', '2ª contagens', 'recontagens', 'Lançamentos marcados como 2ª contagem']];
@@ -719,13 +804,13 @@
       return '<th data-c="' + c[0] + '" class="' + (i ? 'n' : '') + '"' + (c[3] ? ' title="' + esc(c[3]) + '"' : '') + '>' + c[1] + (ord.c === c[0] ? '<span class="ar">' + (ord.d < 0 ? '▼' : '▲') + '</span>' : '') + (c[2] ? '<small class="thsub">' + c[2] + '</small>' : '') + '</th>';
     }).join('') + '</tr></thead><tbody>' + P.map(function (p) {
       return '<tr><td><b>' + esc(p.nome) + '</b></td><td class="n num"><div style="display:flex;align-items:center;gap:8px;justify-content:flex-end"><span style="display:inline-block;width:70px;height:6px;border-radius:3px;background:var(--trilho);overflow:hidden"><i style="display:block;height:100%;width:' + (100 * p.lanc / mx) + '%;background:var(--acento)"></i></span>' + n0(p.lanc) + '</div></td>' +
-        '<td class="n num">' + n0(p.pos) + '</td><td class="n num">' + n0(p.ends) + '</td><td class="n num">' + n0(p.skus) + '</td><td class="n num">' + n0(p.pecas) + '</td>' +
+        '<td class="n num">' + n0(p.pos) + '</td><td class="n num">' + n0(p.ends) + '</td><td class="n num">' + n0(p.skus) + '</td><td class="n num"><b>' + n(p.codHora.toFixed(1)) + '</b></td><td class="n num">' + n(p.minCod.toFixed(1)) + ' min</td><td class="n num">' + n0(p.pecas) + '</td>' +
         '<td class="n num">' + dtBR(p.ini) + '</td><td class="n num">' + dtBR(p.fim) + '</td><td class="n num">' + n(Math.round(p.horas * 10) / 10) + ' h</td>' +
         '<td class="n num"><b>' + n(Math.round(p.ritmo * 10) / 10) + '</b></td><td class="n num">' + (p.acur == null ? '—' : '<span class="tag ' + (p.acur >= .95 ? 'ok' : p.acur >= .8 ? 'al' : 'bx') + '">' + pc(p.acur, 0) + '</span>') + '</td><td class="n num">' + n0(p.seg) + '</td></tr>';
     }).join('') + '</tbody></table></div></div>';
-    // heatmap pessoa x hora
+    // heatmap de códigos distintos por pessoa x hora
     var horas = []; for (var i = 0; i < 24; i++) horas.push((i + 6) % 24);
-    var mat = P.map(function (p) { var a = new Array(24).fill(0); p.horasArr.forEach(function (l) { if (l.t) a[(l.t.getHours() + 18) % 24]++; }); return a; });
+    var mat = P.map(function (p) { var a = new Array(24).fill(0), vistos = {}; p.horasArr.forEach(function (l) { if (l.t) { var ix = (l.t.getHours() + 18) % 24, chave = ix + '|' + l.sku; if (!vistos[chave]) { vistos[chave] = 1; a[ix]++; } } }); return a; });
     var usadas = horas.map(function (x, i) { return mat.some(function (a) { return a[i]; }); });
     var i0 = usadas.indexOf(true), i1 = 23 - usadas.slice().reverse().indexOf(true);
     var mxh = Math.max.apply(null, mat.map(function (a) { return Math.max.apply(null, a); }).concat([1]));
@@ -739,7 +824,8 @@
       }
     });
     hm += '</div>';
-    h += '<div class="card"><p class="eyebrow">Mapa de calor</p><h3>Lançamentos por conferente e hora</h3><p class="sc">Mostra quando cada um contou — faixas apagadas são pausas ou troca de turno</p>' + hm + '</div>';
+    var mediaMinCod = soma(P, function (p) { return p.horas; }) * 60 / Math.max(1, soma(P, function (p) { return p.skus; }));
+    h += '<div class="card"><p class="eyebrow">Mapa de calor</p><h3>Códigos distintos por conferente e hora</h3><p class="sc">Média geral de <b style="color:var(--tx)">' + n(mediaMinCod.toFixed(1)) + ' min por código</b> · pausas acima de 30 minutos não entram no tempo ativo</p>' + hm + '</div>';
     $('v-perf').innerHTML = h;
     Array.prototype.forEach.call($('pTab').querySelectorAll('th'), function (th) {
       th.addEventListener('click', function () { var c = th.getAttribute('data-c'); perfOrd = { c: c, d: perfOrd.c === c ? -perfOrd.d : (c === 'nome' ? 1 : -1) }; perf(filtrados()); });

@@ -283,7 +283,14 @@
     .podio { grid-template-columns: 1fr; }
   }
   /* ---------- seletor de tema (fileira de bolinhas) ---------- */
-  .tema { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border: 1px solid var(--borda); border-radius: 12px; background: var(--ctrl); }
+  .tema { position: relative; display: inline-flex; }
+  .tema-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--borda); background: var(--ctrl); color: var(--tx2); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: border-color .12s, color .12s, background .12s; }
+  .tema-btn:hover { border-color: var(--acento); color: var(--tx); background: var(--ctrl2); }
+  .tema-pop { position: absolute; right: 0; top: calc(100% + 8px); z-index: 300; background: var(--card1); border: 1px solid var(--borda); border-radius: 14px; padding: 12px 14px; box-shadow: 0 16px 40px rgba(0,0,0,.45); }
+  .tema-pop[hidden] { display: none; }
+  .tema-pop-h { font-size: 10.5px; font-weight: 800; letter-spacing: .6px; text-transform: uppercase; color: var(--tx3); margin-bottom: 10px; white-space: nowrap; }
+  .tema-dots { display: flex; gap: 11px; }
+  .tema-dots .sw-dot { width: 24px; height: 24px; }
   .sw-dot { width: 21px; height: 21px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255,255,255,.28); transition: transform .12s, box-shadow .12s; }
   .sw-dot:hover { transform: scale(1.14); }
   .sw-dot.on { transform: scale(1.06); box-shadow: inset 0 0 0 1px rgba(255,255,255,.35), 0 0 0 2px var(--ctrl), 0 0 0 4px var(--acento); }
@@ -381,12 +388,20 @@
         </select>
         <button class="btn" id="bAtu"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4L21 8"/><path d="M21 3v5h-5"/></svg>Atualizar</button>
         <button class="btn" id="bReset" title="Atualizar SBF e MB52 do turno"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.5 9a9 9 0 0 1 14.9-3.4L23 10M1 14l4.6 4.4A9 9 0 0 0 20.5 15"/></svg>Atualizar SBF/MB52</button>
-        <div class="tema" id="tema" role="group" aria-label="Tema de cores">
-          <button type="button" class="sw-dot" data-t="azul"  title="Azul-marinho"  aria-label="Azul-marinho"  style="background:linear-gradient(135deg,#38b9ff,#22d3ee)"></button>
-          <button type="button" class="sw-dot" data-t="lime"  title="Cyber Lime"    aria-label="Cyber Lime"    style="background:linear-gradient(135deg,#B6FF2E,#10B981)"></button>
-          <button type="button" class="sw-dot" data-t="cyan"  title="Electric Cyan" aria-label="Electric Cyan" style="background:linear-gradient(135deg,#00E5FF,#3B82F6)"></button>
-          <button type="button" class="sw-dot" data-t="teal"  title="Deep Teal"     aria-label="Deep Teal"     style="background:linear-gradient(135deg,#2DD4BF,#22D3EE)"></button>
-          <button type="button" class="sw-dot" data-t="claro" title="Claro"         aria-label="Tema claro"    style="background:linear-gradient(135deg,#4F46E5,#2563EB)"></button>
+        <div class="tema" id="tema">
+          <button type="button" class="tema-btn" id="temaBtn" aria-haspopup="true" aria-expanded="false" title="Cor do painel" aria-label="Cor do painel">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.1"/><circle cx="17.5" cy="10.5" r="1.1"/><circle cx="8.5" cy="7.5" r="1.1"/><circle cx="6.5" cy="12.5" r="1.1"/><path d="M12 2C6.5 2 2 6 2 11c0 4 3 7 7 7 1.1 0 2-.9 2-2 0-.5-.2-.9-.5-1.3-.3-.4-.5-.8-.5-1.2 0-1.1.9-2 2-2h2.3C17.9 11.5 20 9.4 20 6.5 20 4 16.4 2 12 2z"/></svg>
+          </button>
+          <div class="tema-pop" id="temaPop" hidden role="group" aria-label="Cores do painel">
+            <div class="tema-pop-h">Cor do painel</div>
+            <div class="tema-dots">
+              <button type="button" class="sw-dot" data-t="azul"  title="Azul-marinho"  aria-label="Azul-marinho"  style="background:linear-gradient(135deg,#38b9ff,#22d3ee)"></button>
+              <button type="button" class="sw-dot" data-t="lime"  title="Cyber Lime"    aria-label="Cyber Lime"    style="background:linear-gradient(135deg,#B6FF2E,#10B981)"></button>
+              <button type="button" class="sw-dot" data-t="cyan"  title="Electric Cyan" aria-label="Electric Cyan" style="background:linear-gradient(135deg,#00E5FF,#3B82F6)"></button>
+              <button type="button" class="sw-dot" data-t="teal"  title="Deep Teal"     aria-label="Deep Teal"     style="background:linear-gradient(135deg,#2DD4BF,#22D3EE)"></button>
+              <button type="button" class="sw-dot" data-t="claro" title="Claro"         aria-label="Tema claro"    style="background:linear-gradient(135deg,#4F46E5,#2563EB)"></button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1110,9 +1125,15 @@
       Array.prototype.forEach.call(document.querySelectorAll(".sw-dot"), function (b) { b.classList.toggle("on", b.getAttribute("data-t") === t); });
       try { if (typeof desenhar === "function" && D) desenhar(); } catch (e) {}
     }
+    var tBtn = document.getElementById("temaBtn"), tPop = document.getElementById("temaPop");
+    function fecharTema() { if (tPop) tPop.hidden = true; if (tBtn) tBtn.setAttribute("aria-expanded", "false"); }
     Array.prototype.forEach.call(document.querySelectorAll(".sw-dot"), function (b) {
-      b.addEventListener("click", function () { aplica(b.getAttribute("data-t")); });
+      b.addEventListener("click", function () { aplica(b.getAttribute("data-t")); fecharTema(); });
     });
+    if (tBtn && tPop) {
+      tBtn.addEventListener("click", function (e) { e.stopPropagation(); var abrir = tPop.hidden; tPop.hidden = !abrir; tBtn.setAttribute("aria-expanded", String(abrir)); });
+      document.addEventListener("click", function (e) { var w = document.getElementById("tema"); if (w && !w.contains(e.target)) fecharTema(); });
+    }
     aplica(salvo());
   })();
 

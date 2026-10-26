@@ -1,5 +1,11 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.9.0 — 26/10/2026 — Estilo WS: botão de cores circular + fonte DM Sans na contagem
+- Gestão: o seletor de tema virou um **botão circular (estilo WS)** no topo que abre um popover com as
+  **5 cores** (azul/lime/cyan/teal/claro) — nada se perde; só o botão ficou no padrão WS.
+- Contagem: fonte do corpo trocada para **DM Sans** (igual WS/Gestão); títulos seguem em Oxanium.
+- Referência de estilo do WS (medido ao vivo): DM Sans · fundo #040A18 · cards #23384C (raio 9px) · texto #EDF7FF.
+
 ## v0.8.6 — 25/10/2026 — Cenários imutáveis SBF/MB52
 - Cada clique em **Atualizar SBF/MB52** cria um cenário identificado por dia, turno e horário.
 - Cada novo lançamento grava o cenário e a fotografia usada no cálculo: saldo SBF, armazém e MB52.

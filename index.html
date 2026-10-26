@@ -1114,7 +1114,7 @@
     return carregarSBF().then(function (s) {
       var f = filtro.trim().toUpperCase().replace(/\s+/g, ' '), itens = [];
       Object.keys(s.e).forEach(function (end) {
-        if (end === f || end.indexOf(f) === 0) s.e[end].forEach(function (x) { itens.push({ sku: s.p[x[0]], desc: s.d[x[0]], local: end, qtd: x[1] }); });
+        if (end === f) s.e[end].forEach(function (x) { itens.push({ sku: s.p[x[0]], desc: s.d[x[0]], local: end, qtd: x[1] }); });
       });
       itens.sort(function (a, b) { return a.local.localeCompare(b.local, 'pt-BR', { numeric: true }) || a.sku.localeCompare(b.sku, 'pt-BR', { numeric: true }); });
       return { titulo: f, fonte: 'sbf', itens: itens, almoxarife: estado.resp || '', logo: '', gerado: s.gerado };

@@ -1,5 +1,14 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.8.6 — 25/10/2026 — Cenários imutáveis SBF/MB52
+- Cada clique em **Atualizar SBF/MB52** cria um cenário identificado por dia, turno e horário.
+- Cada novo lançamento grava o cenário e a fotografia usada no cálculo: saldo SBF, armazém e MB52.
+- Lançamentos anteriores não mudam quando outro turno é atualizado ou quando há nova atualização no meio do turno.
+- Uma atualização adicional no mesmo turno abre um novo cenário; somente os lançamentos posteriores usam a nova base.
+- HISTÓRICO, DIVERGÊNCIAS e filas ROBÔ BAIXA/ALTA passaram a carregar a identificação do cenário.
+- Registros anteriores à implantação foram preservados e identificados como `LEGADO`.
+- Backend Apps Script publicado como **Versão 27**.
+
 ## v0.8.5 — 25/10/2026 — Quantidades com milhar e decimal
 - Corrigida a leitura de quantidade no lançamento avulso e no Kardex: `10.520`/`10,520` passa a
   significar `10520`, em vez de `10,52`.

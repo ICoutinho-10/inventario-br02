@@ -1,5 +1,15 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.9.3 — 27/10/2026 — Status do HISTÓRICO: Ajustado manualmente (sem saldo) + Verificar (erro)
+- Adicionado **"Verificar"** à lista suspensa do Status do HISTÓRICO (`ST_HIST`).
+- `roboResultado` passou a marcar o HISTÓRICO em todos os casos: **BAIXADO/ALTA FEITA → "Ajustado Robô"**
+  (resolve, sai de DIVERGÊNCIAS), **"JA BAIXADO" → "Ajustado manualmente"** (endereço sem saldo = ajuste
+  feito à mão, não é erro; também resolve), **erro → "Verificar"** (não resolve, fica pra revisar).
+- Antes, baixa-feita e já-baixado gravavam o mesmo "BAIXADO"/"Ajustado Robô" (não dava pra distinguir);
+  e erro não marcava nada no HISTÓRICO.
+- Validado com produto fake (ajustado = True p/ BAIXADO e JA BAIXADO, False p/ ERRO). Publicado (V38, mesma /exec).
+- Robô (rede) v1.9.3: caso sem saldo manda status "JA BAIXADO". Fora do Git (projeto Apps Script + rede).
+
 ## v0.9.2 — 27/10/2026 — HISTÓRICO: ordem cronológica + "Qtde a lançar" correta
 - **Ordem cronológica (regra fixa):** o HISTÓRICO passou a ser ordenado por "Última contagem"
   **crescente** — mais antigo em cima, lançamentos de hoje embaixo. Antes ordenava por dia

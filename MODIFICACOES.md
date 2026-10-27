@@ -1,5 +1,21 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.9.4 — 27/10/2026 — HISTÓRICO durável + dashboards pelo HISTÓRICO + filtro DE/ATÉ
+- **Dashboards pelo HISTÓRICO:** Performance e KPIs agora vêm do HISTÓRICO (não mais da aba
+  Lançamentos). O `L` interno é derivado do HISTÓRICO (cada posição = uma "contagem"), então
+  nada quebra quando a aba Lançamentos for aposentada. Rótulo "Lançamentos" → "Contagens".
+- **Correção dia-turno:** a Performance passou a agrupar pelo **dia-turno (corte 06:00)**, não
+  pela data crua. Contagens de madrugada (ex.: 00:19–05:27 de 27/10) voltam a cair no dia 26/10,
+  como manda a regra — some o "2º turno de hoje" que não existia.
+- **Filtro de período DE/ATÉ:** o calendário virou intervalo (1º clique = início, 2º = fim;
+  campo oculto `fDiaAte`; filtro `de <= dia <= até`).
+- **HISTÓRICO durável (backend, V40):** `atualizarHistorico_` agora **preserva** as linhas que já
+  existem e não vieram na leitura dos Lançamentos (merge por `produto|endereço|cenário`). Antes ele
+  reconstruía do zero (apaga + reescreve) — se os Lançamentos perdessem um dia, o HISTÓRICO perdia
+  também. Testado: um `recalcular` com os Lançamentos SEM 27/10 **manteve** os 756 registros de 27/10.
+- **Seguro excluir Lançamentos (V41):** `ultLanc_` devolve vazio se a aba não existir, então excluir
+  a aba Lançamentos não dá erro e não apaga o HISTÓRICO.
+
 ## v0.9.3 — 27/10/2026 — Status do HISTÓRICO: Ajustado manualmente (sem saldo) + Verificar (erro)
 - Adicionado **"Verificar"** à lista suspensa do Status do HISTÓRICO (`ST_HIST`).
 - `roboResultado` passou a marcar o HISTÓRICO em todos os casos: **BAIXADO/ALTA FEITA → "Ajustado Robô"**

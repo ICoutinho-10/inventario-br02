@@ -312,6 +312,7 @@
   .cal-grid .d.fora { color: var(--tx4); opacity: .55; }
   .cal-grid .d.hoje { box-shadow: inset 0 0 0 1.6px var(--acento); color: var(--tx); }
   .cal-grid .d.sel { background: var(--grad); color: var(--on-accent); box-shadow: none; }
+  .cal-grid .d.intervalo { background: rgba(var(--acento-rgb), .18); color: var(--tx); }
   .cal-hoje { margin-top: 11px; width: 100%; height: 34px; border-radius: 9px; border: 1px solid var(--borda); background: var(--ctrl); color: var(--tx); cursor: pointer; font-weight: 700; font-size: 12.5px; }
   .cal-hoje:hover { border-color: var(--acento); }
   #calLimpar[hidden] { display: none; }
@@ -368,6 +369,7 @@
       </div>
       <div class="ctr">
         <input type="hidden" id="fDia" value="">
+        <input type="hidden" id="fDiaAte" value="">
         <div class="cal" id="cal">
           <button type="button" class="btn" id="calBtn" aria-haspopup="true" aria-expanded="false" title="Filtrar por dia">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
@@ -506,7 +508,7 @@
     d.H = d.hist.map(function (r) {
       var u = parseD(r[11]);
       return { prod: String(r[0]), desc: r[1], arm: r[2], end: String(r[3]), saldo: num(r[4]), cont: num(r[5]), dif: num(r[6]), lancar: num(r[7]),
-               mov: String(r[8] || ''), n: num(r[9]), resp: String(r[10] || ''), ult: u, dia: u ? diaKey(u) : '', obs: r[12] || '',
+               mov: String(r[8] || ''), n: num(r[9]), resp: String(r[10] || ''), ult: u, dia: u ? diaKey(diaTurno(u)) : '', obs: r[12] || '',
                mb52: r[13] === '' ? null : num(r[13]), consol: num(r[14]), pct: typeof r[15] === 'number' ? r[15] : null, custo: num((d.custo || {})[r[0]]),
                origem: String(r[17] || ''), turno: String(r[18] || '') };
     });
@@ -524,11 +526,13 @@
   }
   function filtrados() {
     var dia = $('fDia').value;
+    var ate = ($('fDiaAte') && $('fDiaAte').value) || dia;
     var tn = $('fTurno') ? $('fTurno').value : '';
+    function noPeriodo(d) { return !dia || (d >= dia && d <= ate); }
     return {
-      dia: dia, turno: tn,
-      H: D.H.filter(function (h) { return (!dia || h.dia === dia) && (!tn || (h.turno && h.turno.indexOf(tn) >= 0)); }),
-      L: D.L.filter(function (l) { return (!dia || l.dia === dia) && (!tn || l.turno === tn); })
+      dia: dia, ate: ate, turno: tn,
+      H: D.H.filter(function (h) { return noPeriodo(h.dia) && (!tn || (h.turno && h.turno.indexOf(tn) >= 0)); }),
+      L: D.L.filter(function (l) { return noPeriodo(l.dia) && (!tn || l.turno === tn); })
     };
   }
 
@@ -561,7 +565,7 @@
     var F = filtrados();
     var titulo = { dash: ['Visão geral', 'Dashboard'], perf: ['Pessoas', 'Performance de contagem'], hist: ['Registro', 'Histórico'], kdx: ['Posições', 'Contagem Kardex'] }[VIEW];
     $('eb').textContent = titulo[0]; $('tit').textContent = titulo[1];
-    $('sub').textContent = (F.dia ? 'Turno de ' + diaBR(F.dia) + ' (06:00 até 05:59 do dia seguinte)' : 'Todos os dias de contagem') + (F.turno ? ' · ' + F.turno : '') + ' · ' + n0(F.H.length) + ' posições · ' + n0(soma(F.H, function (h) { return h.n || 1; })) + ' contagens';
+    $('sub').textContent = (F.dia ? (F.ate && F.ate !== F.dia ? 'De ' + diaBR(F.dia) + ' até ' + diaBR(F.ate) : 'Turno de ' + diaBR(F.dia) + ' (06:00 até 05:59 do dia seguinte)') : 'Todos os dias de contagem') + (F.turno ? ' · ' + F.turno : '') + ' · ' + n0(F.H.length) + ' posições · ' + n0(soma(F.H, function (h) { return h.n || 1; })) + ' contagens';
     $('ctHist').textContent = n0(F.H.length);
     $('ctKdx').textContent = n0(uniq(F.H.map(function (h) { return h.end; })).length);
     $('ctPerf').textContent = n0(uniq(F.L.map(function (l) { return l.conf; })).length);
@@ -1147,26 +1151,30 @@
     if (!btn) return;
     var MES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
     var WD = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-    var hoje = new Date(), vis = new Date(hoje.getFullYear(), hoje.getMonth(), 1), sel = null;
+    var hoje = new Date(), vis = new Date(hoje.getFullYear(), hoje.getMonth(), 1), selDe = null, selAte = null;
     function k2(n) { return (n < 10 ? '0' : '') + n; }
     function keyDe(d) { return d.getFullYear() + '-' + k2(d.getMonth() + 1) + '-' + k2(d.getDate()); }
+    function brDia(d) { return k2(d.getDate()) + '/' + k2(d.getMonth() + 1) + '/' + d.getFullYear(); }
     function render() {
       mesLbl.textContent = MES[vis.getMonth()] + ' ' + vis.getFullYear();
       var ini = new Date(vis.getFullYear(), vis.getMonth(), 1), start = new Date(ini);
       start.setDate(1 - ini.getDay());
+      var kDe = selDe ? keyDe(selDe) : '', kAte = selAte ? keyDe(selAte) : '';
       var h = WD.map(function (w) { return '<div class="wd">' + w + '</div>'; }).join('');
       for (var i = 0; i < 42; i++) {
-        var d = new Date(start); d.setDate(start.getDate() + i);
-        var cls = 'd' + (d.getMonth() !== vis.getMonth() ? ' fora' : '') + (keyDe(d) === keyDe(hoje) ? ' hoje' : '') + (sel && keyDe(d) === keyDe(sel) ? ' sel' : '');
-        h += '<button type="button" class="' + cls + '" data-k="' + keyDe(d) + '">' + d.getDate() + '</button>';
+        var d = new Date(start); d.setDate(start.getDate() + i); var kd = keyDe(d);
+        var dentro = kDe && kAte && kd > kDe && kd < kAte;
+        var cls = 'd' + (d.getMonth() !== vis.getMonth() ? ' fora' : '') + (kd === keyDe(hoje) ? ' hoje' : '') + ((kd === kDe || kd === kAte) ? ' sel' : (dentro ? ' intervalo' : ''));
+        h += '<button type="button" class="' + cls + '" data-k="' + kd + '">' + d.getDate() + '</button>';
       }
       grid.innerHTML = h;
     }
     function fecha() { pop.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
-    function aplicaDia(key, label) {
-      $('fDia').value = key || '';
-      tx.textContent = label;
-      limpar.hidden = !key && !($('fTurno') && $('fTurno').value);
+    function aplica() {
+      var de = selDe ? keyDe(selDe) : '', ate = selAte ? keyDe(selAte) : de;
+      $('fDia').value = de; $('fDiaAte').value = ate;
+      tx.textContent = !de ? 'Todos os dias' : (de === ate ? brDia(selDe) : 'de ' + brDia(selDe) + ' até ' + brDia(selAte));
+      limpar.hidden = !de && !($('fTurno') && $('fTurno').value);
       try { hEst.pag = 0; } catch (e) {}
       try { kMax = 40; } catch (e) {}
       try { if (typeof desenhar === 'function' && D) desenhar(); } catch (e) {}
@@ -1174,7 +1182,7 @@
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       var abrir = pop.hidden;
-      vis = sel ? new Date(sel.getFullYear(), sel.getMonth(), 1) : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+      vis = selDe ? new Date(selDe.getFullYear(), selDe.getMonth(), 1) : new Date(hoje.getFullYear(), hoje.getMonth(), 1);
       render(); pop.hidden = !abrir; btn.setAttribute('aria-expanded', String(abrir));
     });
     document.addEventListener('click', function (e) { if (cal && !cal.contains(e.target)) fecha(); });
@@ -1183,11 +1191,11 @@
     $('calHoje').addEventListener('click', function () { vis = new Date(hoje.getFullYear(), hoje.getMonth(), 1); render(); });
     grid.addEventListener('click', function (e) {
       var b = e.target.closest ? e.target.closest('button[data-k]') : null; if (!b) return;
-      var key = b.getAttribute('data-k'); sel = new Date(key + 'T12:00:00'); render();
-      aplicaDia(key, k2(sel.getDate()) + '/' + k2(sel.getMonth() + 1) + '/' + sel.getFullYear());
-      fecha();
+      var d = new Date(b.getAttribute('data-k') + 'T12:00:00');
+      if (!selDe || selAte) { selDe = d; selAte = null; render(); aplica(); }   // 1º clique = início (fica aberto p/ escolher o fim)
+      else { if (d < selDe) { selAte = selDe; selDe = d; } else { selAte = d; } render(); aplica(); fecha(); }  // 2º clique = fim
     });
-    limpar.addEventListener('click', function () { sel = null; if ($('fTurno')) $('fTurno').value = ''; render(); aplicaDia('', 'Todos os dias'); });
+    limpar.addEventListener('click', function () { selDe = null; selAte = null; if ($('fTurno')) $('fTurno').value = ''; render(); aplica(); });
   })();
 </script>
 </body>

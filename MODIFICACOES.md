@@ -1,5 +1,15 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.9.2 — 27/10/2026 — HISTÓRICO: ordem cronológica + "Qtde a lançar" correta
+- **Ordem cronológica (regra fixa):** o HISTÓRICO passou a ser ordenado por "Última contagem"
+  **crescente** — mais antigo em cima, lançamentos de hoje embaixo. Antes ordenava por dia
+  decrescente (novo em cima). Vale sempre, a cada recálculo.
+- **Qtde a lançar corrigida:** estava copiando a "Qtde contada" (nas linhas OK aparecia a própria
+  contagem em vez de 0). Agora **Qtde a lançar = |Saldo TOTVS − Qtde contada|** (a diferença, usando
+  a contagem consolidada do Kardex). OK → 0; BAIXA/ALTA → a diferença.
+- Validado em todos os 5.475 registros: 0 linhas com "a lançar" errada, 0 pares fora de ordem.
+- Mudança no Apps Script `atualizarHistorico_` (col 7 e o `sort`); publicado (mesma URL /exec). Fora do Git.
+
 ## v0.9.1 — 26/10/2026 — Correções backend: Kardex por último dia + rota `jalido`
 - **Kardex somava datas diferentes.** Causa: um arquivo esquecido no projeto Apps Script
   (`Sem título.gs`, experimento "V30") tinha uma cópia própria de `kardex`/`salvarLote` que,

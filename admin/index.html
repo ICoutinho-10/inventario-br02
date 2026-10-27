@@ -510,9 +510,11 @@
                mb52: r[13] === '' ? null : num(r[13]), consol: num(r[14]), pct: typeof r[15] === 'number' ? r[15] : null, custo: num((d.custo || {})[r[0]]),
                origem: String(r[17] || ''), turno: String(r[18] || '') };
     });
-    d.L = d.lanc.filter(function (r) { return !/ANULAD|CANCEL/i.test(r[5]); }).map(function (r) {
-      var t = parseD(r[0]); var td = t ? diaTurno(t) : null;
-      return { t: t, dia: td ? diaKey(td) : '', sku: r[1], end: r[2], q: num(r[3]), conf: r[4] || '(sem nome)', st: r[5], seg: /2/.test(r[5]), origem: r[6] || '', turno: r[7] || '' };
+    // A aba Lançamentos será aposentada: Performance, KPIs e Dashboard passam a vir do HISTÓRICO.
+    // Cada posição do HISTÓRICO vira uma "contagem" (última data, qtd contada, responsável, turno).
+    d.L = d.H.filter(function (h) { return h.resp; }).map(function (h) {
+      return { t: h.ult, dia: h.dia, sku: h.prod, end: h.end, q: h.cont, conf: h.resp || '(sem nome)',
+               st: ((h.n || 1) > 1 ? '2ª contagem' : 'Contado'), seg: (h.n || 1) > 1, origem: h.origem, turno: h.turno };
     });
     var dias = {};
     d.H.forEach(function (h) { if (h.dia) dias[h.dia] = 1; });
@@ -559,7 +561,7 @@
     var F = filtrados();
     var titulo = { dash: ['Visão geral', 'Dashboard'], perf: ['Pessoas', 'Performance de contagem'], hist: ['Registro', 'Histórico'], kdx: ['Posições', 'Contagem Kardex'] }[VIEW];
     $('eb').textContent = titulo[0]; $('tit').textContent = titulo[1];
-    $('sub').textContent = (F.dia ? 'Turno de ' + diaBR(F.dia) + ' (06:00 até 05:59 do dia seguinte)' : 'Todos os dias de contagem') + (F.turno ? ' · ' + F.turno : '') + ' · ' + n0(F.H.length) + ' posições · ' + n0(F.L.length) + ' lançamentos';
+    $('sub').textContent = (F.dia ? 'Turno de ' + diaBR(F.dia) + ' (06:00 até 05:59 do dia seguinte)' : 'Todos os dias de contagem') + (F.turno ? ' · ' + F.turno : '') + ' · ' + n0(F.H.length) + ' posições · ' + n0(soma(F.H, function (h) { return h.n || 1; })) + ' contagens';
     $('ctHist').textContent = n0(F.H.length);
     $('ctKdx').textContent = n0(uniq(F.H.map(function (h) { return h.end; })).length);
     $('ctPerf').textContent = n0(uniq(F.L.map(function (l) { return l.conf; })).length);
@@ -785,28 +787,30 @@
   // ---------- PERFORMANCE ----------
   var perfOrd = { c: 'lanc', d: -1 };
   function perf(F) {
-    var L = F.L, H = F.H;
-    if (!L.length) { $('v-perf').innerHTML = '<div class="card vazio">Nenhum lançamento neste dia.</div>'; return; }
-    var P = groupBy(L, function (l) { return l.conf; }).map(function (g) {
-      var it = g.itens, ts = it.map(function (l) { return l.t; }).filter(Boolean).sort(function (a, b) { return a - b; });
-      var pos = uniq(it.map(function (l) { return l.sku + '|' + l.end; }));
-      var hs = 0; groupBy(it, function (l) { return l.dia; }).forEach(function (x) { hs += horasAtivas(x.itens); });
-      var meus = H.filter(function (h) { return h.resp.split(', ').indexOf(g.k) >= 0; });
-      var ok = meus.filter(function (h) { return h.mov === 'OK'; }).length;
-      var nSkus = uniq(it.map(function (l) { return l.sku; })).length;
-      return { nome: g.k, lanc: it.length, pos: pos.length, ends: uniq(it.map(function (l) { return l.end; })).length, skus: nSkus,
-               pecas: soma(it, function (l) { return l.q; }), ini: ts[0], fim: ts[ts.length - 1], horas: hs, ritmo: hs ? it.length / hs : 0,
+    // Fonte: HISTÓRICO (aba Lançamentos vai ser aposentada). 1 linha do HISTÓRICO = 1 posição
+    // (SKU + endereço) com a última contagem, Nº de contagens, responsável e turno.
+    var H = F.H;
+    if (!H.length) { $('v-perf').innerHTML = '<div class="card vazio">Nenhuma contagem neste período.</div>'; return; }
+    var P = groupBy(H, function (h) { return h.resp || '(sem nome)'; }).map(function (g) {
+      var it = g.itens, ts = it.map(function (h) { return h.ult; }).filter(Boolean).sort(function (a, b) { return a - b; });
+      var hs = 0; groupBy(it, function (h) { return h.dia; }).forEach(function (x) { hs += horasAtivas(x.itens.map(function (h) { return { t: h.ult }; })); });
+      var ok = it.filter(function (h) { return h.mov === 'OK'; }).length;
+      var nSkus = uniq(it.map(function (h) { return h.prod; })).length;
+      var nCont = soma(it, function (h) { return h.n || 1; });  // Nº de contagens (vindo do HISTÓRICO)
+      return { nome: g.k, lanc: nCont, pos: it.length, ends: uniq(it.map(function (h) { return h.end; })).length, skus: nSkus,
+               pecas: soma(it, function (h) { return h.cont; }), ini: ts[0], fim: ts[ts.length - 1], horas: hs, ritmo: hs ? it.length / hs : 0,
                codHora: hs ? nSkus / hs : 0, minCod: nSkus ? hs * 60 / nSkus : 0,
-               acur: meus.length ? ok / meus.length : null, seg: it.filter(function (l) { return l.seg; }).length, horasArr: it };
+               acur: it.length ? ok / it.length : null, seg: it.filter(function (h) { return (h.n || 1) > 1; }).length,
+               horasArr: it.map(function (h) { return { t: h.ult, sku: h.prod }; }) };
     });
     var ord = perfOrd;
     P.sort(function (a, b) { var x = a[ord.c], y = b[ord.c]; if (typeof x === 'string') return ord.d * x.localeCompare(y); return ord.d * ((x == null ? -1 : x) - (y == null ? -1 : y)); });
     var top3 = P.slice().sort(function (a, b) { return b.lanc - a.lanc; }).slice(0, 3);
     var h = '<div class="podio">' + top3.map(function (p, i) {
-      return '<div class="card pd"><span class="lugar">' + (i + 1) + 'º</span><p class="eyebrow">' + ['Mais lançamentos', '2º lugar', '3º lugar'][i] + '</p><div class="nm">' + esc(p.nome) + '</div>' +
-        '<div class="kv"><div><b class="num">' + n0(p.lanc) + '</b><small>lançamentos</small></div><div><b class="num">' + n(p.codHora.toFixed(1)) + '</b><small>códigos/h</small></div><div><b class="num">' + n(p.minCod.toFixed(1)) + '</b><small>min/código</small></div><div><b class="num" style="color:' + (p.acur == null ? 'var(--tx3)' : corAc(p.acur)) + '">' + (p.acur == null ? '—' : pc(p.acur, 0)) + '</b><small>acurácia</small></div></div></div>';
+      return '<div class="card pd"><span class="lugar">' + (i + 1) + 'º</span><p class="eyebrow">' + ['Mais contagens', '2º lugar', '3º lugar'][i] + '</p><div class="nm">' + esc(p.nome) + '</div>' +
+        '<div class="kv"><div><b class="num">' + n0(p.lanc) + '</b><small>contagens</small></div><div><b class="num">' + n(p.codHora.toFixed(1)) + '</b><small>códigos/h</small></div><div><b class="num">' + n(p.minCod.toFixed(1)) + '</b><small>min/código</small></div><div><b class="num" style="color:' + (p.acur == null ? 'var(--tx3)' : corAc(p.acur)) + '">' + (p.acur == null ? '—' : pc(p.acur, 0)) + '</b><small>acurácia</small></div></div></div>';
     }).join('') + '</div>';
-    var cols = [['nome', 'Conferente', ''], ['lanc', 'Lançamentos', 'linhas enviadas', 'Cada vez que o conferente clicou em Lançar uma quantidade (1 linha na aba Lançamentos)'],
+    var cols = [['nome', 'Conferente', ''], ['lanc', 'Contagens', 'contagens feitas', 'Nº de contagens das posições da pessoa (do HISTÓRICO; inclui recontagens / 2ª contagem)'],
                 ['pos', 'Posições', 'SKU + endereço', 'Combinações SKU + endereço diferentes. Lançamentos maior que Posições = mesma posição lançada mais de uma vez (recontagem, 2ª contagem ou quantidade lançada em partes)'],
                 ['ends', 'Endereços', 'locais diferentes', 'Quantos endereços físicos diferentes a pessoa contou'], ['skus', 'SKUs', 'códigos diferentes', 'Quantos códigos de peça diferentes a pessoa contou'],
                 ['codHora', 'Códigos/h', 'códigos por tempo', 'Códigos distintos divididos pelas horas ativas'], ['minCod', 'Média/código', 'minutos por código', 'Minutos ativos divididos pelos códigos distintos; pausas acima de 30 minutos não entram'],
@@ -814,7 +818,7 @@
                 ['horas', 'Horas ativas', 'tempo contando', 'Tempo entre lançamentos, sem contar pausas longas'], ['ritmo', 'Ritmo', 'lançamentos/hora', 'Lançamentos ÷ horas ativas'],
                 ['acur', 'Acurácia', 'posições OK', 'Posições da pessoa em que a contagem bateu com o saldo TOTVS ÷ posições contadas'], ['seg', '2ª contagens', 'recontagens', 'Lançamentos marcados como 2ª contagem']];
     var mx = Math.max.apply(null, P.map(function (p) { return p.lanc; }));
-    h += '<div class="leg"><b>Como ler:</b> <span><em>Lançamentos</em> = cliques em Lançar</span><span><em>Posições</em> = SKU + endereço diferentes</span><span><em>Endereços</em> = locais diferentes</span><span>Lançamentos − Posições = <b>relançamentos</b> da mesma posição (recontagem, 2ª contagem ou lançado em partes)</span><span class="mut">Passe o mouse no título da coluna para ver a explicação.</span></div>';
+    h += '<div class="leg"><b>Como ler:</b> <span><em>Contagens</em> = contagens das posições (c/ recontagens)</span><span><em>Posições</em> = SKU + endereço diferentes</span><span><em>Endereços</em> = locais diferentes</span><span>Contagens − Posições = <b>recontagens</b> da mesma posição (2ª contagem)</span><span class="mut">Passe o mouse no título da coluna para ver a explicação.</span></div>';
     h += '<div class="card" style="padding:0"><div class="tw" style="border:0;max-height:none"><table class="t" id="pTab"><thead><tr>' + cols.map(function (c, i) {
       return '<th data-c="' + c[0] + '" class="' + (i ? 'n' : '') + '"' + (c[3] ? ' title="' + esc(c[3]) + '"' : '') + '>' + c[1] + (ord.c === c[0] ? '<span class="ar">' + (ord.d < 0 ? '▼' : '▲') + '</span>' : '') + (c[2] ? '<small class="thsub">' + c[2] + '</small>' : '') + '</th>';
     }).join('') + '</tr></thead><tbody>' + P.map(function (p) {

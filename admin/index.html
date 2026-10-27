@@ -20,15 +20,16 @@
 <link rel="icon" type="image/png" href="../login/byd.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Oxanium:wght@600;700;800&family=DM+Sans:wght@400;500;700&display=swap">
 <style>
+  /* ===== Padrão WS — Neon Indigo (navy #03101f + acento índigo→ciano #6366f1→#06b6d4) ===== */
   :root {
-    --bg: #020914; --card1: #08223b; --card2: #041426; --borda: #174768; --borda2: #123b59;
-    --acento: #38b9ff; --eyebrow: #57b9ed; --tx: #edf7ff; --tx2: #a9c6da; --tx3: #7495aa; --tx4: #5f819a;
-    --trilho: #0b2237; --ok: #34d399; --bx: #f87171; --al: #fb923c; --azul: #60a5fa; --ama: #fbbf24;
-    --ctrl: #061a2e; --ctrl2: #0a2d4c; --row-alt: rgba(8,34,59,.45); --row-hover: rgba(56,185,255,.08);
-    --on-accent: #02121f; --tese1: #0a2947; --tese2: #05192e; --accent-weak: rgba(56,185,255,.15);
-    --glow1: rgba(17,119,190,.22); --glow2: rgba(56,185,255,.08); --grad: linear-gradient(135deg, #38b9ff, #22d3ee); --acento-rgb: 56,185,255;
+    --bg: #03101f; --card1: #08223b; --card2: #041426; --borda: #174768; --borda2: #123b59;
+    --acento: #818cf8; --eyebrow: #a6b0e8; --tx: #eef1ff; --tx2: #a6b0e8; --tx3: #7480c0; --tx4: #5f6ba0;
+    --trilho: #0b2237; --ok: #34d399; --bx: #ff5f7e; --al: #f59e0b; --azul: #22d3ee; --ama: #fbbf24;
+    --ctrl: #061a2e; --ctrl2: #0a2d4c; --row-alt: rgba(8,34,59,.45); --row-hover: rgba(129,140,248,.09);
+    --on-accent: #0a1026; --tese1: #0a2947; --tese2: #05192e; --accent-weak: rgba(129,140,248,.16);
+    --glow1: rgba(12,51,88,.55); --glow2: rgba(99,102,241,.12); --grad: linear-gradient(135deg, #6366f1, #06b6d4); --acento-rgb: 129,140,248;
   }
   [data-theme="lime"] {
     --bg:#07100B; --card1:#0E2017; --card2:#081610; --borda:#1E5A3A; --borda2:#164830;
@@ -68,6 +69,8 @@
          background-attachment: fixed; color: var(--tx); font-family: "DM Sans", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
   .num { font-variant-numeric: tabular-nums; }
   button, input, select { font-family: inherit; }
+  /* tipografia de display do WS: Oxanium em títulos, eyebrows e números grandes */
+  h1, h2, h3, .marca b, .eyebrow, .num, .kpi-num, .big, .valor { font-family: "Oxanium", "Manrope", "DM Sans", system-ui, sans-serif; }
 
   /* ---------- layout ---------- */
   .lay { display: grid; grid-template-columns: 248px minmax(0, 1fr); min-height: 100vh; }

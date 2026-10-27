@@ -8,15 +8,16 @@
 <link rel="icon" type="image/png" href="login/byd.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Oxanium:wght@600;700;800&display=swap">
 <style>
-  :root { --ink:#eef3ff; --dim:#9fb0d8; --linha:rgba(120,170,255,.22); --azul:#2f7bff; --ciano:#22d3ee; --erro:#ff8095; }
+  /* Tema Neon Indigo (padrão WS): navy #03101f + acento índigo→ciano #6366f1→#06b6d4 */
+  :root { --ink:#eef1ff; --dim:#a6b0e8; --linha:rgba(129,140,248,.28); --azul:#6366f1; --ciano:#06b6d4; --erro:#ff5f7e; }
   * { box-sizing: border-box; }
   html, body { margin: 0; min-height: 100%; }
   body {
     min-height: 100vh; display: grid; place-items: center; padding: 24px 16px;
     font-family: "Manrope", system-ui, sans-serif; color: var(--ink);
-    background: #040a18 url("/login/fundo.webp") center / cover no-repeat fixed;
+    background: #03101f url("/login/fundo.webp") center / cover no-repeat fixed;
   }
   body::before { content: ""; position: fixed; inset: 0; background: linear-gradient(120deg, rgba(3,9,24,.92) 20%, rgba(3,9,24,.55) 70%, rgba(3,9,24,.75)); }
   .cartao {
@@ -26,8 +27,8 @@
   }
   .marca { display: flex; align-items: center; gap: 12px; margin-bottom: 26px; }
   .marca img { width: 72px; height: auto; filter: brightness(0) invert(1); }
-  .marca strong { display: block; font-size: 20px; font-weight: 800; letter-spacing: 1.6px; }
-  .marca small { display: block; font-size: 11px; letter-spacing: 3px; color: var(--ciano); font-weight: 700; }
+  .marca strong { display: block; font-family: "Oxanium", "Manrope", system-ui, sans-serif; font-size: 20px; font-weight: 800; letter-spacing: 1.6px; }
+  .marca small { display: block; font-family: "Oxanium", "Manrope", system-ui, sans-serif; font-size: 11px; letter-spacing: 3px; color: var(--ciano); font-weight: 700; }
   h1 { font-size: 17px; font-weight: 700; margin: 0 0 4px; }
   p.sub { margin: 0 0 20px; color: var(--dim); font-size: 13px; }
   label { display: block; font-size: 12px; font-weight: 700; color: var(--dim); margin: 14px 0 6px; letter-spacing: .3px; }

@@ -1,5 +1,25 @@
 # Modificações — Gestão de Desempenho de Inventário (BR02)
 
+## v0.9.5 — 27/10/2026 — Aposentar a aba Lançamentos (fonte única = _LOG_CONTAGENS) + fix do "substituir"
+- **Contexto:** o app ativo (V27/V28/V30) já gravava as contagens no `_LOG_CONTAGENS` (log cru
+  permanente) e montava o HISTÓRICO a partir dele. A aba **Lançamentos ficou legada** (congelada em
+  ~26/10) — não era mais usada por `salvarLote`, `salvarContagem`, `kardex` nem pelo rebuild (fila V30 →
+  `atualizarDivergencias_`/`atualizarHistorico_`, todos via `garantirLancV27_` = `_LOG`).
+- **Repoint dos leitores legados → `_LOG_CONTAGENS`** (file_1): `ultimosLancamentos` (L93),
+  `corrigirDescricoes` (L188), `kardexEndereco` (L655), `listarConferentes` (L1001), `jaLido` (L1234)
+  e a fórmula do `criarKardex` (L1398). Assim a aba Lançamentos pode ser excluída sem quebrar nada.
+- **Fix do "perguntar substituir":** o `jaLido` lia a aba Lançamentos **velha** (não via as contagens
+  de hoje). Agora lê o `_LOG` → o aviso de substituir volta a funcionar na recontagem.
+- **Blindagem:** `filtrarLancData_` ganhou `if(!sh) return;` (não quebra se a aba sumir); `onEdit` só
+  dispara no branch da Lançamentos se a aba existir; `dadosAdmin.lanc` fica protegido por `ultLanc_`
+  (devolve [] se a aba não existir) — admin já deriva o L do HISTÓRICO.
+- **Pendente (manual, só se rodar menu):** `configurarAbas`/"Recarregar base" ainda recria uma
+  Lançamentos **vazia** se executado — inofensivo (nada grava nela). Evitar rodar esses menus.
+- Testado ao vivo (V42, mesma /exec): `?api=conferentes` (26 nomes) e `?api=ultimos` (contagens de
+  HOJE, total 6127 = `_LOG`). Backup completo antes: planilha "BACKUP Inventario BR02 - 2026-10-27
+  (antes de aposentar Lancamentos)" (dados + Apps Script) + snapshot .xlsx local.
+- Fora do Git (projeto Apps Script). Próximo passo: Ivan exclui a aba Lançamentos na planilha.
+
 ## v0.9.4 — 27/10/2026 — HISTÓRICO durável + dashboards pelo HISTÓRICO + filtro DE/ATÉ
 - **Dashboards pelo HISTÓRICO:** Performance e KPIs agora vêm do HISTÓRICO (não mais da aba
   Lançamentos). O `L` interno é derivado do HISTÓRICO (cada posição = uma "contagem"), então
